@@ -2,11 +2,7 @@ package test;
 
 import java.util.List;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-
-@XStreamAlias("person")
 public class User {
-	@XStreamAlias("personId")
 	private String id;
 	private String name;
 	private String url;
