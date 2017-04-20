@@ -5,18 +5,18 @@ import java.util.List;
 public class User {
 	private String id;
 	private String name;
-	private String url;
+	private String address;
 	
 	public User(){
 	}
 	
-	public User(String id, String name, String url) {
+	public User(String id, String name, String address) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.url = url;
+		this.address = address;
 	}
-	public String getId() {
+	public String getXXId() {
 		return id;
 	}
 	public void setId(String id) {
@@ -27,11 +27,5 @@ public class User {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public String getUrl() {
-		return url;
-	}
-	public void setUrl(String url) {
-		this.url = url;
 	}
 }
