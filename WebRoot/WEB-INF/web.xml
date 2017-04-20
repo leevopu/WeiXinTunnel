@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>WeixinTest2</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <servlet>
+    <servlet-name>CorpWeixinServlet</servlet-name>
+    <servlet-class>com.weixin.corp.main.CorpWeixinServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>CorpWeixinServlet</servlet-name>
+    <url-pattern>/testServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>  
+        <servlet-name>tokenServlet</servlet-name>  
+        <servlet-class>  
+            com.weixin.corp.main.TokenServlet
+        </servlet-class>  
+        <!-- 配置获取access_token所需参数appid和appsecret -->  
+
+<!-- real_account
+	    <init-param>  
+            <param-name>appid</param-name>
+            <param-value>wxcdfcd140645e6fe7</param-value>
+        </init-param>  
+        <init-param>  
+            <param-name>appsecret</param-name>
+            <param-value>652dcb6849be43fdbfdb28769eb1430a</param-value>  
+        </init-param>
+ -->
+
+<!-- test_account 
+	    <init-param>  
+            <param-name>appid</param-name>
+            <param-value>wx168dbadda799a989</param-value>  
+        </init-param>  
+        <init-param>  
+            <param-name>appsecret</param-name>
+            <param-value>0cb2de6f5e25137e0ffe03e32d05ff04</param-value>  
+        </init-param>
+  -->
+ 
+ <!-- corp_account -->
+	    <init-param>  
+            <param-name>appid</param-name>
+            <param-value>wx522a5f82e335b883</param-value>
+        </init-param>
+        <init-param>
+            <param-name>appsecret</param-name>
+            <param-value>LSBRNWP6sptVw2QLoY8lpFytYQsd1PE5Oy-OyL7oiqtCSbZbRflta3IrkkJfO7c7</param-value>  
+        </init-param>
+        <init-param>
+        	<param-name>aeskey</param-name>
+        	<param-value>nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR</param-value>
+        </init-param>
+
+ 
+        <load-on-startup>0</load-on-startup>  
+    </servlet>
+    
+</web-app>
