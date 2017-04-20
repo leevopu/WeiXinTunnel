@@ -19,7 +19,7 @@ public class User {
 	public String getXXId() {
 		return id;
 	}
-	public void setId(String id) {
+	public void setDDId(String id) {
 		this.id = id;
 	}
 	public String getName() {
