@@ -9,9 +9,6 @@ import java.net.ConnectException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
 
 import net.sf.json.JSONObject;
 
@@ -21,14 +18,11 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.AccessToken;
 
 public class WeixinUtil {
-	// /** personal test */ public final static String ACCESS_TOKEN_URL =
-	// "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
-	/**
-	 * 企业ACCESS_TOKEN_URL
-	 */
+///** personal test */	public final static String ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
+	
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
-
-	private static Log log = LogFactory.getLog(WeixinUtil.class);
+	
+		private static Log log = LogFactory.getLog(WeixinUtil.class);
 
 	public static AccessToken accessToken = null;
 
@@ -48,17 +42,17 @@ public class WeixinUtil {
 		JSONObject jsonObject = null;
 		StringBuffer buffer = new StringBuffer();
 		try {
-			// 创建SSLContext对象，并使用我们指定的信任管理器初始化
-			TrustManager[] tm = { new MyX509TrustManager() };
-			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom());
-			// 从上述SSLContext对象中得到SSLSocketFactory对象
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
-
+			// // 创建SSLContext对象，并使用我们指定的信任管理器初始化
+			// TrustManager[] tm = { new MyX509TrustManager() };
+			// SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+			// sslContext.init(null, tm, new java.security.SecureRandom());
+			// // 从上述SSLContext对象中得到SSLSocketFactory对象
+			// SSLSocketFactory ssf = sslContext.getSocketFactory();
+			//
 			URL url = new URL(requestUrl);
 			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
 					.openConnection();
-			httpUrlConn.setSSLSocketFactory(ssf);
+			// httpUrlConn.setSSLSocketFactory(ssf);
 
 			httpUrlConn.setDoOutput(true);
 			httpUrlConn.setDoInput(true);
@@ -80,7 +74,7 @@ public class WeixinUtil {
 			// 将返回的输入流转换成字符串
 			InputStream inputStream = httpUrlConn.getInputStream();
 			InputStreamReader inputStreamReader = new InputStreamReader(
-					inputStream, "UTF-8");
+					inputStream, "utf-8");
 			BufferedReader bufferedReader = new BufferedReader(
 					inputStreamReader);
 
@@ -104,28 +98,27 @@ public class WeixinUtil {
 	}
 
 	/**
-	 * 获取可用的accesstoken
+	 * 获取可用的access_token
 	 * 
-	 * @return accesstoken
+	 * @return access_token
 	 */
 	public static String getAvailableAccessToken() {
 		return accessToken.getToken();
 	}
 
 	/**
-	 * 获取新的accesstoken
+	 * 获取新的access_token
 	 * 
 	 * @param appid
 	 *            凭证
 	 * @param appsecret
 	 *            密钥
 	 * @param aeskey
-	 * 
-	 * 
+	 *            				
+	 *            
 	 * @return
 	 */
-	public static AccessToken getNewAccessToken(String appid, String appsecret,
-			String aeskey) {
+	public static AccessToken getNewAccessToken(String appid, String appsecret, String aeskey) {
 		String requestUrl = ACCESS_TOKEN_URL.replace("APPID", appid).replace(
 				"APPSECRET", appsecret);
 		JSONObject jsonObject = httpRequest(requestUrl, "GET", null);
@@ -144,5 +137,5 @@ public class WeixinUtil {
 		}
 		return accessToken;
 	}
-
+	
 }
