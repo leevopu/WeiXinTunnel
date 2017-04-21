@@ -35,6 +35,10 @@ public class TokenServlet extends HttpServlet {
 		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey)) {
 			log.error("appid, appsecret or aeskey configuration error in web.xml, please check carefully.");
 		} else {
+			String token = getInitParameter("token");
+			if (null != token) {
+				WeixinUtil.setToken(token);
+			}
 			// 启动定时获取access_token的线程
 			new Thread(new TokenThread()).start();
 		}
@@ -61,8 +65,9 @@ public class TokenServlet extends HttpServlet {
 		public void run() {
 			while (true) {
 				try {
-					accessToken = WeixinUtil
-							.getNewAccessToken(appid, appsecret, aeskey);
+					System.out.println(WeixinUtil.getToken());
+					accessToken = WeixinUtil.getNewAccessToken(appid,
+							appsecret, aeskey);
 					if (null != accessToken) {
 						log.info(String.format(
 								"获取access_token成功，有效时长%d秒 token:%s",

@@ -22,6 +22,7 @@ import com.weixin.aes.WXBizMsgCrypt;
 import com.weixin.corp.service.AgentService;
 import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.SignUtil;
+import com.weixin.corp.utils.WeixinUtil;
 
 /**
  * 核心请求处理类
@@ -77,7 +78,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		}
 
 		// 通过检验signature对请求进行校验，若校验成功则原样返回echostr，表示接入成功，否则接入失败
-		if (SignUtil.checkSignature(signature, timestamp, nonce)) {
+		if (WeixinUtil.checkSignature(signature, timestamp, nonce)) {
 			out.print(echostr);
 		}
 		out.close();
@@ -88,7 +89,7 @@ public class CorpWeixinServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		
+
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
