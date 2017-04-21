@@ -5,7 +5,6 @@ import java.util.List;
 public class User {
 	private String id;
 	private String name;
-	private String address;
 	
 	public User(){
 	}
@@ -14,7 +13,6 @@ public class User {
 		super();
 		this.id = id;
 		this.name = name;
-		this.address = address;
 	}
 	public String getXXId() {
 		return id;
