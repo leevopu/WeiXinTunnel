@@ -36,6 +36,8 @@ public class CorpWeixinServlet extends HttpServlet {
 		System.out.println("doGet");
 		System.out.println("-------------");
 		System.out.println(request.getRequestURL().toString());
+		System.out.println("appid: " + TokenServlet.appid);
+		System.out.println("appsecret: " + TokenServlet.appsecret);
 		System.out.println("accessToken: " + TokenServlet.accessToken);
 		System.out.println("-------------");
 		// Œ¢–≈º”√‹«©√˚
