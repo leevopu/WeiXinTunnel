@@ -42,18 +42,6 @@ public class TokenServlet extends HttpServlet {
 			// 启动定时获取access_token的线程
 			new Thread(new TokenThread()).start();
 		}
-		// while (sendTemplateMsgTime > 0) {
-		// System.out.println(321);
-		// if (null != accessToken) {
-		// int result =
-		// SendTemplateMsg.sendTemplateMessage(accessToken.getToken(),
-		// openId);
-		// if(0 == result){
-		// sendTemplateMsgTime--;
-		// }
-		// }
-		//
-		// }
 	}
 
 	/**

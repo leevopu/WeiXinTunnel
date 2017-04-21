@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.aes.AesException;
 import com.weixin.aes.WXBizMsgCrypt;
-import com.weixin.corp.service.AgentService;
 import com.weixin.corp.utils.MessageUtil;
-import com.weixin.corp.utils.SignUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 /**
