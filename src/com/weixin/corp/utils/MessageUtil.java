@@ -19,12 +19,11 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
-import com.weixin.corp.entity.BaseMessage;
-import com.weixin.corp.entity.CorpBaseMessage;
-import com.weixin.corp.entity.ImageMessage;
-import com.weixin.corp.entity.TemplateMessage;
-import com.weixin.corp.entity.TemplateMessageData;
-import com.weixin.corp.entity.TextMessage;
+import com.weixin.corp.entity.message.BaseMessage;
+import com.weixin.corp.entity.message.ImageMessage;
+import com.weixin.corp.entity.message.TemplateMessage;
+import com.weixin.corp.entity.message.TemplateMessageData;
+import com.weixin.corp.entity.message.TextMessage;
 
 /**
  * 消息工具类
