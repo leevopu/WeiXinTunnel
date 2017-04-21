@@ -1,6 +1,6 @@
 package com.weixin.corp.entity.message;
 
-public class TextMessage extends BaseMessage {
+public class TextMessage extends CorpBaseMessage {
 	/**
 	 * 回复的消息内容
 	 */

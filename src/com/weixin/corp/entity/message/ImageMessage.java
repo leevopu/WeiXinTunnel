@@ -1,7 +1,7 @@
 package com.weixin.corp.entity.message;
 
 
-public class ImageMessage extends BaseMessage {
+public class ImageMessage extends CorpBaseMessage {
 	/**
 	 * 只能在初始化时配置Image
 	 */

@@ -20,6 +20,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.weixin.corp.entity.message.BaseMessage;
+import com.weixin.corp.entity.message.CorpBaseMessage;
 import com.weixin.corp.entity.message.ImageMessage;
 import com.weixin.corp.entity.message.TemplateMessage;
 import com.weixin.corp.entity.message.TemplateMessageData;
