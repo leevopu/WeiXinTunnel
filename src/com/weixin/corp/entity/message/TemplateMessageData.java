@@ -1,4 +1,4 @@
-package com.weixin.corp.entity;
+package com.weixin.corp.entity.message;
 
 public class TemplateMessageData {
 	private String value;

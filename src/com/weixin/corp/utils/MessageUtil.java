@@ -19,12 +19,12 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
-import com.weixin.corp.entity.BaseMessage;
-import com.weixin.corp.entity.CorpBaseMessage;
-import com.weixin.corp.entity.ImageMessage;
-import com.weixin.corp.entity.TemplateMessage;
-import com.weixin.corp.entity.TemplateMessageData;
-import com.weixin.corp.entity.TextMessage;
+import com.weixin.corp.entity.message.BaseMessage;
+import com.weixin.corp.entity.message.CorpBaseMessage;
+import com.weixin.corp.entity.message.ImageMessage;
+import com.weixin.corp.entity.message.TemplateMessage;
+import com.weixin.corp.entity.message.TemplateMessageData;
+import com.weixin.corp.entity.message.TextMessage;
 
 /**
  * 消息工具类
@@ -226,58 +226,6 @@ public class MessageUtil {
 
 		respMessage = textMessageToXml(baseMessage);
 		return respMessage;
-	}
-	
-	
-
-	public static int sendTemplateMessage(Map<String, String> requestMap) {
-		return sendTemplateMessage(requestMap, 0);
-	}
-	
-	public static int sendTemplateMessage(Map<String, String> requestMap, int templateId) {
-		int result = -1;
-		BaseMessage baseMessage = null;
-		String respMessage = null;
-		String respContent = "";
-
-		// 发送方账号（用户OpenId）
-		String fromUserName = requestMap.get("FromUserName");
-		
-		String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token="
-				+ WeixinUtil.getAvailableAccessToken();
-		TemplateMessage temp = new TemplateMessage();
-		String template_id = ConfigUtil.getTemplate("template" + templateId);
-		if (null == template_id) {
-			template_id = ConfigUtil.getTemplate("template_warning");
-		}
-		temp.setTemplate_id(template_id);
-		// temp.setUrl("http://www.baidu.com");//点击无响应
-		temp.setTouser(fromUserName);
-		temp.setTopcolor("#173177");
-
-		Map<String, TemplateMessageData> data = new HashMap<String, TemplateMessageData>();
-		TemplateMessageData first = new TemplateMessageData();
-		first.setColor("#AA3177");
-		first.setValue("这里填写您要发送的模板信息");
-		data.put("first", first);
-		TemplateMessageData key2 = new TemplateMessageData();
-		key2.setColor("#FF0000");
-		key2.setValue("另一行内人");
-		data.put("key2", key2);
-		temp.setData(data);
-		String jsonString = JSONObject.fromObject(temp).toString();
-//		JSONObject jsonObject = WeixinUtil.httpRequest(url, "POST", jsonString);
-//		System.out.println("template json: " + jsonObject);
-//		if (null != jsonObject) {
-//			if (0 != jsonObject.getInt("errcode")) {
-//				result = jsonObject.getInt("errcode");
-//				log.error(String.format("获取token失败 %d, %s",
-//						jsonObject.getInt("errcode"),
-//						jsonObject.getString("errmsg")));
-//			}
-//		}
-		log.info("模板消息发送结果：" + result);
-		return result;
 	}
 
 	/**

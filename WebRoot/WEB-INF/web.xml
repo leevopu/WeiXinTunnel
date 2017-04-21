@@ -45,7 +45,7 @@
         </init-param>
   -->
  
- <!-- corp_account -->
+ <!-- corp_account corpId, corpSecret -->
 	    <init-param>  
             <param-name>appid</param-name>
             <param-value>wx522a5f82e335b883</param-value>
@@ -58,8 +58,10 @@
         	<param-name>aeskey</param-name>
         	<param-value>nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR</param-value>
         </init-param>
-
- 
+        <init-param>
+            <param-name>token</param-name>
+            <param-value>weixin</param-value>  
+        </init-param>
         <load-on-startup>0</load-on-startup>  
     </servlet>
     
