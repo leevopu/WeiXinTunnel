@@ -2,8 +2,6 @@ package com.weixin.corp.entity.message;
 
 /**
  * Í¼ÎÄÏûÏ¢
- * @author caspar.chen
- * @version 1.0
  * 
  */
 public class Article {
