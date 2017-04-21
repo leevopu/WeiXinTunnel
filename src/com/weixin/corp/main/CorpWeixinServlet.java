@@ -33,13 +33,6 @@ public class CorpWeixinServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("doGet");
-		System.out.println("-------------");
-		System.out.println(request.getRequestURL().toString());
-		System.out.println("appid: " + TokenServlet.appid);
-		System.out.println("appsecret: " + TokenServlet.appsecret);
-		System.out.println("accessToken: " + TokenServlet.accessToken);
-		System.out.println("-------------");
 		// 微信加密签名
 		String signature = request.getParameter("msg_signature");
 		// 时间戳
@@ -48,11 +41,6 @@ public class CorpWeixinServlet extends HttpServlet {
 		String nonce = request.getParameter("nonce");
 		// 随机字符串
 		String echostr = request.getParameter("echostr");
-
-		System.out.println(signature);
-		System.out.println(timestamp);
-		System.out.println(nonce);
-		System.out.println(echostr);
 
 		if (null == signature && null == timestamp && null == nonce) {
 
@@ -64,9 +52,8 @@ public class CorpWeixinServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		WXBizMsgCrypt wxcpt;
 		try {
-			wxcpt = new WXBizMsgCrypt("weixin",
-					"nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR",
-					"wx522a5f82e335b883");
+			wxcpt = new WXBizMsgCrypt(WeixinUtil.getToken(),
+					WeixinUtil.getAppsecret(), WeixinUtil.getAppid());
 			sEchoStr = wxcpt.VerifyURL(signature, timestamp, nonce, echostr);
 			// 验证URL成功，将sEchoStr返回
 			out.print(sEchoStr);
@@ -79,20 +66,19 @@ public class CorpWeixinServlet extends HttpServlet {
 			out.print(echostr);
 		}
 		out.close();
-		System.out.println("doGet close");
 		out = null;
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
 		// 获得请求参数
 		String signature = request.getParameter("msg_signature");
 		System.out.println("signature: " + signature);
+		// 以后key再复杂点request.getParameterXXX
 		if (requestCachePool.containsKey(signature)) {
 			return;
 		}
@@ -113,9 +99,8 @@ public class CorpWeixinServlet extends HttpServlet {
 		String aesErrorInfo = null;
 		WXBizMsgCrypt wxcpt = null;
 		try {
-			wxcpt = new WXBizMsgCrypt("weixin",
-					"nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR",
-					"wx522a5f82e335b883");
+			wxcpt = new WXBizMsgCrypt(WeixinUtil.getToken(),
+					WeixinUtil.getAppsecret(), WeixinUtil.getAppid());
 			requestDecryptMsg = wxcpt.DecryptMsg(signature, timestamp, nonce,
 					requestMsg);
 			System.out.println("requestDecryptMsg: " + requestDecryptMsg);
@@ -135,21 +120,8 @@ public class CorpWeixinServlet extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		// 调用核心业务类接收消息、处理消息
 
-		Map<String, String> paramMap = new HashMap<>(); // 不一定用
-		// String uploadFilePath =
-		// "C:/Users/Administrator/Desktop/weixin_guanzhu.png";
-		// String sendUrl =
-		// "http://file.api.weixin.qq.com/cgi-bin/media/upload?type=UPLOAD_TYPE&access_token=ACCESS_TOKEN";
-		// Image image = ImageIO.read(new File(uploadFilePath));
-		// if (null != image) {
-		// sendUrl = sendUrl.replace("UPLOAD_TYPE", "image");
-		// }
-		// String mediaId = UploadUtil.send(
-		// sendUrl.replace("ACCESS_TOKEN",
-		// WeixinUtil.getAvailableAccessToken()), uploadFilePath);
-		// System.out.println("mediaId : " + mediaId);
-		//
-		// paramMap.put("mediaId", mediaId);
+		// 不一定用,后期如果不用就去掉
+		Map<String, String> paramMap = new HashMap<>();
 		Map<String, String> requestMap = null;
 		try {
 			requestMap = MessageUtil.parseXml(bais);

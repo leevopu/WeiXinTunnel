@@ -13,31 +13,30 @@ public class TokenServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
 
-	// 第三方用户唯一凭证
-	public static String appid = "";
-	// 第三方用户唯一凭证密钥
-	public static String appsecret = "";
-
-	public static String aeskey = "";
-
 	public static AccessToken accessToken = null;
-
+	
 	public void init() throws ServletException {
 		// 获取web.xml中配置的参数
-		appid = getInitParameter("appid");
-		appsecret = getInitParameter("appsecret");
-		aeskey = getInitParameter("aeskey");
+		// appid第三方用户唯一凭证
+		String appid = getInitParameter("appid");
+		// appsecret第三方用户唯一凭证密钥
+		String appsecret = getInitParameter("appsecret");
+		// aeskey第三方用户加密密钥
+		String aeskey = getInitParameter("aeskey");
 
 		log.info("weixin api appid: " + appid);
 		log.info("weixin api appsecret: " + appsecret);
 
 		// 未配置appid、appsecret、aeskey时给出提示
-		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey)) {
+		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey) || aeskey.length() != 43) {
 			log.error("appid, appsecret or aeskey configuration error in web.xml, please check carefully.");
-		} else {
+			System.exit(-1);
+		}
+		else {
+			// token第三方用户验证口令
 			String token = getInitParameter("token");
 			if (null != token) {
-				WeixinUtil.setToken(token);
+				WeixinUtil.init(token, appid, appsecret, aeskey);
 			}
 			// 启动定时获取access_token的线程
 			new Thread(new TokenThread()).start();
@@ -54,8 +53,7 @@ public class TokenServlet extends HttpServlet {
 			while (true) {
 				try {
 					System.out.println(WeixinUtil.getToken());
-					accessToken = WeixinUtil.getNewAccessToken(appid,
-							appsecret, aeskey);
+					accessToken = WeixinUtil.getNewAccessToken();
 					if (null != accessToken) {
 						log.info(String.format(
 								"获取access_token成功，有效时长%d秒 token:%s",
