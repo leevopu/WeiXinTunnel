@@ -2,7 +2,7 @@ package com.weixin.corp.entity.message;
 
 /**
  * Í¼ÎÄÏûÏ¢
- * 
+ * sss
  */
 public class Article {
 	/**
