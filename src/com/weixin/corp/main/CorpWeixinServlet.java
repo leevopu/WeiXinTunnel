@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.aes.AesException;
 import com.weixin.aes.WXBizMsgCrypt;
-import com.weixin.corp.service.AgentService;
 import com.weixin.corp.utils.MessageUtil;
-import com.weixin.corp.utils.SignUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 /**
@@ -39,8 +36,6 @@ public class CorpWeixinServlet extends HttpServlet {
 		System.out.println("doGet");
 		System.out.println("-------------");
 		System.out.println(request.getRequestURL().toString());
-		System.out.println("appid: " + TokenServlet.appid);
-		System.out.println("appsecret: " + TokenServlet.appsecret);
 		System.out.println("accessToken: " + TokenServlet.accessToken);
 		System.out.println("-------------");
 		// Œ¢–≈º”√‹«©√˚
