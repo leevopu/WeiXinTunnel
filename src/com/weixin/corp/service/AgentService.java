@@ -8,9 +8,8 @@ public class AgentService {
 	public static final String AGENT_LIST_URL = "https://qyapi.weixin.qq.com/cgi-bin/agent/list?access_token=ACCESS_TOKEN";
 
 	public static String getAgentList(){
-		JSONObject json = WeixinUtil.httpRequest(
-				AGENT_LIST_URL.replace("ACCESS_TOKEN",
-						WeixinUtil.getAvailableAccessToken()), "POST", null);
+		JSONObject json = WeixinUtil.httpsRequest(
+				AGENT_LIST_URL, "POST", null);
 		return json.toString();
 	}
 }

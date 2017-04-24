@@ -15,7 +15,7 @@ public class TestGroupMessage {
 		String openid4data = "{\"touser\":[\"obGXiwHTGN_4HkR2WToFj_3uaEKY\",\"obGXiwNu0z2o_RRWaODvaZctdWEM\"], \"mpnews\": {\"media_id\":\"6I8DOB-7rJsY_zdOCe6YJKJ59MwXWPb2iYBKVqb22cBHPtECYdRgiWIULfCW-hcF\"},\"msgtype\":\"mpnews\"}";
 		String url = groupUrl.replace("ACCESS_TOKEN",
 				WeixinUtil.getAvailableAccessToken());
-		JSONObject json = WeixinUtil.httpRequest(url, "POST", group1data);
+		JSONObject json = WeixinUtil.httpsRequest(url, "POST", group1data);
 		return json.toString();
 	}
 	//https://api.weixin.qq.com/cgi-bin/user/get?access_token=a1JPzpy2ytCY3iHk0palRP4fgB8i-eMpWQeyWRFMi6pCw2xJTyY4mRgiQEuIVpOPTTEao26qkEZXTs0hnJsNeO9mRU91INnl4Ykt5QH35Q44qMSDP4B0Tn6oFwuhbntwJWEbAGAANV&next_openid=oU8JkwOg2e3-m-C_UIkkSJrVmmno
@@ -23,7 +23,7 @@ public class TestGroupMessage {
 		String createGroup = "https://api.weixin.qq.com/cgi-bin/groups/create?access_token=ACCESS_TOKEN";
 		String createGroupValue = "{\"group\":{\"name\":\"test3\"}}";
 		String getGroup = "https://api.weixin.qq.com/cgi-bin/groups/get?access_token=ACCESS_TOKEN";
-		JSONObject json = WeixinUtil.httpRequest(
+		JSONObject json = WeixinUtil.httpsRequest(
 				getGroup.replace("ACCESS_TOKEN",
 						WeixinUtil.getAvailableAccessToken()), "POST", null);
 		return json.toString();
@@ -33,7 +33,7 @@ public class TestGroupMessage {
 		String createGroup = "https://api.weixin.qq.com/cgi-bin/groups/create?access_token=ACCESS_TOKEN";
 		String createGroupValue = "{\"group\":{\"name\":\"test3\"}}";
 		String getGroup = "https://api.weixin.qq.com/cgi-bin/groups/get?access_token=ACCESS_TOKEN";
-		JSONObject json = WeixinUtil.httpRequest(
+		JSONObject json = WeixinUtil.httpsRequest(
 				getGroup.replace("ACCESS_TOKEN",
 						WeixinUtil.getAvailableAccessToken()), "POST", null);
 		return json.toString();

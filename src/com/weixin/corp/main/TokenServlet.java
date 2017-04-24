@@ -23,20 +23,22 @@ public class TokenServlet extends HttpServlet {
 		String appsecret = getInitParameter("appsecret");
 		// aeskey第三方用户加密密钥
 		String aeskey = getInitParameter("aeskey");
+		// agentid第三方用户应用ID
+		String agentid = getInitParameter("agentid");
 
 		log.info("weixin api appid: " + appid);
 		log.info("weixin api appsecret: " + appsecret);
 
 		// 未配置appid、appsecret、aeskey时给出提示
-		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey) || aeskey.length() != 43) {
-			log.error("appid, appsecret or aeskey configuration error in web.xml, please check carefully.");
+		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey) || aeskey.length() != 43 || "".equals(agentid)) {
+			log.error("appid, appsecret, aeskey or agentid configuration error in web.xml, please check carefully.");
 			System.exit(-1);
 		}
 		else {
 			// token第三方用户验证口令
 			String token = getInitParameter("token");
 			if (null != token) {
-				WeixinUtil.init(token, appid, appsecret, aeskey);
+				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
 			// 启动定时获取access_token的线程
 			new Thread(new TokenThread()).start();

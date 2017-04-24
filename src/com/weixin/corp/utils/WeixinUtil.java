@@ -35,13 +35,15 @@ public class WeixinUtil {
 	private static String appid;
 	private static String appsecret;
 	private static String aeskey;
+	private static String agentid;
 
 	public static void init(String token, String appid, String appsecret,
-			String aeskey) {
+			String aeskey, String agentid) {
 		WeixinUtil.token = token;
 		WeixinUtil.appid = appid;
 		WeixinUtil.appsecret = appsecret;
 		WeixinUtil.aeskey = aeskey;
+		WeixinUtil.agentid = agentid;
 	}
 
 	/**
@@ -55,6 +57,10 @@ public class WeixinUtil {
 
 	public static String getAppid() {
 		return appid;
+	}
+
+	public static String getAgentid() {
+		return agentid;
 	}
 
 	public static String getAppsecret() {
@@ -76,8 +82,11 @@ public class WeixinUtil {
 	 *            提交的数据
 	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
 	 */
-	public static JSONObject httpRequest(String requestUrl,
+	public static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr) {
+		requestUrl = requestUrl.replace("ACCESS_TOKEN",
+				WeixinUtil.getAvailableAccessToken()).replace("AGENTID",
+				WeixinUtil.getAgentid());
 		JSONObject jsonObject = null;
 		StringBuffer buffer = new StringBuffer();
 		try {
@@ -146,15 +155,14 @@ public class WeixinUtil {
 	}
 
 	/**
-	 * 获取新的access_token
-	 * <br>
+	 * 获取新的access_token <br>
 	 * <br>
 	 * 调用access_token的接口地址（GET） 限200（次/天）
 	 */
 	public static AccessToken getNewAccessToken() {
 		String requestUrl = ACCESS_TOKEN_URL.replace("APPID", appid).replace(
 				"APPSECRET", appsecret);
-		JSONObject jsonObject = httpRequest(requestUrl, "GET", null);
+		JSONObject jsonObject = httpsRequest(requestUrl, "GET", null);
 		// 如果请求成功
 		if (null != jsonObject) {
 			System.out.println("access_token init success");

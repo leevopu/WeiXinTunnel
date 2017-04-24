@@ -4,9 +4,7 @@ package com.weixin.corp.entity.menu;
 /**s
  * 按钮
  * 
- * @author caspar.chen
- * @version 1.0
- * 
+ * 一级菜单数组，个数应为1~3个
  */
 public class Button {
 
@@ -32,6 +30,7 @@ public class Button {
 
 	/**
 	 * 子按钮列表
+	 * 二级菜单数组，个数应为1~5个
 	 */
 	private Button[] sub_button;
 
