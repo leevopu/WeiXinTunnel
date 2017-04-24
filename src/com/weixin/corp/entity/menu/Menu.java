@@ -1,7 +1,8 @@
 package com.weixin.corp.entity.menu;
 
+
 /**
- * èœå•
+ * ²Ëµ¥
  * @author caspar.chen
  * @version 1.0
  * 
@@ -9,7 +10,7 @@ package com.weixin.corp.entity.menu;
 public class Menu {
 	
 	/**
-	 * èœå•æŒ‰é’®
+	 * ²Ëµ¥°´Å¥
 	 */
 	private Button[] button;
 

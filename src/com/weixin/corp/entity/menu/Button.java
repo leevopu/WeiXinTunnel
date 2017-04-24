@@ -1,7 +1,8 @@
 package com.weixin.corp.entity.menu;
 
-/**
- * 鎸夐挳
+
+/**s
+ * 按钮
  * 
  * @author caspar.chen
  * @version 1.0
@@ -10,26 +11,28 @@ package com.weixin.corp.entity.menu;
 public class Button {
 
 	/**
-	 * 鎸夐挳鍚嶇О
+	 * 按钮名称
 	 */
 	private String name;
 
 	/**
-	 * 鎸夐挳绫诲瀷
+	 * 按钮类型
 	 */
 	private String type;
 
 	/**
-	 * 鎸夐挳key鍊?	 */
+	 * 按钮key值
+	 */
 	private String key;
 
 	/**
-	 * 鎸夐挳url
+	 * 按钮url
 	 */
 	private String url;
 
 	/**
-	 * 瀛愭寜閽垪琛?	 */
+	 * 子按钮列表
+	 */
 	private Button[] sub_button;
 
 	public Button[] getSub_button() {
