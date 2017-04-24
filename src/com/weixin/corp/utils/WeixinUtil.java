@@ -1,6 +1,5 @@
 package com.weixin.corp.utils;
 
-// 获取access_token的接口地址（GET） 限200（次/天）
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -148,8 +147,9 @@ public class WeixinUtil {
 
 	/**
 	 * 获取新的access_token
-	 * 
-	 * @return
+	 * <br>
+	 * <br>
+	 * 调用access_token的接口地址（GET） 限200（次/天）
 	 */
 	public static AccessToken getNewAccessToken() {
 		String requestUrl = ACCESS_TOKEN_URL.replace("APPID", appid).replace(
