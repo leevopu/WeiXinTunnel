@@ -3,8 +3,6 @@ package com.weixin.corp.entity.menu;
 
 /**
  * ²Ëµ¥
- * @author caspar.chen
- * @version 1.0
  * 
  */
 public class Menu {

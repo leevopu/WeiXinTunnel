@@ -7,8 +7,6 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * 证书信任管理器（用于https请求）
- * @author caspar.chen
- * @version 1.0
  * 
  */
 public class MyX509TrustManager implements X509TrustManager {

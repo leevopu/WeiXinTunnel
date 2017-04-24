@@ -12,13 +12,10 @@ import com.weixin.corp.utils.WeixinUtil;
 /**
  * 菜单创建
  * 
- * @author caspar.chen
- * @version 1.1
- * 
  */
 public class MenuService {
 
-	private static Log log = LogFactory.getLog(WeixinUtil.class);
+	private static Log log = LogFactory.getLog(MenuService.class);
 
 	/**
 	 * 菜单创建（POST） 限100（次/天）
