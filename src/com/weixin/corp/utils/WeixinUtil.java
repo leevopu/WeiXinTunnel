@@ -8,6 +8,12 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -20,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
+import com.weixin.corp.entity.data.Data;
 
 public class WeixinUtil {
 	// /** personal test */ public final static String ACCESS_TOKEN_URL =
@@ -30,6 +37,9 @@ public class WeixinUtil {
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
 
 	public static AccessToken accessToken = null;
+
+	private static Map<String, Data> dataCachePool = new HashMap<String, Data>();
+	private static Set<Data> datas = new HashSet<Data>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -44,6 +54,23 @@ public class WeixinUtil {
 		WeixinUtil.appsecret = appsecret;
 		WeixinUtil.aeskey = aeskey;
 		WeixinUtil.agentid = agentid;
+	}
+
+	public static void test() {
+
+		// test1
+		Data data1 = new Data("monthlyA", "wangli", "300");
+		Data data2 = new Data("monthlyA", "dawei", null);
+		List<Data> dataList = new ArrayList<Data>();
+		dataList.add(data1);
+		dataList.add(data2);
+		for (Data data : dataList) {
+			dataCachePool.put(data.getTitle() + data.getToUser(), data1);
+		}
+
+		// test2
+		datas.add(data1);
+		datas.add(data2);
 	}
 
 	/**
@@ -69,6 +96,14 @@ public class WeixinUtil {
 
 	public static String getAeskey() {
 		return aeskey;
+	}
+
+	public static Map<String, Data> getDataCachePool() {
+		return dataCachePool;
+	}
+
+	public static Set<Data> getDatas() {
+		return datas;
 	}
 
 	/**
