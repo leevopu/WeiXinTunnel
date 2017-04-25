@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import net.sf.json.JSONObject;
 
@@ -22,18 +24,27 @@ public class TestJson {
 	String preUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
 	String tempUrl = String.format(preUrl, appID, appsecret);
 
-	public static void main(String[] args) {
-		TestJson tj = new TestJson();
-		System.out.println(tj.getUserInfo("id"));
+	public static void main(String[] args) throws Exception {
+
+		String keyWord = URLDecoder.decode("%E5%A4%B4%E5%83%8F", "UTF-8");
+
+		System.out.println(keyWord);
+
+		String urlStr = URLEncoder.encode("东证资管测试号", "UTF-8");
+
+		System.out.println(urlStr);
+
+//		TestJson tj = new TestJson();
+//		System.out.println(tj.getUserInfo("id"));
 	}
 
-	public String getUserInfo(String key){
+	public String getUserInfo(String key) {
 		User user = new User("baidu", "百度", "www.baidu.com");
 		JSONObject jsonObject = JSONObject.fromObject(user);
 		System.out.println(jsonObject.toString());
 		return jsonObject.getString(key);
 	}
-	
+
 	// 返回String类型access_token
 	public String get() {
 		String temp = null;

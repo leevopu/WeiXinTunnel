@@ -6,4 +6,6 @@ import org.apache.commons.logging.LogFactory;
 public class MediaService {
 	
 	private static Log log = LogFactory.getLog(MediaService.class);
+	
+	
 }

@@ -1,26 +1,55 @@
 package com.weixin.corp.utils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ConfigUtil {
 	
-	private static Properties templateProps = new Properties();
+	private static Log log = LogFactory.getLog(ConfigUtil.class);
+	
+	private static Map<String, String[]> messageMapConfig = null;
 
 	static {
+		Properties properties = new Properties();
 		try {
-			templateProps.load(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("config/template.properties"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			properties.load(Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream("config/message.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("获取message.properties失败");
+		}
+		messageMapConfig = new HashMap<String, String[]>();
+		Iterator<Entry<Object, Object>> it = properties.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<Object, Object> entry = it.next();
+			String key = entry.getKey().toString();
+			String value = entry.getValue().toString();
+			System.out.println("key   :" + key);
+			System.out.println("value :" + value);
+			System.out.println("---------------");
+			try{
+				Long.parseLong(value.replaceAll(",", ""));
+			}catch(NumberFormatException e){
+				e.printStackTrace();
+				log.error("message.properties配置不正确，等号右边请把部门的数字ID用逗号隔开");
+				continue;
+			}
+			messageMapConfig.put(key, value.split(","));
 		}
 	}
 
-	public static String getTemplate(String key) {
-		return templateProps.getProperty(key);
+	public static Map<String, String[]> getGroupMessageConfig() {
+		return messageMapConfig;
 	}
 
+	public static void main(String[] args) {
+		System.out.println(Long.parseLong("xxx"));
+	}
 }

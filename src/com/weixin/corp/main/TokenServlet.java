@@ -41,7 +41,7 @@ public class TokenServlet extends HttpServlet {
 				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
 			// 启动定时获取access_token的线程
-			new Thread(new TokenThread()).start();
+//			new Thread(new TokenThread()).start();
 		}
 	}
 

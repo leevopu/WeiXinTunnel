@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.aes.AesException;
 import com.weixin.aes.WXBizMsgCrypt;
+import com.weixin.corp.utils.ConfigUtil;
 import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -78,12 +79,14 @@ public class CorpWeixinServlet extends HttpServlet {
 		// 获得请求参数
 		String signature = request.getParameter("msg_signature");
 		System.out.println("signature: " + signature);
-		// 以后key再复杂点request.getParameterXXX
-		if (requestCachePool.containsKey(signature)) {
-			return;
-		}
 		String timestamp = request.getParameter("timestamp");
 		String nonce = request.getParameter("nonce");
+
+		String requestId = signature + timestamp + nonce;
+
+		if (requestCachePool.containsKey(requestId)) {
+			return;
+		}
 
 		// 获得post提交的数据
 		BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -130,7 +133,7 @@ public class CorpWeixinServlet extends HttpServlet {
 			log.error("ParseXml Error: " + e1.getMessage());
 			return;
 		}
-		requestCachePool.put(signature, requestMap);
+		requestCachePool.put(requestId, requestMap);
 		try {
 			Thread.sleep(1 * 1000); // 模拟请求超时
 		} catch (InterruptedException e) {
@@ -170,9 +173,6 @@ public class CorpWeixinServlet extends HttpServlet {
 		out.print(responseMsg);
 		out.close();
 
-		try {
-			requestCachePool.remove(request.getParameter("msg_signature"));
-		} catch (Exception e) {
-		}
+		requestCachePool.remove(requestId);
 	}
 }
