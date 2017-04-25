@@ -68,4 +68,14 @@
         <load-on-startup>0</load-on-startup>  
     </servlet>
     
+     <servlet>
+		<servlet-name>menuServlet</servlet-name>
+		<servlet-class>com.weixin.corp.main.MenuServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>menuServlet</servlet-name>
+		<url-pattern>/doMenu</url-pattern>
+	</servlet-mapping>
+    
 </web-app>
