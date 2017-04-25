@@ -56,6 +56,7 @@
 		<input id="remove"  class="input" type="button" 	value="删除" /> 
 	</div>
 	<div style="border:1px solid #F00;overflow-y: true;">
+	<form action="">
 		<table id="table" align="center" cellspacing="0" width="100%" >
 			<tr>
 				<th style="width: 160px;"></th>
@@ -65,6 +66,7 @@
 				<th style="width: 160px;">上级菜单</th>
 			</tr>
 		</table>
+	</form>
 	</div>
 		<div align="center">
 			<input id="save"  class="input"  align="middle" type="submit" 	value="保存" />
