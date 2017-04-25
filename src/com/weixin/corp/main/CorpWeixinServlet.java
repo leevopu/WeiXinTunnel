@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.aes.AesException;
 import com.weixin.aes.WXBizMsgCrypt;
-import com.weixin.corp.utils.ConfigUtil;
 import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -29,7 +30,7 @@ import com.weixin.corp.utils.WeixinUtil;
 public class CorpWeixinServlet extends HttpServlet {
 	private static Log log = LogFactory.getLog(CorpWeixinServlet.class);
 	private static final long serialVersionUID = -5021188348833856475L;
-	private static HashMap<String, Map<String, String>> requestCachePool = new HashMap<>();
+	private static ConcurrentMap<String, Map<String, String>> requestCachePool = new ConcurrentHashMap<>();
 
 	@Override
 	protected void doGet(HttpServletRequest request,

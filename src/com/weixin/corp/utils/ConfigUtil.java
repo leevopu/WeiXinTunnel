@@ -14,7 +14,7 @@ public class ConfigUtil {
 	
 	private static Log log = LogFactory.getLog(ConfigUtil.class);
 	
-	private static Map<String, String[]> messageMapConfig = null;
+	private static Map<String, String[]> messagePartyIdsConfig = null;
 
 	static {
 		Properties properties = new Properties();
@@ -25,7 +25,7 @@ public class ConfigUtil {
 			e.printStackTrace();
 			log.error("获取message.properties失败");
 		}
-		messageMapConfig = new HashMap<String, String[]>();
+		messagePartyIdsConfig = new HashMap<String, String[]>();
 		Iterator<Entry<Object, Object>> it = properties.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<Object, Object> entry = it.next();
@@ -41,12 +41,12 @@ public class ConfigUtil {
 				log.error("message.properties配置不正确，等号右边请把部门的数字ID用逗号隔开");
 				continue;
 			}
-			messageMapConfig.put(key, value.split(","));
+			messagePartyIdsConfig.put(key, value.split(","));
 		}
 	}
 
 	public static Map<String, String[]> getGroupMessageConfig() {
-		return messageMapConfig;
+		return messagePartyIdsConfig;
 	}
 
 	public static void main(String[] args) {

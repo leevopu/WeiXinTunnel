@@ -2,56 +2,56 @@ package com.weixin.corp.entity.message;
 
 public class CorpBaseMessage {
 
-	private String msgType;
+	private String msgtype;
 
-	private String agentId;
+	private String agentid;
 
-	private String toUser;
+	private String touser;
 
-	private String toParty;
+	private String toparty;
 
-	private String toTag;
-
+	private String totag;
+	
 	private int safe = 0;
 
-	public String getMsgType() {
-		return msgType;
+	public String getMsgtype() {
+		return msgtype;
 	}
 
-	public void setMsgType(String msgType) {
-		this.msgType = msgType;
+	public void setMsgtype(String msgtype) {
+		this.msgtype = msgtype;
 	}
 
-	public String getAgentId() {
-		return agentId;
+	public String getAgentid() {
+		return agentid;
 	}
 
-	public void setAgentId(String agentId) {
-		this.agentId = agentId;
+	public void setAgentid(String agentid) {
+		this.agentid = agentid;
 	}
 
-	public String getToUser() {
-		return toUser;
+	public String getTouser() {
+		return touser;
 	}
 
-	public void setToUser(String toUser) {
-		this.toUser = toUser;
+	public void setTouser(String touser) {
+		this.touser = touser;
 	}
 
-	public String getToParty() {
-		return toParty;
+	public String getToparty() {
+		return toparty;
 	}
 
-	public void setToParty(String toParty) {
-		this.toParty = toParty;
+	public void setToparty(String toparty) {
+		this.toparty = toparty;
 	}
 
-	public String getToTag() {
-		return toTag;
+	public String getTotag() {
+		return totag;
 	}
 
-	public void setToTag(String toTag) {
-		this.toTag = toTag;
+	public void setTotag(String totag) {
+		this.totag = totag;
 	}
 
 	public int getSafe() {
@@ -61,5 +61,6 @@ public class CorpBaseMessage {
 	public void setSafe(int safe) {
 		this.safe = safe;
 	}
+
 
 }

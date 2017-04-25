@@ -13,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.dao.TestDao;
 import com.weixin.corp.utils.ConfigUtil;
-import com.weixin.corp.utils.WeixinUtil;
 
 public class MessageService {
 	private TestDao testDao = new TestDao();
@@ -22,13 +21,6 @@ public class MessageService {
 
 	public static void itWarnMessage(String warn) {
 		System.out.println(warn);
-	}
-	
-	public static void monthlyReport(String[] partyIds) {
-//		String result = testDao.test();
-		// È¡»º´æÊý¾Ý
-		for(String partyId : partyIds)
-		System.out.println(partyId);
 	}
 
 	public static void main(String[] args) throws SecurityException,

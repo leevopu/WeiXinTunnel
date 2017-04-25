@@ -2,12 +2,13 @@ package com.weixin.corp.utils;
 
 import java.io.InputStream;
 import java.io.Writer;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+
+import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,15 +21,18 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
+import com.weixin.corp.entity.data.Data;
 import com.weixin.corp.entity.message.BaseMessage;
 import com.weixin.corp.entity.message.CorpBaseMessage;
-import com.weixin.corp.service.MessageService;
+import com.weixin.corp.entity.message.Text;
+import com.weixin.corp.entity.message.TextMessage;
 
 /**
  * 消息工具类
  */
 public class MessageUtil {
 	private static Log log = LogFactory.getLog(MessageUtil.class);
+	public static String GROUP_MESSAGE_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
 
 	/**
 	 * 解析微信发来的请求（XML）
@@ -52,7 +56,7 @@ public class MessageUtil {
 		List<Element> elementList = root.elements();
 
 		// 遍历所有子节点
-		for (Element e : elementList){
+		for (Element e : elementList) {
 			map.put(e.getName(), e.getText());
 		}
 
@@ -72,17 +76,17 @@ public class MessageUtil {
 	 */
 	public static String textMessageToXml(BaseMessage message) {
 		xstream.alias("xml", message.getClass());
-//		if(message instanceof NewsMessage){
-//			xstream.alias("item", new Article().getClass());
-//		}
+		// if(message instanceof NewsMessage){
+		// xstream.alias("item", new Article().getClass());
+		// }
 		return xstream.toXML(message);
 	}
-	
+
 	public static String textMessageToXml(CorpBaseMessage message) {
 		xstream.alias("xml", message.getClass());
-//		if(message instanceof NewsMessage){
-//			xstream.alias("item", new Article().getClass());
-//		}
+		// if(message instanceof NewsMessage){
+		// xstream.alias("item", new Article().getClass());
+		// }
 		return xstream.toXML(message);
 	}
 
@@ -108,7 +112,7 @@ public class MessageUtil {
 			};
 		}
 	});
-	
+
 	/**
 	 * 
 	 * @param requestMap
@@ -170,32 +174,49 @@ public class MessageUtil {
 		respMessage = textMessageToXml(baseMessage);
 		return respMessage;
 	}
-	
+
 	public static void itWarnMessage(String warn) {
 		System.out.println(warn);
 	}
-	
-	public static void sendMessageByNameAndPartyIds(String messageName, String[] partyIds) {
-//		String result = testDao.test();
+
+	public static void sendMessageByNameAndPartyIds(String messageName,
+			String[] partyIds) {
+		// String result = testDao.test();
 		// 取缓存数据
-		for(String partyId : partyIds)
-		System.out.println(partyId);
+		for (String partyId : partyIds)
+			System.out.println(partyId);
 	}
-	
-	public static void groupMessage(Map<String, String[]> messageMapConfig,
-			String... periods) throws Exception {
-		for (String period : periods) {
-			Iterator<Entry<String, String[]>> it = messageMapConfig.entrySet()
-					.iterator();
- 			while (it.hasNext()) {
-				Map.Entry<String, String[]> entry = it.next();
-				if (entry.getKey().toLowerCase().contains(period)) {
-					Method method = MessageService.class.getMethod(
-							entry.getKey(), new Class[]{String[].class});
-					method.invoke(MessageService.class, new Object[]{entry.getValue()});
-				}
-			}
+
+	// public static void groupMessage(Map<String, String[]> messageMapConfig,
+	// String... periods) throws Exception {
+	// for (String period : periods) {
+	// Iterator<Entry<String, String[]>> it = messageMapConfig.entrySet()
+	// .iterator();
+	// while (it.hasNext()) {
+	// Map.Entry<String, String[]> entry = it.next();
+	// if (entry.getKey().toLowerCase().contains(period)) {
+	// // Method method = MessageService.class.getMethod(
+	// // entry.getKey(), new Class[]{String[].class});
+	// // method.invoke(MessageService.class, new Object[]{entry.getValue()});
+	// sendMessageByNameAndPartyIds(entry.getKey(), entry.getValue());
+	// }
+	// }
+	// }
+
+	private static List<String> getMessageJSONs() {
+		List<String> jsons = new ArrayList<String>();
+		Set<Data> datas = WeixinUtil.getDatas();
+		for (Data data : datas) {
+			TextMessage tm = new TextMessage();
+			Text text = new Text();
+			tm.setText(text);
+			text.setContent(data.getAmount());
+			tm.setAgentid(WeixinUtil.getAgentid());
+			tm.setMsgtype("text");
+			tm.setTouser(data.getToUser());
+			jsons.add(JSONObject.fromObject(tm).toString());
 		}
+		return jsons;
 	}
 
 	/**
@@ -227,4 +248,12 @@ public class MessageUtil {
 	 * 事件类型：CLICK(自定义菜单点击事件)
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
+
+	public static void main(String[] args) {
+		WeixinUtil.test();
+		List<String> messageJSONs = getMessageJSONs();
+		for(String messageJSON : messageJSONs){
+			System.out.println(WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", messageJSON));
+		}
+	}
 }

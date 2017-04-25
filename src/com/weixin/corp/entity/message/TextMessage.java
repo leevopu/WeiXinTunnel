@@ -4,15 +4,19 @@ public class TextMessage extends CorpBaseMessage {
 	/**
 	 * 回复的消息内容
 	 */
-	private String Content;
+	private Text text;
 
-	public String getContent() {
-		return Content;
+	public Text getText() {
+		return text;
 	}
 
-	public TextMessage(String content) {
-		super();
-		Content = content;
+	public void setText(Text text) {
+		this.text = text;
 	}
 	
+	public TextMessage() {
+		super();
+		this.text = new Text();
+	}
+
 }
