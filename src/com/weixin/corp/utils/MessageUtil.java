@@ -2,8 +2,8 @@ package com.weixin.corp.utils;
 
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -179,14 +179,6 @@ public class MessageUtil {
 		System.out.println(warn);
 	}
 
-	public static void sendMessageByNameAndPartyIds(String messageName,
-			String[] partyIds) {
-		// String result = testDao.test();
-		// 取缓存数据
-		for (String partyId : partyIds)
-			System.out.println(partyId);
-	}
-
 	// public static void groupMessage(Map<String, String[]> messageMapConfig,
 	// String... periods) throws Exception {
 	// for (String period : periods) {
@@ -203,21 +195,37 @@ public class MessageUtil {
 	// }
 	// }
 
-	private static List<String> getMessageJSONs() {
-		List<String> jsons = new ArrayList<String>();
+	public static int groupMessage() {
+		int result = 0;
 		Set<Data> datas = WeixinUtil.getDatas();
+		Set<Data> errordatas = new HashSet<Data>();
 		for (Data data : datas) {
 			TextMessage tm = new TextMessage();
 			Text text = new Text();
 			tm.setText(text);
-			text.setContent(data.getAmount());
+			text.setContent(null == data.getContext() ? "" : data.getContext());
 			tm.setAgentid(WeixinUtil.getAgentid());
 			tm.setMsgtype("text");
 			tm.setTouser(data.getToUser());
-			jsons.add(JSONObject.fromObject(tm).toString());
+	
+			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
+			if (null != jsonObject) {
+				if (0 != jsonObject.getInt("errcode")) {
+					result = jsonObject.getInt("errcode");
+					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+							+ "，errmsg:" + jsonObject.getString("errmsg") + "，invaliduser:" + jsonObject.getString("invaliduser"));
+					errordatas.add(data);
+				}
+			}
+			try {
+				Thread.sleep(5 * 1000);
+			} catch (InterruptedException e) {
+			}
 		}
-		return jsons;
+		datas.removeAll(errordatas);
+		return result;
 	}
+
 
 	/**
 	 * 消息类型：文本
@@ -251,9 +259,7 @@ public class MessageUtil {
 
 	public static void main(String[] args) {
 		WeixinUtil.test();
-		List<String> messageJSONs = getMessageJSONs();
-		for(String messageJSON : messageJSONs){
-			System.out.println(WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", messageJSON));
-		}
+		groupMessage();
 	}
+
 }

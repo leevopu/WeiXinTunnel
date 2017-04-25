@@ -3,13 +3,13 @@ package com.weixin.corp.entity.data;
 public class Data {
 	private String title;
 	private String toUser;
-	private String amount;
+	private String context;
 
-	public Data(String title, String toUser, String amount) {
+	public Data(String title, String toUser, String context) {
 		super();
 		this.title = title;
 		this.toUser = toUser;
-		this.amount = amount;
+		this.context = context;
 	}
 
 	public Data() {
@@ -32,11 +32,12 @@ public class Data {
 		this.toUser = toUser;
 	}
 
-	public String getAmount() {
-		return amount;
+	public String getContext() {
+		return context;
 	}
 
-	public void setAmount(String amount) {
-		this.amount = amount;
+	public void setContext(String context) {
+		this.context = context;
 	}
+
 }
