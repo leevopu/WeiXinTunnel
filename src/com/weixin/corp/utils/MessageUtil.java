@@ -207,20 +207,20 @@ public class MessageUtil {
 			tm.setAgentid(WeixinUtil.getAgentid());
 			tm.setMsgtype("text");
 			tm.setTouser(data.getToUser());
-	
-			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
-			if (null != jsonObject) {
-				if (0 != jsonObject.getInt("errcode")) {
-					result = jsonObject.getInt("errcode");
-					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
-							+ "，errmsg:" + jsonObject.getString("errmsg") + "，invaliduser:" + jsonObject.getString("invaliduser"));
-					errordatas.add(data);
-				}
-			}
-			try {
-				Thread.sleep(5 * 1000);
-			} catch (InterruptedException e) {
-			}
+
+//			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
+//			if (null != jsonObject) {
+//				if (0 != jsonObject.getInt("errcode")) {
+//					result = jsonObject.getInt("errcode");
+//					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+//							+ "，errmsg:" + jsonObject.getString("errmsg") + "，invaliduser:" + jsonObject.getString("invaliduser"));
+//					errordatas.add(data);
+//				}
+//			}
+//			try {
+//				Thread.sleep(5 * 1000);
+//			} catch (InterruptedException e) {
+//			}
 		}
 		datas.removeAll(errordatas);
 		return result;

@@ -8,13 +8,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.weixin.corp.service.MenuService;
 import com.weixin.corp.utils.MenuUtil;
 
 public class MenuServlet extends HttpServlet{
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -1707218526916889365L;
 	
 	@Override

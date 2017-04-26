@@ -17,14 +17,14 @@ public class MenuService {
 	private static Log log = LogFactory.getLog(MenuService.class);
 
 	/**
-	 * 菜单创建（POST） 限100（次/天）
+	 * 菜单创建（POST）
 	 */
-	public static String MENU_CREATE = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
+	private static String MENU_CREATE = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
 
 	/**
 	 * 菜单查询
 	 */
-	public static String MENU_GET = "https://api.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN";
+	private static String MENU_GET = "https://api.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN";
 
 	/**
 	 * 创建菜单
@@ -90,7 +90,7 @@ public class MenuService {
 	 * @return Menu 菜单对象
 	 */
 	public static Menu testGetMenu() {
-		String testgetMenuUrl = "{    \"menu\": {   \"button\":[       {           \"type\":\"click\",           \"name\":\"今日歌曲\",           \"key\":\"V1001_TODAY_MUSIC\"       },       {           \"name\":\"菜单\",           \"sub_button\":[               {                   \"type\":\"view\",                   \"name\":\"搜索\",                   \"url\":\"http://www.soso.com/\"               },               {                   \"type\":\"click\",                   \"name\":\"赞一下我们\",                   \"key\":\"V1001_GOOD\"               }           ]      }   ]}}";
+		String testgetMenuUrl = "{    \"menu\": {   \"button\":[       {           \"type\":\"click\",           \"name\":\"今日x歌曲\",           \"key\":\"V1001_TODAY_MUSIC\"       },       {           \"name\":\"菜单\",           \"sub_button\":[               {                   \"type\":\"view\",                   \"name\":\"搜索\",                   \"url\":\"http://www.soso.com/\"               },               {                   \"type\":\"click\",                   \"name\":\"赞一下我们\",                   \"key\":\"V1001_GOOD\"               }           ]      }   ]}}";
 		// String testgetMenuUrl =
 		// "{    \"menu\": {        \"button\": [            {                \"name\": \"预报\",                \"sub_button\": [                    {                        \"type\": \"click\",                        \"name\": \"北京天气\",                        \"key\": \"天气北京\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"上海天气\",                        \"key\": \"天气上海\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"广州天气\",                        \"key\": \"天气广州\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"深圳天气\",                        \"key\": \"天气深圳\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"view\",                        \"name\": \"本地天气\",                        \"url\": \"http://m.hao123.com/a/tianqi\",                        \"sub_button\": [ ]                    }                ]            },            {                \"name\": \"方倍工作室\",                \"sub_button\": [                    {                        \"type\": \"click\",                        \"name\": \"公司简介\",                        \"key\": \"company\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"趣味游戏\",                        \"key\": \"游戏\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"ddddd\",                        \"key\": \"ddddd\",                        \"sub_button\": [ ]                    }                ]            }        ]    }}";
 		JSONObject json = JSONObject.fromObject(testgetMenuUrl).getJSONObject(

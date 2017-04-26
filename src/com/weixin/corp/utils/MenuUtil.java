@@ -1,7 +1,5 @@
 package com.weixin.corp.utils;
 
-import java.lang.reflect.Array;
-
 import net.sf.json.JSONObject;
 
 import com.weixin.corp.entity.menu.Button;

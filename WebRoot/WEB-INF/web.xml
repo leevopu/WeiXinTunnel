@@ -77,5 +77,15 @@
 		<servlet-name>menuServlet</servlet-name>
 		<url-pattern>/doMenu</url-pattern>
 	</servlet-mapping>
+	
+	 <servlet>
+		<servlet-name>userServlet</servlet-name>
+		<servlet-class>com.weixin.corp.main.UserServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>userServlet</servlet-name>
+		<url-pattern>/userServlet</url-pattern>
+	</servlet-mapping>
     
 </web-app>
