@@ -75,7 +75,7 @@
 
 	<servlet-mapping>
 		<servlet-name>menuServlet</servlet-name>
-		<url-pattern>/doMenu</url-pattern>
+		<url-pattern>*.do</url-pattern>
 	</servlet-mapping>
 	
 	 <servlet>

@@ -25,14 +25,17 @@ public class MenuServlet extends HttpServlet{
 	    //MenuService.getMenu();
 	    
 	    if("get".equals(action)){
-	    	String str = menuUtil.add();
+	    	String str = menuUtil.get();
+	    	System.out.println(str);
 	    	req.setAttribute("str",str); 
 	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");
 			dispatcher.forward(req, resp);
 	    }
 	    if("add".equals(action)){
-	    	String str = menuUtil.get();
-	    	System.out.println(str);
+	    	String str = menuUtil.add();
+	    	req.setAttribute("str",str); 
+	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");
+			dispatcher.forward(req, resp);
 	    }
 	    
 		String str = "[{\"name\":\"ΩÒ»’∏Ë«˙\",\"key\":\"V1001_TODAY_MUSIC\",\"type\":\"click\"},"
