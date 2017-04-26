@@ -55,8 +55,8 @@
 		&nbsp;
 		<input id="remove"  class="input" type="button" 	value="删除" /> 
 	</div>
+	<form action="save.do" method="post">
 	<div style="border:1px solid #F00;overflow-y: true;">
-	<form action="">
 		<table id="table" align="center" cellspacing="0" width="100%" >
 			<tr>
 				<th style="width: 160px;"></th>
@@ -66,11 +66,12 @@
 				<th style="width: 160px;">上级菜单</th>
 			</tr>
 		</table>
-	</form>
+	
 	</div>
 		<div align="center">
 			<input id="save"  class="input"  align="middle" type="submit" 	value="保存" />
 		</div>
+	</form>
 </div>
 </body>
  <script  type="text/javascript">
@@ -83,8 +84,7 @@
     	var menusList ;
     	function load(){
     		var datas =<%=str %>;
-    		menusList = dataFormat(datas);
-    		debugger;
+    		menusList = dataFormat(datas.button);
     		for (var i = 0; i < menusList.length; i++) {
     			addRow();//新增行
     			var menu = menusList[i];
@@ -137,7 +137,7 @@
     		var n=0;
     		$("input[name=\"ckb\"]:checked").each(function() { //遍历选中的checkbox
     			i++;
-    			n = $(this).parents("tr").index();  // 获取checkbox所在行的顺序
+    			n = $(this).parents("tr").index();  // 获取checkbox所在行的序列
             });
     		if(i==0){
     			alert("请选择要删除的行！");
