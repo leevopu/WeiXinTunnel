@@ -16,7 +16,7 @@ public class User implements Serializable {
 	private String gender;
 	private String email;
 	private String weixinid;
-	private Integer enable;
+	private Integer enable = 1; //默认启用， 0为禁用
 
 
 	public String getUserid() {
@@ -43,6 +43,10 @@ public class User implements Serializable {
 	public void setDepartment(String department) {
 		this.department = department;
 	}
+	
+	public void setDepartment(int departmentId) {
+		this.department = departmentId + "";
+	} 
 
 	public String getGender() {
 		return this.gender;

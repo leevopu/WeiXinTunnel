@@ -32,6 +32,7 @@ import com.weixin.corp.entity.message.TextMessage;
  */
 public class MessageUtil {
 	private static Log log = LogFactory.getLog(MessageUtil.class);
+	
 	public static String GROUP_MESSAGE_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
 
 	/**
@@ -121,8 +122,8 @@ public class MessageUtil {
 	 */
 	public static String processRequest(Map<String, String> requestMap,
 			Map<String, String> paramMap) {
-		CorpBaseMessage baseMessage = null;
-		String respMessage = null;
+		BaseMessage baseMessage = null;
+		String responseMsg = null;
 		String respContent = "";
 
 		System.out.println(requestMap);
@@ -171,61 +172,73 @@ public class MessageUtil {
 			}
 		}
 
-		respMessage = textMessageToXml(baseMessage);
-		return respMessage;
+		responseMsg = textMessageToXml(baseMessage);
+		return responseMsg;
 	}
-
-	public static void itWarnMessage(String warn) {
-		System.out.println(warn);
-	}
-
-	// public static void groupMessage(Map<String, String[]> messageMapConfig,
-	// String... periods) throws Exception {
-	// for (String period : periods) {
-	// Iterator<Entry<String, String[]>> it = messageMapConfig.entrySet()
-	// .iterator();
-	// while (it.hasNext()) {
-	// Map.Entry<String, String[]> entry = it.next();
-	// if (entry.getKey().toLowerCase().contains(period)) {
-	// // Method method = MessageService.class.getMethod(
-	// // entry.getKey(), new Class[]{String[].class});
-	// // method.invoke(MessageService.class, new Object[]{entry.getValue()});
-	// sendMessageByNameAndPartyIds(entry.getKey(), entry.getValue());
-	// }
-	// }
-	// }
 
 	public static int groupMessage() {
 		int result = 0;
 		Set<Data> datas = WeixinUtil.getDatas();
-		Set<Data> errordatas = new HashSet<Data>();
+		Set<Data> successDatas = new HashSet<Data>();
 		for (Data data : datas) {
-			TextMessage tm = new TextMessage();
-			Text text = new Text();
-			tm.setText(text);
-			text.setContent(null == data.getContext() ? "" : data.getContext());
-			tm.setAgentid(WeixinUtil.getAgentid());
-			tm.setMsgtype("text");
-			tm.setTouser(data.getToUser());
-
-//			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
-//			if (null != jsonObject) {
-//				if (0 != jsonObject.getInt("errcode")) {
-//					result = jsonObject.getInt("errcode");
-//					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
-//							+ "，errmsg:" + jsonObject.getString("errmsg") + "，invaliduser:" + jsonObject.getString("invaliduser"));
-//					errordatas.add(data);
-//				}
-//			}
-//			try {
-//				Thread.sleep(5 * 1000);
-//			} catch (InterruptedException e) {
-//			}
+			TextMessage tm = changeDataToTm(data);
+			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
+			if (null != jsonObject) {
+				if (0 != jsonObject.getInt("errcode")) {
+					result = jsonObject.getInt("errcode");
+					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+							+ "，errmsg:" + jsonObject.getString("errmsg") + "，invaliduser:" + jsonObject.getString("invaliduser"));
+				}
+				else {
+					successDatas.add(data);
+				}
+			}
+			try {
+				// 间隔发送，降低压力
+				Thread.sleep(2 * 1000);
+			} catch (InterruptedException e) {
+			}
 		}
-		datas.removeAll(errordatas);
+		// 移除成功发送的消息
+		datas.removeAll(successDatas);
+		log.info("群发消息完成");
+		return result;
+	}
+	
+	public static int warnFailureMessage() {
+		int result = 0;
+		Set<Data> datas = WeixinUtil.getDatas();
+		for (Data data : datas) {
+			TextMessage tm = changeDataToTm(data);
+			tm.setTouser("管理员");
+			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
+			if (null != jsonObject) {
+				if (0 != jsonObject.getInt("errcode")) {
+					result = jsonObject.getInt("errcode");
+					log.error("警告消息出错 errcode:" + jsonObject.getInt("errcode")
+							+ "，errmsg:" + jsonObject.getString("errmsg"));
+				}
+			}
+			try {
+				// 间隔发送，降低压力
+				Thread.sleep(2 * 1000);
+			} catch (InterruptedException e) {
+			}
+		}
+		log.info("警告消息发送完成");
 		return result;
 	}
 
+	private static TextMessage changeDataToTm(Data data) {
+		TextMessage tm = new TextMessage();
+		Text text = new Text();
+		tm.setText(text);
+		text.setContent(data.getContext());
+		tm.setAgentid(WeixinUtil.getAgentid());
+		tm.setMsgtype("text");
+		tm.setTouser(data.getTouser());
+		return tm;
+	}
 
 	/**
 	 * 消息类型：文本
@@ -256,10 +269,5 @@ public class MessageUtil {
 	 * 事件类型：CLICK(自定义菜单点击事件)
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
-
-	public static void main(String[] args) {
-		WeixinUtil.test();
-		groupMessage();
-	}
 
 }

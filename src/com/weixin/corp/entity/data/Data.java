@@ -1,14 +1,18 @@
 package com.weixin.corp.entity.data;
 
+import java.util.Date;
+
 public class Data {
 	private String title;
-	private String toUser;
+	private String touser;
+	private Object sysdate;
 	private String context;
 
-	public Data(String title, String toUser, String context) {
+	public Data(String title, String touser, Object sysdate, String context) {
 		super();
 		this.title = title;
-		this.toUser = toUser;
+		this.touser = touser;
+		this.sysdate = sysdate;
 		this.context = context;
 	}
 
@@ -24,12 +28,20 @@ public class Data {
 		this.title = title;
 	}
 
-	public String getToUser() {
-		return toUser;
+	public String getTouser() {
+		return touser;
 	}
 
-	public void setToUser(String toUser) {
-		this.toUser = toUser;
+	public void setTouser(String touser) {
+		this.touser = touser;
+	}
+
+	public Object getSysdate() {
+		return sysdate;
+	}
+
+	public void setSysdate(Date sysdate) {
+		this.sysdate = sysdate;
 	}
 
 	public String getContext() {

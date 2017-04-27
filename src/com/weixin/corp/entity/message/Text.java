@@ -9,7 +9,7 @@ public class Text {
 	}
 
 	public void setContent(String content) {
-		this.content = content;
+		this.content = (null == content ? "" : content);
 	}
 
 }

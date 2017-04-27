@@ -1,24 +1,16 @@
 package com.weixin.corp.utils;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.ConnectException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
 
 import net.sf.json.JSONObject;
 
@@ -33,6 +25,8 @@ public class WeixinUtil {
 	// "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
 
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
+
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
 
@@ -56,21 +50,52 @@ public class WeixinUtil {
 		WeixinUtil.agentid = agentid;
 	}
 
-	public static void test() {
-
+	// 目前环境无数据库，模拟取数据
+	public static void testFetchData() {
+		Data data1 = new Data("monthlyStockReport", "wangli", "2017-04-26",
+				"300");
+		Data data2 = new Data("monthlyBondReport", "dawei", "2017-04-26", null);
 		// test1
-		Data data1 = new Data("monthlyA", "wangli", "300");
-		Data data2 = new Data("monthlyA", "dawei", null);
-		List<Data> dataList = new ArrayList<Data>();
-		dataList.add(data1);
-		dataList.add(data2);
-		for (Data data : dataList) {
-			dataCachePool.put(data.getTitle() + data.getToUser(), data1);
-		}
+		// List<Data> dataList = new ArrayList<Data>();
+		// dataList.add(data1);
+		// dataList.add(data2);
+		// for (Data data : dataList) {
+		// dataCachePool.put(data.getTitle() + data.getTouser(), data1);
+		// }
 
 		// test2
-		datas.add(data1);
-		datas.add(data2);
+		List<Data> todayDatas = new ArrayList<Data>();
+		todayDatas.add(data1);
+		todayDatas.add(data2);
+		for (Data todayData : todayDatas) {
+			try {
+				if (isNeededData(todayData)) {
+					datas.add(todayData);
+				}
+			} catch (java.text.ParseException e) {
+				e.printStackTrace();
+				log.error("获取的数据: " + todayData.getTitle()
+						+ todayData.getTouser() + ", 日期: "
+						+ todayData.getSysdate() + ", 不正确");
+			}
+		}
+		System.out.println("完成数据获取");
+	}
+
+	private static boolean isNeededData(Data data) throws ParseException {
+		Date today = null;
+		today = sdf.parse(sdf.format(new Date()));
+		Object sysdate = data.getSysdate();
+		if (sysdate instanceof String) {
+			if (0 == today.compareTo(sdf.parse((String) sysdate))) {
+				return true;
+			}
+		} else {
+			if (0 == today.compareTo((Date) sysdate)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -106,6 +131,10 @@ public class WeixinUtil {
 		return datas;
 	}
 
+	public static void setDatas(Set<Data> datas) {
+		WeixinUtil.datas = datas;
+	}
+
 	/**
 	 * 发起https请求并获取结果
 	 * 
@@ -119,66 +148,47 @@ public class WeixinUtil {
 	 */
 	public static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr) {
-		requestUrl = requestUrl.replace("ACCESS_TOKEN",
-				WeixinUtil.getAvailableAccessToken()).replace("AGENTID",
-				WeixinUtil.getAgentid());
-		JSONObject jsonObject = null;
-		StringBuffer buffer = new StringBuffer();
-		try {
-			// 创建SSLContext对象，并使用我们指定的信任管理器初始化
-			TrustManager[] tm = { new MyX509TrustManager() };
-			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom());
-			// 从上述SSLContext对象中得到SSLSocketFactory对象
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
-
-			URL url = new URL(requestUrl);
-			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
-					.openConnection();
-			httpUrlConn.setSSLSocketFactory(ssf);
-
-			httpUrlConn.setDoOutput(true);
-			httpUrlConn.setDoInput(true);
-			httpUrlConn.setUseCaches(false);
-			// 设置请求方式（GET/POST）
-			httpUrlConn.setRequestMethod(requestMethod);
-
-			if ("GET".equalsIgnoreCase(requestMethod))
-				httpUrlConn.connect();
-
-			// 当有数据需要提交时
-			if (null != outputStr) {
-				OutputStream outputStream = httpUrlConn.getOutputStream();
-				// 注意编码格式，防止中文乱码
-				outputStream.write(outputStr.getBytes("UTF-8"));
-				outputStream.close();
-			}
-
-			// 将返回的输入流转换成字符串
-			InputStream inputStream = httpUrlConn.getInputStream();
-			InputStreamReader inputStreamReader = new InputStreamReader(
-					inputStream, "utf-8");
-			BufferedReader bufferedReader = new BufferedReader(
-					inputStreamReader);
-
-			String str = null;
-			while ((str = bufferedReader.readLine()) != null) {
-				buffer.append(str);
-			}
-			bufferedReader.close();
-			inputStreamReader.close();
-			// 释放资源
-			inputStream.close();
-			inputStream = null;
-			httpUrlConn.disconnect();
-			jsonObject = JSONObject.fromObject(buffer.toString());
-		} catch (ConnectException ce) {
-			log.error("Weixin server connection timed out.", ce);
-		} catch (Exception e) {
-			log.error("https request error:{}", e);
-		}
-		return jsonObject;
-	}
+		return null;
+		/*
+		 * requestUrl = requestUrl.replace("ACCESS_TOKEN",
+		 * WeixinUtil.getAvailableAccessToken()).replace("AGENTID",
+		 * WeixinUtil.getAgentid()); JSONObject jsonObject = null; StringBuffer
+		 * buffer = new StringBuffer(); try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
+		 * TrustManager[] tm = { new MyX509TrustManager() }; SSLContext
+		 * sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+		 * sslContext.init(null, tm, new java.security.SecureRandom()); //
+		 * 从上述SSLContext对象中得到SSLSocketFactory对象 SSLSocketFactory ssf =
+		 * sslContext.getSocketFactory();
+		 * 
+		 * URL url = new URL(requestUrl); HttpsURLConnection httpUrlConn =
+		 * (HttpsURLConnection) url .openConnection();
+		 * httpUrlConn.setSSLSocketFactory(ssf);
+		 * 
+		 * httpUrlConn.setDoOutput(true); httpUrlConn.setDoInput(true);
+		 * httpUrlConn.setUseCaches(false); // 设置请求方式（GET/POST）
+		 * httpUrlConn.setRequestMethod(requestMethod);
+		 * 
+		 * if ("GET".equalsIgnoreCase(requestMethod)) httpUrlConn.connect();
+		 * 
+		 * // 当有数据需要提交时 if (null != outputStr) { OutputStream outputStream =
+		 * httpUrlConn.getOutputStream(); // 注意编码格式，防止中文乱码
+		 * outputStream.write(outputStr.getBytes("UTF-8"));
+		 * outputStream.close(); }
+		 * 
+		 * // 将返回的输入流转换成字符串 InputStream inputStream =
+		 * httpUrlConn.getInputStream(); InputStreamReader inputStreamReader =
+		 * new InputStreamReader( inputStream, "utf-8"); BufferedReader
+		 * bufferedReader = new BufferedReader( inputStreamReader);
+		 * 
+		 * String str = null; while ((str = bufferedReader.readLine()) != null)
+		 * { buffer.append(str); } bufferedReader.close();
+		 * inputStreamReader.close(); // 释放资源 inputStream.close(); inputStream =
+		 * null; httpUrlConn.disconnect(); jsonObject =
+		 * JSONObject.fromObject(buffer.toString()); } catch (ConnectException
+		 * ce) { log.error("Weixin server connection timed out.", ce); } catch
+		 * (Exception e) { log.error("https request error:{}", e); } return
+		 * jsonObject;
+		 */}
 
 	/**
 	 * 获取可用的access_token
