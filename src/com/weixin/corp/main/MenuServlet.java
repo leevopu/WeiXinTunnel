@@ -46,20 +46,11 @@ public class MenuServlet extends HttpServlet{
 			dispatcher.forward(req, resp);
 	    }
 	    if("save".equals(action)){
-	    	String[] name = req.getParameterValues("name");
-	    	String[] key = req.getParameterValues("key");
-	    	String[] type = req.getParameterValues("type");
-	    	String[] rank = req.getParameterValues("rank");
-	    	for (int i = 0; i < name.length; i++) {
-	    		System.out.println(name[i].toString());
-	    		System.out.println(key[i].toString());
-	    		System.out.println(type[i].toString());
-	    		System.out.println(rank[i].toString());
-			}
-	    	
-	    	String str = menuUtil.get();
-	    	System.out.println(str);
-	    	req.setAttribute("str",str); 
+	    	String menus = req.getParameter("result");
+	    	System.out.println(menus);
+//	    	String strNew = menuUtil.get();
+//	    	System.out.println(strNew);
+	    	req.setAttribute("str",menus); 
 	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");
 	    	dispatcher.forward(req, resp);
 	    }

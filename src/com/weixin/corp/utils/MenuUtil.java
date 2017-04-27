@@ -32,19 +32,15 @@ public class MenuUtil {
 		btn4.setKey("WeiXin_PHOTOS");
 		btn4.setType("pic_weixin");
 		
-		
 		Button btn5 = new Button();
 		Button[] btns = {btn2,btn3,btn4};
 		btn5.setName("ÃÀÀö¶«·½");
 		btn5.setSub_button(btns);
 		
 		Button[] btna = {btn1,btn5};
-		for (int i = 0; i < btna.length; i++) {
-			Button button = btna[i];
-			System.out.println(button.toString());
-		}
 		Menu menu = new Menu();
 		menu.setButton(btna);
+		
 		String str = JSONObject.fromObject(menu).toString();
 		return str;
 	}
