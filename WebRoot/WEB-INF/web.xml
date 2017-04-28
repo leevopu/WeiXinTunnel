@@ -15,6 +15,15 @@
     <servlet-name>CorpWeixinServlet</servlet-name>
     <url-pattern>/testServlet</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <servlet-class>com.weixin.corp.main.UploadServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/uploadServlet</url-pattern>
+  </servlet-mapping>
   
   <servlet>  
         <servlet-name>tokenServlet</servlet-name>  

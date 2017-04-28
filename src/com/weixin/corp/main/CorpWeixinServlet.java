@@ -94,11 +94,16 @@ public class CorpWeixinServlet extends HttpServlet {
 		while (headerNames.hasMoreElements()) {
 			System.out.println(headerNames.nextElement());
 		}
-		System.out.println("lenth: " + request.getContentLength()); //判断文件长度
+		System.out.println("lenth: " + request.getContentLength()); // 判断文件长度
+		System.out.println(request.getParameter("abc"));
 		// 超过20M返回提示
-		File uploadFile = parseUpload(request);
-		// 判断文件是否上传成功
-		System.out.println(uploadFile.exists());
+		if (true) {
+			File uploadFile = parseUpload(request);
+			// 判断文件是否上传成功
+			System.out.println(uploadFile.exists());
+
+			return;
+		}
 		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
 		// 获得请求参数
 		String signature = request.getParameter("msg_signature");
@@ -219,18 +224,24 @@ public class CorpWeixinServlet extends HttpServlet {
 	}
 
 	private File parseUpload(HttpServletRequest request) throws IOException {
-
+		System.out.println(request.getRequestURI());
+		System.out.println(request.getRequestURL().toString());
+		System.out.println(request.getContextPath());
+		System.out.println(request.getPathInfo());
 		final int NONE = 0;
 		final int DATAHEADER = 1;
 		final int FILEDATA = 2;
-//		final int FIELDDATA = 3; // 不需要表单上传
+		final int FIELDDATA = 3; // 不需要表单上传
 
-//		final int MXA_SEGSIZE = 1000 * 1024 * 20;// 设置每批最大的数据量，放到外面判断，否则不方便给返回值
+		// final int MXA_SEGSIZE = 1000 * 1024 * 20;//
+		// 设置每批最大的数据量，放到外面判断，否则不方便给返回值
 
 		String contentType = request.getContentType();// 请求消息类型
 		String filename = ""; // 文件名
 		String boundary = ""; // 分界符
 		String lastboundary = ""; // 结束符
+		String fieldname = "";
+		String fieldvalue = "";
 
 		int pos = contentType.indexOf("boundary=");
 
@@ -249,7 +260,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		// + "M";
 		// return null;
 		// } 放到外面判断
-		
+
 		// 将请求消息的实体送到b变量中
 		int totalBytes = request.getContentLength();
 		byte[] b = new byte[totalBytes];
@@ -260,6 +271,7 @@ public class CorpWeixinServlet extends HttpServlet {
 
 		String line = null;
 		while (null != (line = br.readLine())) {
+			System.out.println(line);
 			switch (state) {
 			case NONE:
 				if (line.startsWith(boundary)) {
@@ -268,16 +280,16 @@ public class CorpWeixinServlet extends HttpServlet {
 				break;
 			case DATAHEADER:
 				pos = line.indexOf("filename=");
-				// if (pos == -1) { // 将表单域的名字解析出来， 不需要
-				// pos = s.indexOf("name=");
-				// pos += "name=".length() + 1;
-				// s = s.substring(pos);
-				// int l = s.length();
-				// s = s.substring(0, l - 1);
-				// fieldname = s;
-				// state = FIELDDATA;
-				// } else { // 将文件名解析出来
-				if (pos != -1) {
+				if (pos == -1) { // 将表单域的名字解析出来， 不需要
+					pos = line.indexOf("name=");
+					pos += "name=".length() + 1;
+					line = line.substring(pos);
+					int l = line.length();
+					line = line.substring(0, l - 1);
+					fieldname = line;
+					state = FIELDDATA;
+				} else { // 将文件名解析出来
+				// if (pos != -1) {
 					String temp = line;
 					pos = line.indexOf("filename=");
 					pos += "filename=".length() + 1;
@@ -310,16 +322,18 @@ public class CorpWeixinServlet extends HttpServlet {
 					state = FILEDATA;
 				}
 				break;
-			// case FIELDDATA: // 表单字段，不需要
-			// s = reqbuf.readLine();
-			// fieldvalue = s;
-			// formfields.put(fieldname, fieldvalue);
-			// state = NONE;
-			// break;
+			case FIELDDATA: // 表单字段，不需要
+				line = br.readLine();
+				fieldvalue = line;
+				// formfields.put(fieldname, fieldvalue);
+				System.out.println(fieldvalue);
+				state = NONE;
+				break;
 			case FILEDATA:
 				while ((!line.startsWith(boundary))
 						&& (!line.startsWith(lastboundary))) {
 					line = br.readLine();
+//					System.out.println("line : " + line);
 					if (line.startsWith(boundary)) {
 						state = DATAHEADER;
 						break;
@@ -328,13 +342,18 @@ public class CorpWeixinServlet extends HttpServlet {
 				break;
 			}
 		}
-		File uploadFolder = new File(UploadUtil.TEMP_URL + CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
-		if(!uploadFolder.exists()){
+		String result = new String(b, "UTF-8");
+		System.out.println("result: " + result);
+		File uploadFolder = new File(UploadUtil.TEMP_URL
+				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
+		if (!uploadFolder.exists()) {
 			uploadFolder.mkdir();
 		}
 		System.out.println(uploadFolder.getAbsolutePath());
-		System.out.println(uploadFolder.getAbsolutePath() + File.separator +  filename);
-		File uploadFile = new File(uploadFolder.getAbsolutePath() + File.separator +  filename);
+		System.out.println(uploadFolder.getAbsolutePath() + File.separator
+				+ filename);
+		File uploadFile = new File(uploadFolder.getAbsolutePath()
+				+ File.separator + filename);
 		// 创建输出流
 		FileOutputStream outStream = new FileOutputStream(uploadFile);
 		// 写入数据
