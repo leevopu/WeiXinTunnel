@@ -55,8 +55,7 @@ public class testFile {
 		sb.append("--"); // 必须多两道线
 		sb.append(BOUNDARY);
 		sb.append("\r\n");
-		sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-				+ file.getName() + "\"\r\n");
+		sb.append("Content-Disposition: form-data;name=\"media\";filename=\""+ file.getName() + "\"\r\n");
 		sb.append("Content-Type:application/octet-stream\r\n\r\n");
 		byte[] head = sb.toString().getBytes("utf-8");
 		// 获得输出流
@@ -105,9 +104,9 @@ public class testFile {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String filePath = "C:/Users/Administrator/Desktop/ggg.jpg";//本地或服务器文件路径
+		String filePath = "D:/temp/777.56.mp4";//本地或服务器文件路径
 //		String sendUrl = "http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=image";//ACCESS_TOKEN是获取到的access_token
-		String sendUrl = "http://localhost/WeixinTest3/testServlet";
+		String sendUrl = "http://localhost/WeixinTest3/uploadServlet";
 		testFile fileUpload = new testFile();
 		String result = fileUpload.send(sendUrl, "image", filePath);
 		System.out.println(result);
