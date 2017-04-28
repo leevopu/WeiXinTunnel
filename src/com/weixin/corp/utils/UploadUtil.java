@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 import net.sf.json.JSONObject;
 
 public class UploadUtil {
-
+	public static final String TEMP_URL = "C:/Users/Administrator/Desktop/";
 	/**
 	 * 模拟form表单的形式 ，上传文件 以输出流的形式把文件写入到url中，然后用输入流来获取url的响应
 	 * 

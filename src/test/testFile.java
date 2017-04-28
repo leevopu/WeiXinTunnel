@@ -23,7 +23,7 @@ public class testFile {
 	 * @return String url的响应信息返回值
 	 * @throws IOException
 	 */
-	public String send(String url, String filePath) throws IOException {
+	public String send(String url, String type, String filePath) throws IOException {
 		String result = null;
 		File file = new File(filePath);
 		if (!file.exists() || !file.isFile()) {
@@ -105,10 +105,11 @@ public class testFile {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String filePath = "C:/Users/Administrator/Desktop/weixin_guanzhu.png";//本地或服务器文件路径
-		String sendUrl = "http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=image";//ACCESS_TOKEN是获取到的access_token
+		String filePath = "C:/Users/Administrator/Desktop/media.mp4";//本地或服务器文件路径
+//		String sendUrl = "http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=image";//ACCESS_TOKEN是获取到的access_token
+		String sendUrl = "http://localhost/WeixinTest3/testServlet";
 		testFile fileUpload = new testFile();
-		String result = fileUpload.send(sendUrl, filePath);
+		String result = fileUpload.send(sendUrl, "image", filePath);
 		System.out.println(result);
 
 	}
