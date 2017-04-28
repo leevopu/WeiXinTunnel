@@ -105,7 +105,7 @@ public class testFile {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String filePath = "C:/Users/Administrator/Desktop/media.mp4";//本地或服务器文件路径
+		String filePath = "C:/Users/Administrator/Desktop/ggg.jpg";//本地或服务器文件路径
 //		String sendUrl = "http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=image";//ACCESS_TOKEN是获取到的access_token
 		String sendUrl = "http://localhost/WeixinTest3/testServlet";
 		testFile fileUpload = new testFile();

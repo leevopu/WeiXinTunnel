@@ -97,8 +97,9 @@ public class CorpWeixinServlet extends HttpServlet {
 		System.out.println("lenth: " + request.getContentLength()); //判断文件长度
 		// 超过20M返回提示
 		File uploadFile = parseUpload(request);
-		//判断文件是否上传成功
+		// 判断文件是否上传成功
 		System.out.println(uploadFile.exists());
+		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
 		// 获得请求参数
 		String signature = request.getParameter("msg_signature");
 		System.out.println("signature: " + signature);
@@ -337,7 +338,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		// 创建输出流
 		FileOutputStream outStream = new FileOutputStream(uploadFile);
 		// 写入数据
-		outStream.write(b);
+		outStream.write(b, 0, b.length - 1);
 		// 关闭输出流
 		outStream.close();
 		return uploadFile;
