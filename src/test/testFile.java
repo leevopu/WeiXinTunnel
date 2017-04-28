@@ -49,15 +49,19 @@ public class testFile {
 		String BOUNDARY = "---------------------------" + System.currentTimeMillis();
 		con.setRequestProperty("Content-Type", "multipart/form-data; boundary="
 				+ BOUNDARY);
+		final String newLine = "\r\n";
 		// 请求正文信息
 		// 第一部分：
 		StringBuilder sb = new StringBuilder();
 		sb.append("--"); // 必须多两道线
 		sb.append(BOUNDARY);
-		sb.append("\r\n");
+		sb.append(newLine);
 		sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-				+ file.getName() + "\"\r\n");
-		sb.append("Content-Type:application/octet-stream\r\n\r\n");
+				+ file.getName() + "\"");
+		sb.append(newLine);
+		sb.append("Content-Type:application/octet-stream");
+		sb.append(newLine);
+		sb.append(newLine);
 		byte[] head = sb.toString().getBytes("utf-8");
 		// 获得输出流
 		OutputStream out = new DataOutputStream(con.getOutputStream());
@@ -65,17 +69,17 @@ public class testFile {
 		out.write(head);
 		// 文件正文部分
 		// 把文件已流文件的方式 推入到url中
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
-		int bytes = 0;
-		byte[] bufferOut = new byte[1024];
-		while ((bytes = in.read(bufferOut)) != -1) {
-			out.write(bufferOut, 0, bytes);
-		}
-		in.close();
-		// 结尾部分
-		byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");// 定义最后数据分隔线
-		out.write(foot);
-
+//		DataInputStream in = new DataInputStream(new FileInputStream(file));
+//		int bytes = 0;
+//		byte[] bufferOut = new byte[1024];
+//		while ((bytes = in.read(bufferOut)) != -1) {
+//			out.write(bufferOut, 0, bytes);
+//		}
+//		in.close();
+//		// 结尾部分
+//		byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");// 定义最后数据分隔线
+//		out.write(foot);
+		out.write("abccccc擦".getBytes("UTF-8"));
 		out.flush();
 		out.close();
 
@@ -105,9 +109,9 @@ public class testFile {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String filePath = "C:/Users/Administrator/Desktop/ggg.jpg";//本地或服务器文件路径
+		String filePath = "C:/Users/Administrator/Desktop/zzz.txt";//本地或服务器文件路径
 //		String sendUrl = "http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=image";//ACCESS_TOKEN是获取到的access_token
-		String sendUrl = "http://localhost/WeixinTest3/testServlet";
+		String sendUrl = "http://localhost/WeixinTest3/testServlet?name=xxx";
 		testFile fileUpload = new testFile();
 		String result = fileUpload.send(sendUrl, "image", filePath);
 		System.out.println(result);
