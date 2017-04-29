@@ -7,15 +7,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
-import com.weixin.corp.service.MessageService;
 import com.weixin.corp.utils.WeixinUtil;
 
-public class TokenServlet extends HttpServlet {
+public class TimerTaskServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
 
 	public static AccessToken accessToken = null;
-	
+
 	public void init() throws ServletException {
 		// 获取web.xml中配置的参数
 		// appid第三方用户唯一凭证
@@ -31,20 +30,20 @@ public class TokenServlet extends HttpServlet {
 		log.info("weixin api appsecret: " + appsecret);
 
 		// 未配置appid、appsecret、aeskey时给出提示
-		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey) || aeskey.length() != 43 || "".equals(agentid)) {
+		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey)
+				|| aeskey.length() != 43 || "".equals(agentid)) {
 			log.error("appid, appsecret, aeskey or agentid configuration error in web.xml, please check carefully.");
 			System.exit(-1);
-		}
-		else {
+		} else {
 			// token第三方用户验证口令
 			String token = getInitParameter("token");
 			if (null != token) {
 				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
 			// 启动定时获取access_token的线程，access_token每隔2小时会失效
-//			new Thread(new TokenThread()).start();
+			// new Thread(new TokenTimerTaskThread()).start();
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
-			MessageService.dailyGroupOnTimeTask();
+			// MessageService.dailyGroupOnTimeTask();
 		}
 	}
 
@@ -52,7 +51,7 @@ public class TokenServlet extends HttpServlet {
 	 * 定时获取微信access_token的线程
 	 * 
 	 */
-	public static class TokenThread implements Runnable {
+	public static class TokenTimerTaskThread implements Runnable {
 
 		public void run() {
 			while (true) {
