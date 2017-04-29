@@ -67,6 +67,10 @@
         	<param-name>aeskey</param-name>
         	<param-value>nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR</param-value>
         </init-param>
+        <init-param>
+            <param-name>token</param-name>
+            <param-value>weixin</param-value>  
+        </init-param>
 <!-- 企业号下某个应用，目前只用1个，如果用多个可能就不能配死了 -->
         <init-param>
         	<param-name>agentid</param-name>
