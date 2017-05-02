@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.Enumeration;
@@ -50,8 +51,10 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		// final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量
+		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
 		long startDoPostTime = System.currentTimeMillis();
+		response.setContentType("text/html;charset=UTF-8");
+		
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
 		System.out.println("ContentType: " + request.getContentType());
@@ -61,8 +64,7 @@ public class UploadServlet extends HttpServlet {
 		while (headerNames.hasMoreElements()) {
 			System.out.println(headerNames.nextElement());
 		}
-		System.out.println("lenth: " + request.getContentLength()); // 判断文件长度
-		// 超过20M返回提示
+		
 		Map<String, Object> uploadMap = parseUpload(request);
 		// 上传了文件
 		Iterator<Entry<String, Object>> it = uploadMap.entrySet().iterator();
@@ -72,7 +74,6 @@ public class UploadServlet extends HttpServlet {
 			System.out.println("====================================================");
 			System.out.println(entry.getKey()+" , "+entry.getValue());
 			System.out.println("====================================================");
-			
 		}
 		
 		String msgType = (String) uploadMap.get("msgType");
@@ -82,23 +83,25 @@ public class UploadServlet extends HttpServlet {
 		File media = (File) uploadMap.get("media");
 		// 判断文件是否上传成功
 		System.out.println(media.exists());
+		
 		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
 		long contentLength = request.getContentLength();
-		System.out.println("lenth: " + contentLength); // 判断文件长度
+		// 判断文件长度
+		System.out.println("lenth: " + contentLength); 
 		// 超过20M返回提示
 		String size = CommonUtil.convertFileSize(contentLength);
 		System.out.println("====================" + size);
 		// =================================================================
 		// 判断文件大小
 		// =================================================================
-		String x = StringUtils.substringBefore(size, " ");
-		System.out.println(x);
-		System.out.println(+Float.parseFloat(x) > 10);
-		/*
-		 * if(Float.parseFloat(x)>10){
-		 * System.out.println("文件大小超过20M，请重新操作！！！！"); return ; }
-		 */
-
+		if(contentLength>MXA_SEGSIZE){
+			/*PrintWriter out;前台页面提示
+	        out = response.getWriter();
+	        out.print("<script>alert('文件大小超过20M，请重新操作！！！！');</script>");
+	        out.close();*/
+			System.out.println("文件大小超过20M，请重新操作！！！！");
+			return; 
+		}
 	}
 
 	private Map<String, Object> parseUpload(HttpServletRequest request)
@@ -109,7 +112,7 @@ public class UploadServlet extends HttpServlet {
 		final int FILEDATA = 2;
 		final int FIELDDATA = 3; // 不需要表单上传
 
-		// final int MXA_SEGSIZE = 1000 * 1024 * 20;//
+		// final int MXA_SEGSIZE = 1024 * 1024 * 20;//
 		// 设置每批最大的数据量，放到外面判断，否则不方便给返回值
 
 		String contentType = request.getContentType();// 请求消息类型
