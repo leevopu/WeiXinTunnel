@@ -22,11 +22,14 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
-import com.weixin.corp.entity.message.BaseMessage;
 import com.weixin.corp.entity.message.CallMessage;
-import com.weixin.corp.entity.message.CorpBaseMessage;
-import com.weixin.corp.entity.message.Text;
-import com.weixin.corp.entity.message.TextMessage;
+import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.message.json.TextJsonMessage;
+import com.weixin.corp.entity.message.pojo.Article;
+import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
+import com.weixin.corp.entity.message.xml.ImageXMLMessage;
+import com.weixin.corp.entity.message.xml.NewsXMLMessage;
+import com.weixin.corp.entity.message.xml.TextXMLMessage;
 
 /**
  * 消息工具类
@@ -76,15 +79,18 @@ public class MessageUtil {
 	 * 
 	 * @return xml
 	 */
-	public static String textMessageToXml(BaseMessage message) {
+	public static String textMessageToXml(CorpBaseXMLMessage message) {
 		xstream.alias("xml", message.getClass());
-		// if(message instanceof NewsMessage){
-		// xstream.alias("item", new Article().getClass());
-		// }
+		if(message instanceof ImageXMLMessage){
+			 xstream.alias("item", new Article().getClass());
+			 }
+		 if(message instanceof NewsXMLMessage){
+		 xstream.alias("item", new Article().getClass());
+		 }
 		return xstream.toXML(message);
 	}
 
-	public static String textMessageToXml(CorpBaseMessage message) {
+	public static String textMessageToXml(CorpBaseJsonMessage message) {
 		xstream.alias("xml", message.getClass());
 		// if(message instanceof NewsMessage){
 		// xstream.alias("item", new Article().getClass());
@@ -121,9 +127,8 @@ public class MessageUtil {
 	 * @param paramMap
 	 * @return
 	 */
-	public static String processRequest(Map<String, String> requestMap,
-			Map<String, String> paramMap) {
-		BaseMessage baseMessage = null;
+	public static String processRequest(Map<String, String> requestMap) {
+		TextXMLMessage defaultMessage = null;
 		String responseMsg = null;
 		String respContent = "";
 
@@ -173,7 +178,7 @@ public class MessageUtil {
 			}
 		}
 
-		responseMsg = textMessageToXml(baseMessage);
+		responseMsg = textMessageToXml(defaultMessage);
 		return responseMsg;
 	}
 
@@ -188,7 +193,7 @@ public class MessageUtil {
 
 		for (CallMessage message : WeixinUtil.getGroupMessagePool().get(
 				todayStr)) {
-			TextMessage tm = changeMessageToTm(message);
+			TextJsonMessage tm = changeMessageToTm(message);
 			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
 					"POST", JSONObject.fromObject(tm).toString());
 			if (null != jsonObject) {
@@ -223,7 +228,7 @@ public class MessageUtil {
 		int result = 0;
 		for (CallMessage message : WeixinUtil.getGroupMessagePool().get(
 				todayStr)) {
-			TextMessage tm = changeMessageToTm(message);
+			TextJsonMessage tm = changeMessageToTm(message);
 			tm.setTouser("管理员");
 			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
 					"POST", JSONObject.fromObject(tm).toString());
@@ -244,13 +249,9 @@ public class MessageUtil {
 		return result;
 	}
 
-	private static TextMessage changeMessageToTm(CallMessage message) {
-		TextMessage tm = new TextMessage();
-		Text text = new Text();
-		tm.setText(text);
-		text.setContent(message.getText());
+	private static TextJsonMessage changeMessageToTm(CallMessage message) {
+		TextJsonMessage tm = new TextJsonMessage(message.getText());
 		tm.setAgentid(WeixinUtil.getAgentid());
-		tm.setMsgtype("text");
 		tm.setTouser(message.getToUser());
 		return tm;
 	}

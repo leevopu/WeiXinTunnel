@@ -1,4 +1,4 @@
-package com.weixin.corp.entity.message;
+package com.weixin.corp.entity.message.pojo;
 
 public class Image {
 	private String MediaId;

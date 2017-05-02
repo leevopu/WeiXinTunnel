@@ -1,9 +1,5 @@
-package com.weixin.corp.entity.message;
+package com.weixin.corp.entity.message.pojo;
 
-/**
- * 图文消息
- * sss
- */
 public class Article {
 	/**
 	 * 图文消息名称

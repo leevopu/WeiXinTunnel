@@ -1,6 +1,6 @@
-package com.weixin.corp.entity.message;
+package com.weixin.corp.entity.message.json;
 
-public class CorpBaseMessage {
+public class CorpBaseJsonMessage {
 
 	private String msgtype;
 

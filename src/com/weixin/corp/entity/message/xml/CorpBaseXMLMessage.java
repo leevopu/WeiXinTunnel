@@ -1,6 +1,6 @@
-package com.weixin.corp.entity.message;
+package com.weixin.corp.entity.message.xml;
 
-public class BaseMessage {
+public class CorpBaseXMLMessage {
 	/**
 	 * Ω” ’∑Ω’À∫≈ <br>
 	 * <br>

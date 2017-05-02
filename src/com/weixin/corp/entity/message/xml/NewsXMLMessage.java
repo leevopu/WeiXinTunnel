@@ -1,12 +1,14 @@
-package com.weixin.corp.entity.message;
+package com.weixin.corp.entity.message.xml;
 
 import java.util.List;
+
+import com.weixin.corp.entity.message.pojo.Article;
 
 /**
  * 图文消息
  * 
  */
-public class NewsMessage extends BaseMessage {
+public class NewsXMLMessage extends CorpBaseXMLMessage {
 	/**
 	 * 图文消息个数，限制为10条以内
 	 */
@@ -20,19 +22,12 @@ public class NewsMessage extends BaseMessage {
 		return ArticleCount;
 	}
 
-	// public void setArticleCount(int articleCount) {
-	// ArticleCount = articleCount;
-	// }
 
 	public List<Article> getArticles() {
 		return Articles;
 	}
 
-	// public void setArticles(List<Article> articles) {
-	// Articles = articles;
-	// }
-
-	public NewsMessage(List<Article> articles) {
+	public NewsXMLMessage(List<Article> articles) {
 		super();
 		if (null != articles) {
 			ArticleCount = articles.size();

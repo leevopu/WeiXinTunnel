@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,12 +23,15 @@ import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 /**
- * 核心请求处理类
+ * 核心请求处理类（微信服务器发过来的请求）
  * 
  */
 public class CorpWeixinServlet extends HttpServlet {
+	
 	private static Log log = LogFactory.getLog(CorpWeixinServlet.class);
+	
 	private static final long serialVersionUID = -5021188348833856475L;
+	
 	private static ConcurrentMap<String, Map<String, String>> requestCachePool = new ConcurrentHashMap<>();
 
 	@Override
@@ -45,7 +47,6 @@ public class CorpWeixinServlet extends HttpServlet {
 		String echostr = request.getParameter("echostr");
 
 		if (null == signature && null == timestamp && null == nonce) {
-
 			System.out.println("signatures all null");
 			return;
 		}
@@ -74,7 +75,6 @@ public class CorpWeixinServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String username = null;
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
@@ -122,12 +122,8 @@ public class CorpWeixinServlet extends HttpServlet {
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(
 				requestDecryptMsg.getBytes("UTF-8"));
-
 		response.setCharacterEncoding("UTF-8");
-		// 调用核心业务类接收消息、处理消息
 
-		// 不一定用,后期如果不用就去掉
-		Map<String, String> paramMap = new HashMap<>();
 		Map<String, String> requestMap = null;
 		try {
 			requestMap = MessageUtil.parseXml(bais);
@@ -137,12 +133,8 @@ public class CorpWeixinServlet extends HttpServlet {
 			return;
 		}
 		requestCachePool.put(requestId, requestMap);
-		try {
-			Thread.sleep(1 * 1000); // 模拟请求超时
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		String responseMsg = MessageUtil.processRequest(requestMap, paramMap);
+		//处理
+		String responseMsg = MessageUtil.processRequest(requestMap);
 		if (null == responseMsg) {
 			return;
 		}

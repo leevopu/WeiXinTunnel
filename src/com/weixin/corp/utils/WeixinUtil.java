@@ -336,6 +336,6 @@ public class WeixinUtil {
 	public static void main(String[] args) throws Exception {
 		String x = "{\"errcode\": 0,   \"errmsg\": \"ok\",  \"invaliduser\": \"\",  \"invalidparty\":\"PartyID1\",   \"invalidtag\":\"TagID1\"}";
 		JSONObject jsonObject = JSONObject.fromObject(x);
-		System.out.println("".equals(jsonObject.getString("invaliduser")));
+		System.out.println("".equals(jsonObject.getString("Invaliduser")));
 	}
 }
