@@ -39,7 +39,7 @@
 		<form name="myform" action="uploadServlet" method="post" enctype="multipart/form-data">
 			<div align="left" style="width: 50%;">
 			发送人：<input type="text" class="input" id="sender"  name="sender"/>&nbsp;&nbsp;&nbsp;
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;
 			接收人：<input type="text" class="input" id="receiver"name="receiver"/>
 			</div>
 			<br>
