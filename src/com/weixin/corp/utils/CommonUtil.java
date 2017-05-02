@@ -127,7 +127,7 @@ public class CommonUtil {
 		File file = new File(filename);
 		// 创建输入流
 		ImageInputStream input = ImageIO.createImageInputStream(file);
-		Iterator readers = ImageIO.getImageReaders(input);
+		Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
 		if (readers == null || !readers.hasNext()) {
 			throw new RuntimeException("No ImageReaders found");
 		}

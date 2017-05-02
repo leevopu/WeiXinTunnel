@@ -1,24 +1,24 @@
 package com.weixin.corp.entity.message.xml;
 
-import com.weixin.corp.entity.message.pojo.Text;
 
 /**
- * 图文消息
+ * 文本消息
  * 
  */
 public class TextXMLMessage extends CorpBaseXMLMessage {
 	/**
-	 * 只能在初始化时配置text
+	 * 只能在初始化时配置content
 	 */
-	private Text text;
+	private String Content;
 
-	public Text getText() {
-		return text;
+	public String getContent() {
+		return Content;
 	}
 
 	public TextXMLMessage(String content) {
 		super();
-		this.text = new Text(content);
+		this.Content = content;
+		this.setMsgType("text");
 	}
 	
 }

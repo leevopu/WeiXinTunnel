@@ -2,7 +2,7 @@ package com.weixin.corp.entity.message.json;
 
 public class CorpBaseJsonMessage {
 
-	private String msgtype;
+	private String MsgType;
 
 	private String agentid;
 
@@ -14,12 +14,12 @@ public class CorpBaseJsonMessage {
 	
 	private int safe = 0;
 
-	public String getMsgtype() {
-		return msgtype;
+	public String getMsgType() {
+		return MsgType;
 	}
 
-	public void setMsgtype(String msgtype) {
-		this.msgtype = msgtype;
+	public void setMsgType(String msgType) {
+		MsgType = msgType;
 	}
 
 	public String getAgentid() {

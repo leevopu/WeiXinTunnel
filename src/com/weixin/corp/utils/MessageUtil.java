@@ -23,11 +23,9 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.weixin.corp.entity.message.CallMessage;
-import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.entity.message.json.TextJsonMessage;
 import com.weixin.corp.entity.message.pojo.Article;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
-import com.weixin.corp.entity.message.xml.ImageXMLMessage;
 import com.weixin.corp.entity.message.xml.NewsXMLMessage;
 import com.weixin.corp.entity.message.xml.TextXMLMessage;
 
@@ -81,22 +79,12 @@ public class MessageUtil {
 	 */
 	public static String textMessageToXml(CorpBaseXMLMessage message) {
 		xstream.alias("xml", message.getClass());
-		if(message instanceof ImageXMLMessage){
-			 xstream.alias("item", new Article().getClass());
-			 }
-		 if(message instanceof NewsXMLMessage){
-		 xstream.alias("item", new Article().getClass());
-		 }
+		if(message instanceof NewsXMLMessage){
+			xstream.alias("item", new Article().getClass());
+		}
 		return xstream.toXML(message);
 	}
 
-	public static String textMessageToXml(CorpBaseJsonMessage message) {
-		xstream.alias("xml", message.getClass());
-		// if(message instanceof NewsMessage){
-		// xstream.alias("item", new Article().getClass());
-		// }
-		return xstream.toXML(message);
-	}
 
 	/**
 	 * 扩展xstream，使其支持CDATA块
@@ -287,15 +275,7 @@ public class MessageUtil {
 	public static final String EVENT_TYPE_CLICK = "CLICK";
 
 	public static void main(String[] args) {
-		// TextMessage tm = new TextMessage();
-		// Text text = new Text();
-		// tm.setText(text);
-		// text.setContent("123");
-		// tm.setAgentid(WeixinUtil.getAgentid());
-		// tm.setMsgtype("text");
-		// tm.setTouser("abc");
-		// JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
-		// "POST", JSONObject.fromObject(tm).toString());
-		// System.out.println(jsonObject);
+		TextXMLMessage textXMLMessage = new TextXMLMessage("abc");
+		System.out.println(textMessageToXml(textXMLMessage));
 	}
 }

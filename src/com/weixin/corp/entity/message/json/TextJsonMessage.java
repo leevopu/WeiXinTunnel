@@ -4,7 +4,7 @@ import com.weixin.corp.entity.message.pojo.Text;
 
 public class TextJsonMessage extends CorpBaseJsonMessage {
 	/**
-	 * 回复的消息内容
+	 * 只能在初始化时配置Image
 	 */
 	private Text text;
 
@@ -15,7 +15,7 @@ public class TextJsonMessage extends CorpBaseJsonMessage {
 	public TextJsonMessage(String content) {
 		super();
 		this.text = new Text(content);
-		this.setMsgtype("text");
+		this.setMsgType("text");
 	}
 
 }
