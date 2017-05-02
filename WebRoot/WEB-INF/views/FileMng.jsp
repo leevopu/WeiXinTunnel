@@ -46,7 +46,7 @@
 			<div align="left" style="width: 50%;">
 				素材类型：
 				<select name="msgType" id="msgType" style="width: 180px;text-align: center;">
-					<option value="...">请选择...</option> 
+					<option value="">请选择...</option> 
 					<option value="image">图片</option> 
 					<option value="text">文本</option> 
 					<option value="video">视频</option> 
