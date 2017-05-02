@@ -22,6 +22,7 @@ import com.weixin.corp.utils.WeixinUtil;
 
 public class MessageService {
 	private TestDao testDao = new TestDao();
+	
 
 	private static Log log = LogFactory.getLog(MessageService.class);
 

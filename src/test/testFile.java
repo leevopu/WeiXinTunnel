@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import test.customer.info.RequestInfo;
+import com.weixin.corp.entity.message.CallMessage;
 
 public class testFile {
 	private static final String TEXT_MSG_TYPE = "text";
@@ -19,10 +19,10 @@ public class testFile {
 	private static final String MEDIA_MSG_TYPE = "media";
 	private static final String FILE_MSG_TYPE = "file";
 
-	public String sendFileUsePost(String url, RequestInfo requestInfo)
+	public String sendFileUsePost(String url, CallMessage callMessage)
 			throws IOException {
 		String result = null;
-		String msgType = requestInfo.getMsgType();
+		String msgType = callMessage.getMsgType();
 		if (TEXT_MSG_TYPE != msgType && IMAGE_MSG_TYPE != msgType
 				&& MEDIA_MSG_TYPE != msgType && FILE_MSG_TYPE != msgType) {
 			return "发送的消息类型不正确，只允许text,image,media和file";
@@ -77,7 +77,7 @@ public class testFile {
 		sb.append("Content-Disposition: form-data;name=\"fromUser\"");
 		sb.append(newLine);
 		sb.append(newLine);
-		sb.append(requestInfo.getFromUser());
+		sb.append(callMessage.getFromUser());
 		sb.append(newLine);
 		sb.append("Content-Type:application/octet-stream");
 		sb.append(newLine);
@@ -90,7 +90,7 @@ public class testFile {
 		sb.append("Content-Disposition: form-data;name=\"toUser\"");
 		sb.append(newLine);
 		sb.append(newLine);
-		sb.append(requestInfo.getToUser());
+		sb.append(callMessage.getToUser());
 		sb.append(newLine);
 		sb.append("Content-Type:application/octet-stream");
 		sb.append(newLine);
@@ -103,7 +103,7 @@ public class testFile {
 		sb.append("Content-Disposition: form-data;name=\"sendTime\"");
 		sb.append(newLine);
 		sb.append(newLine);
-		sb.append(requestInfo.getSendTime());
+		sb.append(callMessage.getSendTime());
 		sb.append(newLine);
 		sb.append("Content-Type:application/octet-stream");
 		sb.append(newLine);
@@ -113,18 +113,18 @@ public class testFile {
 		sb.append("--"); // 必须多两道线
 		sb.append(BOUNDARY);
 		sb.append(newLine);
-		if (TEXT_INFO_TYPE == msgType) {
+		if (TEXT_MSG_TYPE == msgType) {
 			sb.append("Content-Disposition: form-data;name=\"text\"");
 			sb.append(newLine);
 			sb.append(newLine);
-			sb.append(requestInfo.getText());
+			sb.append(callMessage.getText());
 			sb.append(newLine);
 			sb.append("Content-Type:application/octet-stream");
 			sb.append(newLine);
 			sb.append(newLine);
 			out.write(sb.toString().getBytes("utf-8"));
 		} else {
-			File media = new File(requestInfo.getMediaPath());
+			File media = new File(callMessage.getMediaPath());
 			if (!media.exists()) {
 				return "选择的消息文件不存在";
 			}
@@ -282,11 +282,11 @@ public class testFile {
 		// "http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=image";//ACCESS_TOKEN是获取到的access_token
 		String sendUrl = "http://localhost/WeixinTest3/testServlet";
 		testFile fileUpload = new testFile();
-		RequestInfo requestInfo = new RequestInfo("doubi", "13788888888运营部",
+		CallMessage callMessage = new CallMessage("doubi", "13788888888运营部",
 				"image", null, filePath, "2017-05-01");
 		// String resultImage = fileUpload.sendFileUsePost(sendUrl, "image",
 		// filePath);
-		String result = fileUpload.sendFileUsePost(sendUrl, requestInfo);
+		String result = fileUpload.sendFileUsePost(sendUrl, callMessage);
 
 	}
 }

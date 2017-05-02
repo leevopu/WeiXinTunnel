@@ -60,6 +60,8 @@ public class UploadServlet extends HttpServlet {
 		// 超过20M返回提示
 		Map<String, Object> uploadMap = parseUpload(request);
 		// 上传了文件
+		
+		
 		String msgType = (String) uploadMap.get("msgType");
 		if (TEXT_MSG_TYPE == (msgType)) {
 			

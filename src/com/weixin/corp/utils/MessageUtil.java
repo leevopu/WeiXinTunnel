@@ -2,6 +2,7 @@ package com.weixin.corp.utils;
 
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +22,8 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
-import com.weixin.corp.entity.data.Data;
 import com.weixin.corp.entity.message.BaseMessage;
+import com.weixin.corp.entity.message.CallMessage;
 import com.weixin.corp.entity.message.CorpBaseMessage;
 import com.weixin.corp.entity.message.Text;
 import com.weixin.corp.entity.message.TextMessage;
@@ -32,7 +33,7 @@ import com.weixin.corp.entity.message.TextMessage;
  */
 public class MessageUtil {
 	private static Log log = LogFactory.getLog(MessageUtil.class);
-	
+
 	public static String GROUP_MESSAGE_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
 
 	/**
@@ -176,42 +177,56 @@ public class MessageUtil {
 		return responseMsg;
 	}
 
+	/**
+	 * 
+	 * @return 成功为0，失败则为errcode
+	 */
 	public static int groupMessage() {
+		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
-		Set<Data> datas = WeixinUtil.getDatas();
-		Set<Data> successDatas = new HashSet<Data>();
-		for (Data data : datas) {
-			TextMessage tm = changeDataToTm(data);
-			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
+		Set<CallMessage> successMessages = new HashSet<CallMessage>();
+
+		for (CallMessage message : WeixinUtil.getGroupMessagePool().get(
+				todayStr)) {
+			TextMessage tm = changeMessageToTm(message);
+			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
+					"POST", JSONObject.fromObject(tm).toString());
 			if (null != jsonObject) {
 				if (0 != jsonObject.getInt("errcode")) {
 					result = jsonObject.getInt("errcode");
 					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
-							+ "，errmsg:" + jsonObject.getString("errmsg") + "，invaliduser:" + jsonObject.getString("invaliduser"));
-				}
-				else {
-					successDatas.add(data);
+							+ "，errmsg:" + jsonObject.getString("errmsg")
+							+ "，invaliduser:"
+							+ jsonObject.getString("invaliduser"));
+				} else if (!"".equals(jsonObject.getString("invaliduser"))) {
+					log.error("丢失接收人:" + jsonObject.getString("invaliduser")
+							+ "，请确认用户更新情况");
+				} else {
+					successMessages.add(message);
 				}
 			}
 			try {
-				// 间隔发送，降低压力
+				// 间隔发送，降低调用微信服务器压力
 				Thread.sleep(2 * 1000);
 			} catch (InterruptedException e) {
 			}
 		}
 		// 移除成功发送的消息
-		datas.removeAll(successDatas);
+		WeixinUtil.getGroupMessagePool().get(todayStr)
+				.removeAll(successMessages);
 		log.info("群发消息完成");
 		return result;
 	}
-	
+
 	public static int warnFailureMessage() {
+		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
-		Set<Data> datas = WeixinUtil.getDatas();
-		for (Data data : datas) {
-			TextMessage tm = changeDataToTm(data);
+		for (CallMessage message : WeixinUtil.getGroupMessagePool().get(
+				todayStr)) {
+			TextMessage tm = changeMessageToTm(message);
 			tm.setTouser("管理员");
-			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL, "POST", JSONObject.fromObject(tm).toString());
+			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
+					"POST", JSONObject.fromObject(tm).toString());
 			if (null != jsonObject) {
 				if (0 != jsonObject.getInt("errcode")) {
 					result = jsonObject.getInt("errcode");
@@ -229,14 +244,14 @@ public class MessageUtil {
 		return result;
 	}
 
-	private static TextMessage changeDataToTm(Data data) {
+	private static TextMessage changeMessageToTm(CallMessage message) {
 		TextMessage tm = new TextMessage();
 		Text text = new Text();
 		tm.setText(text);
-		text.setContent(data.getContext());
+		text.setContent(message.getText());
 		tm.setAgentid(WeixinUtil.getAgentid());
 		tm.setMsgtype("text");
-		tm.setTouser(data.getTouser());
+		tm.setTouser(message.getToUser());
 		return tm;
 	}
 
@@ -270,4 +285,16 @@ public class MessageUtil {
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
 
+	public static void main(String[] args) {
+		// TextMessage tm = new TextMessage();
+		// Text text = new Text();
+		// tm.setText(text);
+		// text.setContent("123");
+		// tm.setAgentid(WeixinUtil.getAgentid());
+		// tm.setMsgtype("text");
+		// tm.setTouser("abc");
+		// JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
+		// "POST", JSONObject.fromObject(tm).toString());
+		// System.out.println(jsonObject);
+	}
 }

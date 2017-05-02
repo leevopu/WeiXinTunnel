@@ -1,17 +1,25 @@
-package test.customer.info;
+package com.weixin.corp.entity.message;
 
 import java.io.Serializable;
 
-public class RequestInfo implements Serializable {
+/**
+ * 数据库结果群发和用户主动调用的封装消息
+ * 
+ */
+public class CallMessage implements Serializable {
 
 	private static final long serialVersionUID = 5570817032197190881L;
+
 	/**
-	 * 发送人（之后可能会有校验判断）
+	 * 消息标题（非必填)
+	 */
+	private String title;
+	/**
+	 * 发送人（database, user）
 	 */
 	private String fromUser;
 	/**
-	 * 接收人（用手机号，部门名称来唯一确定用户）
-	 * <br>
+	 * 接收人（用手机号，部门名称来唯一确定用户） <br>
 	 * <br>
 	 * 用逗号分割多个接收人，确保及时更新用户信息，否则只有能匹配上的用户能接收到消息
 	 */
@@ -29,18 +37,17 @@ public class RequestInfo implements Serializable {
 	 */
 	private String mediaPath;
 	/**
-	 * 发送时间（控制时间延迟发送，立即发送可不配置）
+	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
-	 * <br>
-	 * 格式 yyyy-MM-dd HH:mm:ss  样例 2020-10-10 10:00:00
+	 * 格式 yyyy-MM-dd HH:mm:ss 样例 2020-10-10 10:00:00
 	 */
 	private String sendTime;
-	
-	public RequestInfo(){
+
+	public CallMessage() {
 		super();
 	}
 
-	public RequestInfo(String fromUser, String toUser, String msgType,
+	public CallMessage(String fromUser, String toUser, String msgType,
 			String text, String mediaPath, String sendTime) {
 		super();
 		this.fromUser = fromUser;
@@ -49,6 +56,22 @@ public class RequestInfo implements Serializable {
 		this.text = text;
 		this.mediaPath = mediaPath;
 		this.sendTime = sendTime;
+	}
+
+	public CallMessage(String title, String toUser, String sendTime, String text) {
+		super();
+		this.title = title;
+		this.toUser = toUser;
+		this.sendTime = sendTime;
+		this.text = text;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public String getFromUser() {
