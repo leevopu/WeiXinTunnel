@@ -9,8 +9,11 @@ import java.io.StringReader;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,13 +42,15 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("doGet");
+		System.out.println("doGet..............................");
+		RequestDispatcher dispatcher=request.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
+		dispatcher.forward(request, response);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		// final int MXA_SEGSIZE = 1000 * 1024 * 20;// 设置每批最大的数据量
+		// final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
@@ -60,7 +65,15 @@ public class UploadServlet extends HttpServlet {
 		// 超过20M返回提示
 		Map<String, Object> uploadMap = parseUpload(request);
 		// 上传了文件
-		
+		Iterator<Entry<String, Object>> it = uploadMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<java.lang.String, java.lang.Object> entry = (Map.Entry<java.lang.String, java.lang.Object>) it
+					.next();
+			System.out.println("====================================================");
+			System.out.println(entry.getKey()+" , "+entry.getValue());
+			System.out.println("====================================================");
+			
+		}
 		
 		String msgType = (String) uploadMap.get("msgType");
 		if (TEXT_MSG_TYPE == (msgType)) {
