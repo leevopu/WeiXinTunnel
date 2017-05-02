@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.user.User;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UserService;
+import com.weixin.corp.utils.WeixinUtil;
 
 public class UserServlet extends HttpServlet {
 	private static Log log = LogFactory.getLog(UserServlet.class);

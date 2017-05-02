@@ -26,9 +26,9 @@
   </servlet-mapping>
   
   <servlet>  
-        <servlet-name>tokenServlet</servlet-name>  
+        <servlet-name>timerTaskServlet</servlet-name>  
         <servlet-class>  
-            com.weixin.corp.main.TokenServlet
+            com.weixin.corp.main.TimerTaskServlet
         </servlet-class>  
         <!-- 配置获取access_token所需参数appid和appsecret -->  
 

@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
+import com.weixin.corp.service.MessageService;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -43,7 +44,7 @@ public class TimerTaskServlet extends HttpServlet {
 			// 启动定时获取access_token的线程，access_token每隔2小时会失效
 			// new Thread(new TokenTimerTaskThread()).start();
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
-			// MessageService.dailyGroupOnTimeTask();
+			 MessageService.dailyGroupOnTimeTask();
 		}
 	}
 

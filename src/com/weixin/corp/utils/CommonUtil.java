@@ -199,4 +199,15 @@ public class CommonUtil {
         ColorModel cm = new ComponentColorModel(cs, false, true, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
         return new BufferedImage(cm, (WritableRaster) raster, true, null);
     }
+    
+    public static void main(String[] args) {
+    	String size = CommonUtil.convertFileSize(1705110020);
+		System.out.println("===================="+size);
+		//=================================================================
+		// 判断文件大小
+		//=================================================================
+		String x = StringUtils.substringBefore(size, " ");
+		System.out.println(x);
+		System.out.println(Float.parseFloat(x)>10);
+	}
 }

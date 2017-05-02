@@ -20,7 +20,6 @@ public class UploadUtil {
 	public static final String TEMP_URL = "D:/temp/";
 	/**
 	 * 模拟form表单的形式 ，上传文件 以输出流的形式把文件写入到url中，然后用输入流来获取url的响应
-	 * 
 	 * @param url
 	 *            请求地址 form表单url地址
 	 * @param filePath

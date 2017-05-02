@@ -68,32 +68,31 @@ public class WeixinUtil {
 		todayDatas.add(data1);
 		todayDatas.add(data2);
 		for (Data todayData : todayDatas) {
-			try {
-				if (isNeededData(todayData)) {
-					datas.add(todayData);
-				}
-			} catch (java.text.ParseException e) {
-				e.printStackTrace();
-				log.error("获取的数据: " + todayData.getTitle()
-						+ todayData.getTouser() + ", 日期: "
-						+ todayData.getSysdate() + ", 不正确");
-			}
+			// if (isNeededData(todayData)) {
+			datas.add(todayData);
+			// }
 		}
 		System.out.println("完成数据获取");
 	}
 
-	private static boolean isNeededData(Data data) throws ParseException {
+	private static boolean isNeededData(Data data) {
 		Date today = null;
-		today = sdf.parse(sdf.format(new Date()));
-		Object sysdate = data.getSysdate();
-		if (sysdate instanceof String) {
-			if (0 == today.compareTo(sdf.parse((String) sysdate))) {
-				return true;
+		try {
+			today = sdf.parse(sdf.format(new Date()));
+			Object sysdate = data.getSysdate();
+			if (sysdate instanceof String) {
+				if (0 == today.compareTo(sdf.parse((String) sysdate))) {
+					return true;
+				}
+			} else {
+				if (0 == today.compareTo((Date) sysdate)) {
+					return true;
+				}
 			}
-		} else {
-			if (0 == today.compareTo((Date) sysdate)) {
-				return true;
-			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+			log.error("获取的数据: " + data.getTitle() + data.getTouser() + ", 日期: "
+					+ data.getSysdate() + ", 不正确");
 		}
 		return false;
 	}
@@ -305,4 +304,7 @@ public class WeixinUtil {
 		}
 	}
 
+	public static void main(String[] args) {
+		WeixinUtil.datas.clear();
+	}
 }

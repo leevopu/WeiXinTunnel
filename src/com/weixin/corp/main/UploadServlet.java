@@ -1,22 +1,15 @@
 package com.weixin.corp.main;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,12 +20,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.weixin.aes.AesException;
-import com.weixin.aes.WXBizMsgCrypt;
 import com.weixin.corp.utils.CommonUtil;
-import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.UploadUtil;
-import com.weixin.corp.utils.WeixinUtil;
 
 /**
  * 核心请求处理类
@@ -41,57 +30,79 @@ import com.weixin.corp.utils.WeixinUtil;
 public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 5941583433272362854L;
 	private static Log log = LogFactory.getLog(UploadServlet.class);
-	private static ConcurrentMap<String, Map<String, String>> requestCachePool = new ConcurrentHashMap<>();
+
+	private static final String TEXT_MSG_TYPE = "text";
+	private static final String IMAGE_MSG_TYPE = "image";
+	private static final String MEDIA_MSG_TYPE = "media";
+	private static final String FILE_MSG_TYPE = "file";
 
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("doGet");
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-//		final int MXA_SEGSIZE = 1000 * 1024 * 20;// 设置每批最大的数据量
+		// final int MXA_SEGSIZE = 1000 * 1024 * 20;// 设置每批最大的数据量
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
 		System.out.println("ContentType: " + request.getContentType());
+		request.getContentLength();
 		System.out.println(request.getHeader("Content-Disposition"));
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements()) {
 			System.out.println(headerNames.nextElement());
 		}
+		System.out.println("lenth: " + request.getContentLength()); // 判断文件长度
+		// 超过20M返回提示
+		Map<String, Object> uploadMap = parseUpload(request);
+		// 上传了文件
+		String msgType = (String) uploadMap.get("msgType");
+		if (TEXT_MSG_TYPE == (msgType)) {
+			
+		}
+		File media = (File) uploadMap.get("media");
+		// 判断文件是否上传成功
+		System.out.println(media.exists());
+		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
 		long contentLength = request.getContentLength();
-		System.out.println("lenth: " + contentLength); //判断文件长度
+		System.out.println("lenth: " + contentLength); // 判断文件长度
 		// 超过20M返回提示
 		String size = CommonUtil.convertFileSize(contentLength);
-		System.out.println("===================="+size);
-		//=================================================================
+		System.out.println("====================" + size);
+		// =================================================================
 		// 判断文件大小
-		//=================================================================
+		// =================================================================
 		String x = StringUtils.substringBefore(size, " ");
 		System.out.println(x);
-		System.out.println(+Float.parseFloat(x)>10);
-		/*if(Float.parseFloat(x)>10){
-			System.out.println("文件大小超过20M，请重新操作！！！！");
-			return ;
-		}*/
-		
-		File uploadFile = parseUpload(request);
-		// 判断文件是否上传成功
-		System.out.println(uploadFile.exists());
+		System.out.println(+Float.parseFloat(x) > 10);
+		/*
+		 * if(Float.parseFloat(x)>10){
+		 * System.out.println("文件大小超过20M，请重新操作！！！！"); return ; }
+		 */
+
 	}
 
-	private File parseUpload(HttpServletRequest request) throws IOException {
-
+	private Map<String, Object> parseUpload(HttpServletRequest request)
+			throws IOException {
+		Map<String, Object> uploadMap = new HashMap<String, Object>();
 		final int NONE = 0;
 		final int DATAHEADER = 1;
 		final int FILEDATA = 2;
+		final int FIELDDATA = 3; // 不需要表单上传
+
+		// final int MXA_SEGSIZE = 1000 * 1024 * 20;//
+		// 设置每批最大的数据量，放到外面判断，否则不方便给返回值
 
 		String contentType = request.getContentType();// 请求消息类型
 		String filename = ""; // 文件名
 		String boundary = ""; // 分界符
 		String lastboundary = ""; // 结束符
+		String fieldname = "";
+		String fieldvalue = "";
 
 		int pos = contentType.indexOf("boundary=");
 
@@ -103,7 +114,7 @@ public class UploadServlet extends HttpServlet {
 		int state = NONE;
 		// 得到数据输入流
 		DataInputStream in = new DataInputStream(request.getInputStream());
-		
+
 		// 将请求消息的实体送到b变量中
 		int totalBytes = request.getContentLength();
 		byte[] b = new byte[totalBytes];
@@ -122,7 +133,16 @@ public class UploadServlet extends HttpServlet {
 				break;
 			case DATAHEADER:
 				pos = line.indexOf("filename=");
-				if (pos != -1) {
+				if (pos == -1) { // 将表单域的名字解析出来， 不需要
+					pos = line.indexOf("name=");
+					pos += "name=".length() + 1;
+					line = line.substring(pos);
+					int l = line.length();
+					line = line.substring(0, l - 1);
+					fieldname = line;
+					state = FIELDDATA;
+				} else { // 将文件名解析出来
+					// if (pos != -1) {
 					String temp = line;
 					pos = line.indexOf("filename=");
 					pos += "filename=".length() + 1;
@@ -132,16 +152,9 @@ public class UploadServlet extends HttpServlet {
 					pos = line.lastIndexOf("\\");
 					line = line.substring(pos + 1);
 					filename = line;
-					//=======================================================================
-					//        获取文件后缀   判断文件类型  若是图片类型，则调用CommonUtil.compressPic() 压缩
-					//=======================================================================
-					String x = StringUtils.substringAfterLast(filename, ".");
-					System.out.println("--------------------------"+x+"-----------------------------");
 					// 从字节数组中取出文件数组
 					pos = byteIndexOf(b, temp, 0);
 					b = subBytes(b, pos + temp.getBytes().length + 2, b.length);// 去掉前面的部分
-					System.out.println(CommonUtil.convertFileSize(b.length));
-					
 					int n = 0;
 					/**
 					 * 过滤boundary下形如 Content-Disposition: form-data; name="bin";
@@ -162,32 +175,43 @@ public class UploadServlet extends HttpServlet {
 					state = FILEDATA;
 				}
 				break;
+			case FIELDDATA: // 表单字段
+				line = br.readLine();
+				fieldvalue = line;
+				uploadMap.put(fieldname, fieldvalue);
+				state = NONE;
+				break;
 			case FILEDATA:
 				while ((!line.startsWith(boundary))
 						&& (!line.startsWith(lastboundary))) {
 					line = br.readLine();
-					if (line.startsWith(boundary)) {
-						state = DATAHEADER;
+					// if (line.startsWith(boundary)) {
+					// state = DATAHEADER;
+					// break;
+					// }
+					if (line.startsWith(lastboundary)) {
+						state = NONE;
 						break;
 					}
 				}
 				break;
 			}
 		}
-		File uploadFolder = new File(UploadUtil.TEMP_URL + CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
-		if(!uploadFolder.exists()){
+		File uploadFolder = new File(UploadUtil.TEMP_URL
+				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
+		if (!uploadFolder.exists()) {
 			uploadFolder.mkdir();
 		}
-		System.out.println(uploadFolder.getAbsolutePath());
-		System.out.println(uploadFolder.getAbsolutePath() + File.separator +  filename);
-		File uploadFile = new File(uploadFolder.getAbsolutePath() + File.separator +  filename);
+		File media = new File(uploadFolder.getAbsolutePath()
+				+ File.separator + filename);
 		// 创建输出流
-		FileOutputStream outStream = new FileOutputStream(uploadFile);
+		FileOutputStream outStream = new FileOutputStream(media);
 		// 写入数据
 		outStream.write(b, 0, b.length - 1);
 		// 关闭输出流
 		outStream.close();
-		return uploadFile;
+		uploadMap.put("media", media);
+		return uploadMap;
 	}
 
 	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似

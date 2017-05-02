@@ -8,10 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.menu.Menu;
 import com.weixin.corp.utils.WeixinUtil;
 
-/**
- * ²Ëµ¥´´½¨
- * 
- */
 public class MenuService {
 
 	private static Log log = LogFactory.getLog(MenuService.class);

@@ -14,16 +14,12 @@ import java.net.URL;
 import test.customer.info.RequestInfo;
 
 public class MediaUploadRequest {
-	
+	private static String disposition = "form-data;name=\"{0}\";filename=\"{1}\"";
 	public void SendWeixinRequest(String url, RequestInfo requestInfo){
+		
 		String uploadType = requestInfo.getInfoType();
 		String pathOrContent = requestInfo.getPathOrContent();
-		if(uploadType)
-		String result = null;
-		File file = new File(filePath);
-		if (!file.exists() || !file.isFile()) {
-			throw new IOException("文件不存在");
-		}
+		
 		/**
 		 * 第一部分
 		 */
@@ -51,8 +47,7 @@ public class MediaUploadRequest {
 		sb.append("--"); // 必须多两道线
 		sb.append(BOUNDARY);
 		sb.append(newLine);
-		sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-				+ file.getName() + "\"");
+		sb.append("Content-Disposition:" + dispostion);
 		sb.append(newLine);
 		sb.append("Content-Type:application/octet-stream");
 		sb.append(newLine);
@@ -107,7 +102,7 @@ public class MediaUploadRequest {
 	}
 	
 	public static void main(String[] args) {
-		MediaUploadRequest request = new MediaUploadRequest();
-		request.
+		String file = "text";
+		System.out.println(file == "text");
 	}
 }
