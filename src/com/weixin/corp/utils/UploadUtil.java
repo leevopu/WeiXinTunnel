@@ -42,7 +42,6 @@ public class UploadUtil {
 	 * @throws IOException
 	 */
 	public static String send(String requestUrl, String filePath) throws IOException {
-
 		String result = null;
 
 		File file = new File(filePath);
