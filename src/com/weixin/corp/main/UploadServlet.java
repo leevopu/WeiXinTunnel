@@ -5,15 +5,11 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -37,11 +33,6 @@ public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 5941583433272362854L;
 	private static Log log = LogFactory.getLog(UploadServlet.class);
 
-	private static final String TEXT_MSG_TYPE = "text";
-	private static final String IMAGE_MSG_TYPE = "image";
-	private static final String MEDIA_MSG_TYPE = "media";
-	private static final String FILE_MSG_TYPE = "file";
-
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
@@ -57,7 +48,7 @@ public class UploadServlet extends HttpServlet {
 		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
 		long startDoPostTime = System.currentTimeMillis();
 		response.setContentType("text/html;charset=UTF-8");
-		
+
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
 		System.out.println("ContentType: " + request.getContentType());
@@ -76,25 +67,7 @@ public class UploadServlet extends HttpServlet {
 			response.getWriter().write(call.getErrorInfo());
 			return;
 		}
-		
-		Map<String, Object> uploadMap = parseUpload(request);
-		// 上传了文件
-		Iterator<Entry<String, Object>> it = uploadMap.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<java.lang.String, java.lang.Object> entry = (Map.Entry<java.lang.String, java.lang.Object>) it
-					.next();
-			System.out.println("====================================================");
-			System.out.println(entry.getKey()+" , "+entry.getValue());
-			System.out.println("====================================================");
-		}
-		
-		RequestCall call = parseRequestCall(request);
 
-		// 解析失败
-		if (null != call.getErrorInfo()) {
-			response.getWriter().write(call.getErrorInfo());
-			return;
-		}
 		// 判断是否格式符合要求，是否有缺失的字段
 		if (null == call.getFromUser() || null == call.getToUser()
 				|| null == call.getMsgType()
@@ -115,8 +88,7 @@ public class UploadServlet extends HttpServlet {
 			response.getWriter().write(missFieldValue.toString());
 			return;
 		}
-		
-		
+
 		// 判断是否格式符合要求，是否有缺失的字段
 		if (null == call.getFromUser() || null == call.getToUser()
 				|| null == call.getMsgType()
@@ -136,37 +108,47 @@ public class UploadServlet extends HttpServlet {
 			}
 			response.getWriter().write(missFieldValue.toString());
 			return;
+		}
+		// 如果发送时间选的不对，早于系统时间30分钟内，那就清空，默认立刻发送。
+		if (CommonUtil.getStrDate(call.getSendTime(), "yyyy-MM-dd HH:mm:ss")
+				.before(new Date(System.currentTimeMillis() + 1000 * 60 * 30))) {
+			call.setSendTime(null);
 		}
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传临时素材，获取素材id
-		if (TEXT_MSG_TYPE != (msgType)) {
-			// 判断设定的时间是否超过3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
-			if(null != call.getSendTime()){
-				CommonUtil.shiftDay(call.getSendTime(), "yyyy-MM-dd", -3)
-				if()
+		if (UploadUtil.TEXT_MSG_TYPE != (msgType)) {
+			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
+			if (null != call.getSendTime()) {
+				if (CommonUtil.getStrDate(call.getSendTime(),
+						"yyyy-MM-dd HH:mm:ss").after(
+						new Date(System.currentTimeMillis() + 1000 * 60 * 60
+								* 24 * 3))) {
+
+				}
 			}
 		}
 		File media = call.getMedia();
 		// 判断文件是否上传成功
 		System.out.println(media.exists());
-		
+
 		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
 		long contentLength = request.getContentLength();
 		// 判断文件长度
-		System.out.println("lenth: " + contentLength); 
+		System.out.println("lenth: " + contentLength);
 		// 超过20M返回提示
 		String size = CommonUtil.convertFileSize(contentLength);
 		System.out.println("====================" + size);
 		// =================================================================
 		// 判断文件大小
 		// =================================================================
-		if(contentLength>MXA_SEGSIZE){
-			/*PrintWriter out;前台页面提示
-	        out = response.getWriter();
-	        out.print("<script>alert('文件大小超过20M，请重新操作！！！！');</script>");
-	        out.close();*/
+		if (contentLength > MXA_SEGSIZE) {
+			/*
+			 * PrintWriter out;前台页面提示 out = response.getWriter();
+			 * out.print("<script>alert('文件大小超过20M，请重新操作！！！！');</script>");
+			 * out.close();
+			 */
 			System.out.println("文件大小超过20M，请重新操作！！！！");
-			return; 
+			return;
 		}
 	}
 

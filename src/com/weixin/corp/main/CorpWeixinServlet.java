@@ -161,7 +161,6 @@ public class CorpWeixinServlet extends HttpServlet {
 			log.error("EncryptMsg Error: " + aesErrorInfo);
 			return;
 		}
-		System.out.println("responseMsg after encrypt: " + responseMsg);
 		log.info("responseMsg after encrypt: " + responseMsg);
 
 		PrintWriter out = response.getWriter();
