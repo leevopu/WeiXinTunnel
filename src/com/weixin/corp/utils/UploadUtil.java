@@ -42,12 +42,12 @@ public class UploadUtil {
 	 * @throws IOException
 	 */
 	public static String send(String requestUrl, String filePath) throws IOException {
-		String result = null;
-
 		File file = new File(filePath);
 		if (!file.exists() || !file.isFile()) {
 			throw new IOException("文件不存在");
 		}
+		JSONObject jsonObject = null;
+		StringBuffer buffer = new StringBuffer();
 		try{
 		TrustManager[] tm = { new MyX509TrustManager() };
 		SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
@@ -117,34 +117,7 @@ public class UploadUtil {
 		
 		
 		
-		---------------------
-		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
-			TrustManager[] tm = { new MyX509TrustManager() };
-			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom()); //
-			// 从上述SSLContext对象中得到SSLSocketFactory对象
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
-
-			URL url = new URL(requestUrl);
-			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
-					.openConnection();
-			httpUrlConn.setSSLSocketFactory(ssf);
-
-			httpUrlConn.setDoOutput(true);
-			httpUrlConn.setDoInput(true);
-			httpUrlConn.setUseCaches(false); // 设置请求方式（GET/POST）
-			httpUrlConn.setRequestMethod(requestMethod);
-
-			if ("GET".equalsIgnoreCase(requestMethod))
-				httpUrlConn.connect();
-
-			// 当有数据需要提交时
-			if (null != outputStr) {
-				OutputStream outputStream = httpUrlConn.getOutputStream();
-				// 注意编码格式，防止中文乱码
-				outputStream.write(outputStr.getBytes("UTF-8"));
-				outputStream.close();
-			}
+//		---------------------
 
 			// 将返回的输入流转换成字符串
 			InputStream inputStream = httpUrlConn.getInputStream();
@@ -163,18 +136,13 @@ public class UploadUtil {
 			inputStream = null;
 			httpUrlConn.disconnect();
 			jsonObject = JSONObject.fromObject(buffer.toString());
+			return jsonObject.getString("media_id");
 		} catch (ConnectException ce) {
 			log.error("Weixin server connection timed out.", ce);
 		} catch (Exception e) {
 			log.error("https request error:{}", e);
 		}
-		return jsonObject;
-		
-		
-		
-		
-		String mediaId = jsonObj.getString("media_id");
-		return mediaId;
+		return null;
 	}
 
 	public static void main(String[] args) throws IOException {
