@@ -94,7 +94,7 @@ public class UploadServlet extends HttpServlet {
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传临时素材，获取素材id
 		if (TEXT_MSG_TYPE != (msgType)) {
-			// 判断设定的时间否则超过3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
+			// 判断设定的时间是否超过3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
 			if(null != call.getSendTime()){
 				CommonUtil.shiftDay(call.getSendTime(), "yyyy-MM-dd", -3)
 				if()
