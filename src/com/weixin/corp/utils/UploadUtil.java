@@ -7,17 +7,31 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
+import java.net.ConnectException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class UploadUtil {
+	
+	private static Log log = LogFactory.getLog(UploadUtil.class);
+	
 	public static final String TEMP_URL = "D:/temp/";
+	
+	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
+		
 	/**
 	 * 模拟form表单的形式 ，上传文件 以输出流的形式把文件写入到url中，然后用输入流来获取url的响应
 	 * @param url
@@ -27,7 +41,7 @@ public class UploadUtil {
 	 * @return String url的响应信息返回值
 	 * @throws IOException
 	 */
-	public static String send(String url, String filePath) throws IOException {
+	public static String send(String requestUrl, String filePath) throws IOException {
 
 		String result = null;
 
@@ -35,29 +49,33 @@ public class UploadUtil {
 		if (!file.exists() || !file.isFile()) {
 			throw new IOException("文件不存在");
 		}
+		try{
+		TrustManager[] tm = { new MyX509TrustManager() };
+		SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+		sslContext.init(null, tm, new java.security.SecureRandom()); //
+		// 从上述SSLContext对象中得到SSLSocketFactory对象
+		SSLSocketFactory ssf = sslContext.getSocketFactory();
 
-		/**
-		 * 第一部分
-		 */
-		URL urlObj = new URL(url);
-		// 连接
-		HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
+		URL url = new URL(requestUrl);
+		HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
+				.openConnection();
+		httpUrlConn.setSSLSocketFactory(ssf);
 
 		/**
 		 * 设置关键值
 		 */
-		con.setRequestMethod("POST"); // 以Post方式提交表单，默认get方式
-		con.setDoInput(true);
-		con.setDoOutput(true);
-		con.setUseCaches(false); // post方式不能使用缓存
+		httpUrlConn.setRequestMethod("POST"); // 以Post方式提交表单，默认get方式
+		httpUrlConn.setDoInput(true);
+		httpUrlConn.setDoOutput(true);
+		httpUrlConn.setUseCaches(false); // post方式不能使用缓存
 
 		// 设置请求头信息
-		con.setRequestProperty("Connection", "Keep-Alive");
-		con.setRequestProperty("Charset", "UTF-8");
+		httpUrlConn.setRequestProperty("Connection", "Keep-Alive");
+		httpUrlConn.setRequestProperty("Charset", "UTF-8");
 
 		// 设置边界
 		String BOUNDARY = "----------" + System.currentTimeMillis();
-		con.setRequestProperty("Content-Type", "multipart/form-data; boundary="
+		httpUrlConn.setRequestProperty("Content-Type", "multipart/form-data; boundary="
 				+ BOUNDARY);
 
 		// 请求正文信息
@@ -74,7 +92,7 @@ public class UploadUtil {
 		byte[] head = sb.toString().getBytes("utf-8");
 
 		// 获得输出流
-		OutputStream out = new DataOutputStream(con.getOutputStream());
+		OutputStream out = new DataOutputStream(httpUrlConn.getOutputStream());
 		// 输出表头
 		out.write(head);
 
@@ -95,32 +113,67 @@ public class UploadUtil {
 
 		out.flush();
 		out.close();
+		
+		
+		
+		
+		
+		---------------------
+		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
+			TrustManager[] tm = { new MyX509TrustManager() };
+			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+			sslContext.init(null, tm, new java.security.SecureRandom()); //
+			// 从上述SSLContext对象中得到SSLSocketFactory对象
+			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
-		StringBuffer buffer = new StringBuffer();
-		BufferedReader reader = null;
-		try {
-			// 定义BufferedReader输入流来读取URL的响应
-			reader = new BufferedReader(new InputStreamReader(
-					con.getInputStream()));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				// System.out.println(line);
-				buffer.append(line);
+			URL url = new URL(requestUrl);
+			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
+					.openConnection();
+			httpUrlConn.setSSLSocketFactory(ssf);
+
+			httpUrlConn.setDoOutput(true);
+			httpUrlConn.setDoInput(true);
+			httpUrlConn.setUseCaches(false); // 设置请求方式（GET/POST）
+			httpUrlConn.setRequestMethod(requestMethod);
+
+			if ("GET".equalsIgnoreCase(requestMethod))
+				httpUrlConn.connect();
+
+			// 当有数据需要提交时
+			if (null != outputStr) {
+				OutputStream outputStream = httpUrlConn.getOutputStream();
+				// 注意编码格式，防止中文乱码
+				outputStream.write(outputStr.getBytes("UTF-8"));
+				outputStream.close();
 			}
-			if (result == null) {
-				result = buffer.toString();
+
+			// 将返回的输入流转换成字符串
+			InputStream inputStream = httpUrlConn.getInputStream();
+			InputStreamReader inputStreamReader = new InputStreamReader(
+					inputStream, "utf-8");
+			BufferedReader bufferedReader = new BufferedReader(
+					inputStreamReader);
+
+			String str = null;
+			while ((str = bufferedReader.readLine()) != null) {
+				buffer.append(str);
 			}
-		} catch (IOException e) {
-			System.out.println("发送POST请求出现异常！" + e);
-			e.printStackTrace();
-			throw new IOException("数据读取异常");
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
+			bufferedReader.close();
+			inputStreamReader.close(); // 释放资源
+			inputStream.close();
+			inputStream = null;
+			httpUrlConn.disconnect();
+			jsonObject = JSONObject.fromObject(buffer.toString());
+		} catch (ConnectException ce) {
+			log.error("Weixin server connection timed out.", ce);
+		} catch (Exception e) {
+			log.error("https request error:{}", e);
 		}
-		System.out.println("upload result : " + result);
-		JSONObject jsonObj = JSONObject.fromObject(result);
+		return jsonObject;
+		
+		
+		
+		
 		String mediaId = jsonObj.getString("media_id");
 		return mediaId;
 	}
