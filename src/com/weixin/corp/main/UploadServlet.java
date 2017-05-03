@@ -71,6 +71,35 @@ public class UploadServlet extends HttpServlet {
 			response.getWriter().write(call.getErrorInfo());
 			return;
 		}
+		
+		RequestCall call = parseRequestCall(request);
+
+		// 解析失败
+		if (null != call.getErrorInfo()) {
+			response.getWriter().write(call.getErrorInfo());
+			return;
+		}
+		// 判断是否格式符合要求，是否有缺失的字段
+		if (null == call.getFromUser() || null == call.getToUser()
+				|| null == call.getMsgType()
+				|| (null == call.getText() && null == call.getMedia())) {
+			StringBuffer missFieldValue = new StringBuffer();
+			missFieldValue.append("缺少必要的信息请检查，fromUser:");
+			missFieldValue.append(call.getFromUser());
+			missFieldValue.append("，toUser:");
+			missFieldValue.append(call.getToUser());
+			missFieldValue.append("，msgType:");
+			missFieldValue.append(call.getMsgType());
+			missFieldValue.append("，text:");
+			missFieldValue.append(call.getText());
+			missFieldValue.append("，media:");
+			if (null != call.getMedia()) {
+				missFieldValue.append(call.getMedia().getName());
+			}
+			response.getWriter().write(missFieldValue.toString());
+			return;
+		}
+		
 		// 判断是否格式符合要求，是否有缺失的字段
 		if (null == call.getFromUser() || null == call.getToUser()
 				|| null == call.getMsgType()
