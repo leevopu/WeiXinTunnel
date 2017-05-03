@@ -183,7 +183,7 @@ public class MessageUtil {
 				todayStr)) {
 			TextJsonMessage tm = changeMessageToTm(message);
 			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
-					"POST", JSONObject.fromObject(tm).toString());
+					WeixinUtil.POST_REQUEST_METHOD, JSONObject.fromObject(tm).toString());
 			if (null != jsonObject) {
 				if (0 != jsonObject.getInt("errcode")) {
 					result = jsonObject.getInt("errcode");
@@ -219,7 +219,7 @@ public class MessageUtil {
 			TextJsonMessage tm = changeMessageToTm(message);
 			tm.setTouser("π‹¿Ì‘±");
 			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
-					"POST", JSONObject.fromObject(tm).toString());
+					WeixinUtil.POST_REQUEST_METHOD, JSONObject.fromObject(tm).toString());
 			if (null != jsonObject) {
 				if (0 != jsonObject.getInt("errcode")) {
 					result = jsonObject.getInt("errcode");

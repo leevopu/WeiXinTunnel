@@ -1,6 +1,10 @@
 package com.weixin.corp.utils;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -37,6 +41,18 @@ public class WeixinUtil {
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	
+	public static final String TEMP_URL = "D:/temp/";
+
+	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
+
+	public static final String TEXT_MSG_TYPE = "text";
+	public static final String IMAGE_MSG_TYPE = "image";
+	public static final String MEDIA_MSG_TYPE = "media";
+	public static final String FILE_MSG_TYPE = "file";
+	
+	public static final String POST_REQUEST_METHOD = "POST";
+	public static final String GET_REQUEST_METHOD = "GET";
 
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
 
@@ -145,6 +161,16 @@ public class WeixinUtil {
 	public static Map<String, HashSet<RequestCall>> getGroupMessagePool() {
 		return groupMessagePool;
 	}
+	
+	public static JSONObject httpsRequest(String requestUrl,
+			String requestMethod, String outputStr) {
+		return httpsRequest(requestUrl, requestMethod, outputStr, null);
+	}
+	
+	public static JSONObject httpsRequestMedia(String requestUrl,
+			String requestMethod, File uploadMedia) {
+		return httpsRequest(requestUrl, requestMethod, null, uploadMedia);
+	}
 
 	/**
 	 * 发起https请求并获取结果
@@ -154,11 +180,13 @@ public class WeixinUtil {
 	 * @param requestMethod
 	 *            请求方式（GET、POST）
 	 * @param outputStr
-	 *            提交的数据
+	 *            提交的字符串形式请求
+	 * @param uploadMedia
+	 *            提交的文件素材形式请求
 	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
 	 */
-	public static JSONObject httpsRequest(String requestUrl,
-			String requestMethod, String outputStr) {
+	private static JSONObject httpsRequest(String requestUrl,
+			String requestMethod, String outputStr, File uploadMedia) {
 		// return null;
 
 		requestUrl = requestUrl.replace("ACCESS_TOKEN",
@@ -169,7 +197,7 @@ public class WeixinUtil {
 		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
 			TrustManager[] tm = { new MyX509TrustManager() };
 			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom()); //
+			sslContext.init(null, tm, new java.security.SecureRandom());
 			// 从上述SSLContext对象中得到SSLSocketFactory对象
 			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
@@ -180,18 +208,62 @@ public class WeixinUtil {
 
 			httpUrlConn.setDoOutput(true);
 			httpUrlConn.setDoInput(true);
-			httpUrlConn.setUseCaches(false); // 设置请求方式（GET/POST）
+			httpUrlConn.setUseCaches(false);
+			// 设置请求方式（GET/POST）
 			httpUrlConn.setRequestMethod(requestMethod);
 
 			if ("GET".equalsIgnoreCase(requestMethod))
 				httpUrlConn.connect();
 
-			// 当有数据需要提交时
+			// 获得输出流
+			OutputStream out = new DataOutputStream(
+					httpUrlConn.getOutputStream());
+			
+			// 当字符串形式请求时，如json、xml
 			if (null != outputStr) {
-				OutputStream outputStream = httpUrlConn.getOutputStream();
-				// 注意编码格式，防止中文乱码
-				outputStream.write(outputStr.getBytes("UTF-8"));
-				outputStream.close();
+				out.write(outputStr.getBytes("UTF-8"));
+				out.close();
+			}
+			// 当文件素材形式请求时
+			else if (null != uploadMedia) {
+				// 设置请求头信息
+				httpUrlConn.setRequestProperty("Connection", "Keep-Alive");
+				httpUrlConn.setRequestProperty("Charset", "UTF-8");
+
+				// 设置边界
+				String BOUNDARY = "----------" + System.currentTimeMillis();
+				httpUrlConn.setRequestProperty("Content-Type",
+						"multipart/form-data; boundary=" + BOUNDARY);
+
+				// 请求正文信息
+
+				// 第一部分：
+				StringBuilder sb = new StringBuilder();
+				sb.append("--"); // 必须多两道线
+				sb.append(BOUNDARY);
+				sb.append("\r\n");
+				sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
+						+ uploadMedia.getName() + "\"\r\n");
+				sb.append("Content-Type:application/octet-stream\r\n\r\n");
+
+				byte[] head = sb.toString().getBytes("utf-8");
+
+				// 输出表头
+				out.write(head);
+				// 文件正文部分
+				// 把文件已流文件的方式 推入到url中
+				DataInputStream in = new DataInputStream(new FileInputStream(uploadMedia));
+				int bytes = 0;
+				byte[] bufferOut = new byte[1024];
+				while ((bytes = in.read(bufferOut)) != -1) {
+					out.write(bufferOut, 0, bytes);
+				}
+				in.close();
+				// 结尾部分
+				byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");// 定义最后数据分隔线
+				out.write(foot);
+				out.flush();
+				out.close();
 			}
 
 			// 将返回的输入流转换成字符串
@@ -205,8 +277,9 @@ public class WeixinUtil {
 			while ((str = bufferedReader.readLine()) != null) {
 				buffer.append(str);
 			}
+			// 释放资源
 			bufferedReader.close();
-			inputStreamReader.close(); // 释放资源
+			inputStreamReader.close();
 			inputStream.close();
 			inputStream = null;
 			httpUrlConn.disconnect();
@@ -236,7 +309,7 @@ public class WeixinUtil {
 	public static AccessToken getNewAccessToken() {
 		String requestUrl = ACCESS_TOKEN_URL.replace("APPID", appid).replace(
 				"APPSECRET", appsecret);
-		JSONObject jsonObject = httpsRequest(requestUrl, "GET", null);
+		JSONObject jsonObject = httpsRequest(requestUrl, GET_REQUEST_METHOD, null, null);
 		// 如果请求成功
 		if (null != jsonObject) {
 			System.out.println("access_token init success");

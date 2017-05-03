@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSONObject;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.UploadUtil;
+import com.weixin.corp.utils.WeixinUtil;
 
 /**
  * 上层应用主动调用 请求处理类
@@ -115,15 +118,20 @@ public class UploadServlet extends HttpServlet {
 			call.setSendTime(null);
 		}
 		String msgType = call.getMsgType();
+		JSONObject jsonObject = null;
 		// 如果不是文本，先上传临时素材，获取素材id
 		if (UploadUtil.TEXT_MSG_TYPE != (msgType)) {
 			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
 			if (null != call.getSendTime()) {
 				if (CommonUtil.getStrDate(call.getSendTime(),
-						"yyyy-MM-dd HH:mm:ss").after(
+						"yyyy-MM-dd HH:mm:ss").before(
 						new Date(System.currentTimeMillis() + 1000 * 60 * 60
 								* 24 * 3))) {
-
+//					调用临时素材接口
+					jsonObject = WeixinUtil.httpsRequestMedia(UploadUtil.MEDIA_TEMP_UPLOAD_URL.replace("TYPE", call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
+				}else {
+					// 永久素材接口
+//					jsonObject = 
 				}
 			}
 		}

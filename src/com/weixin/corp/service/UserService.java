@@ -40,7 +40,7 @@ public class UserService {
 		System.out.println("createUserJson: " + jsonUser);
 		int result = 0;
 		// 调用接口创建用户
-		JSONObject jsonObject = WeixinUtil.httpsRequest(USER_CREATE, "POST",
+		JSONObject jsonObject = WeixinUtil.httpsRequest(USER_CREATE, WeixinUtil.POST_REQUEST_METHOD,
 				jsonUser);
 
 		if (null != jsonObject) {
@@ -83,7 +83,7 @@ public class UserService {
 		System.out.println("updateUserJson: " + jsonUser);
 		int result = 0;
 		// 调用接口创建用户
-		JSONObject jsonObject = WeixinUtil.httpsRequest(USER_UPDATE, "POST",
+		JSONObject jsonObject = WeixinUtil.httpsRequest(USER_UPDATE, WeixinUtil.POST_REQUEST_METHOD,
 				jsonUser);
 
 		if (null != jsonObject) {
@@ -122,7 +122,7 @@ public class UserService {
 	 */
 	private static JSONObject getDepartmentJson() {
 		JSONObject result = null;
-		result = WeixinUtil.httpsRequest(DEPARTMENT_GET, "GET", null);
+		result = WeixinUtil.httpsRequest(DEPARTMENT_GET, WeixinUtil.GET_REQUEST_METHOD, null);
 		return result;
 	}
 

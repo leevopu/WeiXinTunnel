@@ -19,12 +19,12 @@ public class MenuService {
 	/**
 	 * 菜单创建（POST）
 	 */
-	private static String MENU_CREATE = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
+	private static String MENU_CREATE = "https://qyapi.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN&agentid=AGENTID";
 
 	/**
 	 * 菜单查询
 	 */
-	private static String MENU_GET = "https://api.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN";
+	private static String MENU_GET = "https://qyapi.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN&agentid=AGENTID";
 
 	/**
 	 * 创建菜单
@@ -37,7 +37,7 @@ public class MenuService {
 		System.out.println("jsonMenu: " + jsonMenu);
 		int result = 0;
 		// 调用接口创建菜单
-		JSONObject jsonObject = WeixinUtil.httpsRequest(MENU_CREATE, "POST",
+		JSONObject jsonObject = WeixinUtil.httpsRequest(MENU_CREATE, WeixinUtil.POST_REQUEST_METHOD,
 				jsonMenu);
 
 		if (null != jsonObject) {
