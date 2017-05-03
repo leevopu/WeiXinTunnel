@@ -6,12 +6,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -20,14 +18,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.UploadUtil;
 
 /**
- * 核心请求处理类
+ * 上层应用主动调用 请求处理类
  * 
  */
 public class UploadServlet extends HttpServlet {
@@ -43,7 +43,8 @@ public class UploadServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("doGet..............................");
-		RequestDispatcher dispatcher=request.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
+		RequestDispatcher dispatcher = request
+				.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
 		dispatcher.forward(request, response);
 	}
 
@@ -63,23 +64,43 @@ public class UploadServlet extends HttpServlet {
 		}
 		System.out.println("lenth: " + request.getContentLength()); // 判断文件长度
 		// 超过20M返回提示
-		Map<String, Object> uploadMap = parseUpload(request);
-		// 上传了文件
-		Iterator<Entry<String, Object>> it = uploadMap.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<java.lang.String, java.lang.Object> entry = (Map.Entry<java.lang.String, java.lang.Object>) it
-					.next();
-			System.out.println("====================================================");
-			System.out.println(entry.getKey()+" , "+entry.getValue());
-			System.out.println("====================================================");
-			
+		RequestCall call = parseRequestCall(request);
+
+		// 解析失败
+		if (null != call.getErrorInfo()) {
+			response.getWriter().write(call.getErrorInfo());
+			return;
 		}
-		
-		String msgType = (String) uploadMap.get("msgType");
-		if (TEXT_MSG_TYPE == (msgType)) {
-			
+		// 判断是否格式符合要求，是否有缺失的字段
+		if (null == call.getFromUser() || null == call.getToUser()
+				|| null == call.getMsgType()
+				|| (null == call.getText() && null == call.getMedia())) {
+			StringBuffer missFieldValue = new StringBuffer();
+			missFieldValue.append("缺少必要的信息请检查，fromUser:");
+			missFieldValue.append(call.getFromUser());
+			missFieldValue.append("，toUser:");
+			missFieldValue.append(call.getToUser());
+			missFieldValue.append("，msgType:");
+			missFieldValue.append(call.getMsgType());
+			missFieldValue.append("，text:");
+			missFieldValue.append(call.getText());
+			missFieldValue.append("，media:");
+			if (null != call.getMedia()) {
+				missFieldValue.append(call.getMedia().getName());
+			}
+			response.getWriter().write(missFieldValue.toString());
+			return;
 		}
-		File media = (File) uploadMap.get("media");
+		String msgType = call.getMsgType();
+		// 如果不是文本，先上传临时素材，获取素材id
+		if (TEXT_MSG_TYPE != (msgType)) {
+			// 判断设定的时间否则超过3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
+			if(null != call.getSendTime()){
+				CommonUtil.shiftDay(call.getSendTime(), "yyyy-MM-dd", -3)
+				if()
+			}
+		}
+		File media = call.getMedia();
 		// 判断文件是否上传成功
 		System.out.println(media.exists());
 		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
@@ -101,9 +122,9 @@ public class UploadServlet extends HttpServlet {
 
 	}
 
-	private Map<String, Object> parseUpload(HttpServletRequest request)
+	private RequestCall parseRequestCall(HttpServletRequest request)
 			throws IOException {
-		Map<String, Object> uploadMap = new HashMap<String, Object>();
+		RequestCall call = new RequestCall();
 		final int NONE = 0;
 		final int DATAHEADER = 1;
 		final int FILEDATA = 2;
@@ -113,18 +134,18 @@ public class UploadServlet extends HttpServlet {
 		// 设置每批最大的数据量，放到外面判断，否则不方便给返回值
 
 		String contentType = request.getContentType();// 请求消息类型
-		String filename = ""; // 文件名
+		String fileName = ""; // 文件名
 		String boundary = ""; // 分界符
-		String lastboundary = ""; // 结束符
-		String fieldname = "";
-		String fieldvalue = "";
+		String lastBoundary = ""; // 结束符
+		String fieldName = "";
+		String fieldValue = "";
 
 		int pos = contentType.indexOf("boundary=");
 
 		if (pos != -1) { // 取得分界符和结束符
 			pos += "boundary=".length();
 			boundary = "--" + contentType.substring(pos);
-			lastboundary = boundary + "--";
+			lastBoundary = boundary + "--";
 		}
 		int state = NONE;
 		// 得到数据输入流
@@ -154,7 +175,7 @@ public class UploadServlet extends HttpServlet {
 					line = line.substring(pos);
 					int l = line.length();
 					line = line.substring(0, l - 1);
-					fieldname = line;
+					fieldName = line;
 					state = FIELDDATA;
 				} else { // 将文件名解析出来
 					// if (pos != -1) {
@@ -166,7 +187,7 @@ public class UploadServlet extends HttpServlet {
 					line = line.substring(0, l - 1);// 去掉最后那个引号”
 					pos = line.lastIndexOf("\\");
 					line = line.substring(pos + 1);
-					filename = line;
+					fileName = line;
 					// 从字节数组中取出文件数组
 					pos = byteIndexOf(b, temp, 0);
 					b = subBytes(b, pos + temp.getBytes().length + 2, b.length);// 去掉前面的部分
@@ -192,19 +213,19 @@ public class UploadServlet extends HttpServlet {
 				break;
 			case FIELDDATA: // 表单字段
 				line = br.readLine();
-				fieldvalue = line;
-				uploadMap.put(fieldname, fieldvalue);
+				fieldValue = line;
+				reflectFiledValue(call, fieldName, fieldValue);
 				state = NONE;
 				break;
 			case FILEDATA:
 				while ((!line.startsWith(boundary))
-						&& (!line.startsWith(lastboundary))) {
+						&& (!line.startsWith(lastBoundary))) {
 					line = br.readLine();
 					// if (line.startsWith(boundary)) {
 					// state = DATAHEADER;
 					// break;
 					// }
-					if (line.startsWith(lastboundary)) {
+					if (line.startsWith(lastBoundary)) {
 						state = NONE;
 						break;
 					}
@@ -217,16 +238,16 @@ public class UploadServlet extends HttpServlet {
 		if (!uploadFolder.exists()) {
 			uploadFolder.mkdir();
 		}
-		File media = new File(uploadFolder.getAbsolutePath()
-				+ File.separator + filename);
+		File media = new File(uploadFolder.getAbsolutePath() + File.separator
+				+ fileName);
 		// 创建输出流
 		FileOutputStream outStream = new FileOutputStream(media);
 		// 写入数据
 		outStream.write(b, 0, b.length - 1);
 		// 关闭输出流
 		outStream.close();
-		uploadMap.put("media", media);
-		return uploadMap;
+		call.setMedia(media);
+		return call;
 	}
 
 	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似
@@ -272,6 +293,23 @@ public class UploadServlet extends HttpServlet {
 	// 用于从一个字节数组中提取一个字符串
 	public static String subBytesString(byte[] b, int from, int end) {
 		return new String(subBytes(b, from, end));
+	}
+
+	private RequestCall reflectFiledValue(RequestCall call, String fieldName,
+			String fieldValue) {
+		try {
+			Field declaredField = RequestCall.class.getDeclaredField(fieldName);
+			System.out.println(declaredField.getName());
+			Method method = call.getClass().getMethod(
+					"set" + StringUtils.capitalize("sendTime"),
+					declaredField.getType());
+			method.invoke(call, fieldName);
+		} catch (Exception e) {
+			e.printStackTrace();
+			call.setErrorInfo(e.getMessage());
+			log.error("解析用户消息请求失败: " + e.getMessage());
+		}
+		return call;
 	}
 
 }
