@@ -1,12 +1,17 @@
 package com.weixin.corp.entity.message;
 
+import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 数据库结果群发和用户主动调用的封装消息
  * 
  */
-public class CallMessage implements Serializable {
+public class RequestCall implements Serializable {
 
 	private static final long serialVersionUID = 5570817032197190881L;
 
@@ -35,35 +40,64 @@ public class CallMessage implements Serializable {
 	/**
 	 * 若msgType不为text则需有值
 	 */
-	private String mediaPath;
+	private File media;
 	/**
 	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
 	 * 格式 yyyy-MM-dd HH:mm:ss 样例 2020-10-10 10:00:00
 	 */
 	private String sendTime;
+	/**
+	 * 响应后的错误消息用于提醒
+	 */
+	private String errorInfo;
 
-	public CallMessage() {
+	public RequestCall() {
 		super();
 	}
 
-	public CallMessage(String fromUser, String toUser, String msgType,
+	public RequestCall(String fromUser, String toUser, String msgType,
+			String text, File media, String sendTime) {
+		super();
+		this.fromUser = fromUser;
+		this.toUser = toUser;
+		this.msgType = msgType;
+		this.text = text;
+		this.media = media;
+		this.sendTime = sendTime;
+	}
+
+	public RequestCall(String fromUser, String toUser, String msgType,
 			String text, String mediaPath, String sendTime) {
 		super();
 		this.fromUser = fromUser;
 		this.toUser = toUser;
 		this.msgType = msgType;
 		this.text = text;
-		this.mediaPath = mediaPath;
+		this.media = new File(mediaPath);
 		this.sendTime = sendTime;
 	}
 
-	public CallMessage(String title, String toUser, String sendTime, String text) {
+	/**
+	 * 数据库跑批结果的构造方法，fromUser默认值database，msgType默认text
+	 * 
+	 * @param title
+	 *            消息标题
+	 * @param toUser
+	 *            接收人
+	 * @param sendTime
+	 *            发送时间
+	 * @param text
+	 *            主体内容
+	 */
+	public RequestCall(String title, String toUser, String sendTime, String text) {
 		super();
 		this.title = title;
 		this.toUser = toUser;
 		this.sendTime = sendTime;
 		this.text = text;
+		this.fromUser = "database";
+		this.msgType = "text";
 	}
 
 	public String getTitle() {
@@ -106,12 +140,12 @@ public class CallMessage implements Serializable {
 		this.text = text;
 	}
 
-	public String getMediaPath() {
-		return mediaPath;
+	public File getMedia() {
+		return media;
 	}
 
-	public void setMediaPath(String mediaPath) {
-		this.mediaPath = mediaPath;
+	public void setMedia(File media) {
+		this.media = media;
 	}
 
 	public String getSendTime() {
@@ -120,6 +154,14 @@ public class CallMessage implements Serializable {
 
 	public void setSendTime(String sendTime) {
 		this.sendTime = sendTime;
+	}
+	
+	public String getErrorInfo() {
+		return errorInfo;
+	}
+
+	public void setErrorInfo(String errorInfo) {
+		this.errorInfo = errorInfo;
 	}
 
 }

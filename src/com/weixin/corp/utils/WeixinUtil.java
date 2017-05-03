@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
-import com.weixin.corp.entity.message.CallMessage;
+import com.weixin.corp.entity.message.RequestCall;
 
 public class WeixinUtil {
 	// /** personal test */ public final static String ACCESS_TOKEN_URL =
@@ -45,7 +45,7 @@ public class WeixinUtil {
 	/**
 	 * 只存放fromUser为database的群发消息 最外层key为日期，方便清理缓存池
 	 */
-	private static Map<String, HashSet<CallMessage>> groupMessagePool = new HashMap<String, HashSet<CallMessage>>();
+	private static Map<String, HashSet<RequestCall>> groupMessagePool = new HashMap<String, HashSet<RequestCall>>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -64,9 +64,9 @@ public class WeixinUtil {
 
 	// 目前环境无数据库，模拟取数据
 	public static void testFetchData() {
-		CallMessage data1 = new CallMessage("monthlyStockReport", "wangli",
+		RequestCall data1 = new RequestCall("monthlyStockReport", "wangli",
 				"2017-04-26", "300");
-		CallMessage data2 = new CallMessage("monthlyBondReport", "dawei",
+		RequestCall data2 = new RequestCall("monthlyBondReport", "dawei",
 				"2017-04-26", null);
 		// test1
 		// List<Data> dataList = new ArrayList<Data>();
@@ -77,20 +77,21 @@ public class WeixinUtil {
 		// }
 
 		// test2
-		List<CallMessage> todayDatas = new ArrayList<CallMessage>();
+		List<RequestCall> todayDatas = new ArrayList<RequestCall>();
 		todayDatas.add(data1);
 		todayDatas.add(data2);
-		for (CallMessage message : todayDatas) {
+		for (RequestCall message : todayDatas) {
 			addTimerGroupMessage(message);
 		}
 		System.out.println("完成数据获取");
 	}
 
 	/**
-	 * 添加定时群发消息，目前只群发数据库每日跑批，且日期大于等于系统日期，格式为yyyy-MM-dd8位
+	 * 添加定时群发消息，目前只群发数据库每日跑批
+	 * 且日期大于等于系统日期，格式为yyyy-MM-dd8位
 	 * 
 	 */
-	public static boolean addTimerGroupMessage(CallMessage message) {
+	public static boolean addTimerGroupMessage(RequestCall message) {
 		try {
 			Date today = sdf.parse(sdf.format(new Date()));
 			String sendTime = message.getSendTime();
@@ -101,7 +102,7 @@ public class WeixinUtil {
 			if ("database".equals(message.getFromUser())
 					&& !sendTimeDate.before(today)) {
 				if (null == groupMessagePool.get(sendTime)) {
-					groupMessagePool.put(sendTime, new HashSet<CallMessage>());
+					groupMessagePool.put(sendTime, new HashSet<RequestCall>());
 				}
 				groupMessagePool.get(sendTime).add(message);
 				return true;
@@ -141,7 +142,7 @@ public class WeixinUtil {
 		return aeskey;
 	}
 
-	public static Map<String, HashSet<CallMessage>> getGroupMessagePool() {
+	public static Map<String, HashSet<RequestCall>> getGroupMessagePool() {
 		return groupMessagePool;
 	}
 

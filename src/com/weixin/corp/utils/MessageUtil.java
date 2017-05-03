@@ -22,7 +22,7 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
-import com.weixin.corp.entity.message.CallMessage;
+import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.TextJsonMessage;
 import com.weixin.corp.entity.message.pojo.Article;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
@@ -177,9 +177,9 @@ public class MessageUtil {
 	public static int groupMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
-		Set<CallMessage> successMessages = new HashSet<CallMessage>();
+		Set<RequestCall> successMessages = new HashSet<RequestCall>();
 
-		for (CallMessage message : WeixinUtil.getGroupMessagePool().get(
+		for (RequestCall message : WeixinUtil.getGroupMessagePool().get(
 				todayStr)) {
 			TextJsonMessage tm = changeMessageToTm(message);
 			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
@@ -214,7 +214,7 @@ public class MessageUtil {
 	public static int warnFailureMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
-		for (CallMessage message : WeixinUtil.getGroupMessagePool().get(
+		for (RequestCall message : WeixinUtil.getGroupMessagePool().get(
 				todayStr)) {
 			TextJsonMessage tm = changeMessageToTm(message);
 			tm.setTouser("π‹¿Ì‘±");
@@ -237,7 +237,7 @@ public class MessageUtil {
 		return result;
 	}
 
-	private static TextJsonMessage changeMessageToTm(CallMessage message) {
+	private static TextJsonMessage changeMessageToTm(RequestCall message) {
 		TextJsonMessage tm = new TextJsonMessage(message.getText());
 		tm.setAgentid(WeixinUtil.getAgentid());
 		tm.setTouser(message.getToUser());
