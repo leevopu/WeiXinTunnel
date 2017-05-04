@@ -120,7 +120,7 @@
 			</label> 
 			<label> 
 				<span>说明 :</span> 
-				<textarea id="text"name="text" placeholder="..."></textarea>
+				<textarea id="text"name="text" placeholder="接收人为空则素材入库"></textarea>
 			</label> 
 			<label> 
 				<span>素材类型 :</span> 
