@@ -108,19 +108,15 @@
 			</h1>
 			<label> 
 				<span>发 送 人 :</span> 
-				<input id="fromUser" type="text"name="fromUser" placeholder="Sender Num" />
+				<input id="fromUser" type="text"name="fromUser" placeholder="                                                                                                                                部门名称+手机号唯一" />
 			</label> 
 			<label> 
 				<span>接 收 人 :</span> 
-				<input id="toUser"type="text" name="toUser" placeholder="Receiver Nums" />
+				<input id="toUser"type="text" name="toUser" placeholder="接收人为空则素材入库" />
 			</label> 
 			<label> 
 				<span>触发时间 :</span> 
 				<input type="text" class="sang_Calender"id="sendTime"name="sendTime"/>
-			</label> 
-			<label> 
-				<span>说明 :</span> 
-				<textarea id="text"name="text" placeholder="接收人为空则素材入库"></textarea>
 			</label> 
 			<label> 
 				<span>素材类型 :</span> 
@@ -131,6 +127,10 @@
 					<option value="video">视频</option> 
 					<option value="file">文件</option> 
 				</select>
+			</label> 
+			<label> 
+				<span>文本 :</span> 
+				<textarea id="text"name="text" placeholder="若素材类型为文本则填，否则不必填..."></textarea>
 			</label> 
 			<label> 
 				<span>请选择文件 :</span>

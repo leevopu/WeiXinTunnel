@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.DelayQueue;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -33,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.RequestCall;
+import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 
 public class WeixinUtil {
 	// /** personal test */ public final static String ACCESS_TOKEN_URL =
@@ -41,16 +43,9 @@ public class WeixinUtil {
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	
+
 	public static final String TEMP_URL = "D:/temp/";
 
-	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
-
-	public static final String TEXT_MSG_TYPE = "text";
-	public static final String IMAGE_MSG_TYPE = "image";
-	public static final String MEDIA_MSG_TYPE = "media";
-	public static final String FILE_MSG_TYPE = "file";
-	
 	public static final String POST_REQUEST_METHOD = "POST";
 	public static final String GET_REQUEST_METHOD = "GET";
 
@@ -62,6 +57,10 @@ public class WeixinUtil {
 	 * 只存放fromUser为database的群发消息 最外层key为日期，方便清理缓存池
 	 */
 	private static Map<String, HashSet<RequestCall>> groupMessagePool = new HashMap<String, HashSet<RequestCall>>();
+
+	private static DelayQueue<CorpBaseJsonMessage> delayJsonMessageQueue = new DelayQueue<CorpBaseJsonMessage>();
+
+	private static Map<String, HashMap<String, String>> useridPool = new HashMap<String, HashMap<String, String>>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -93,44 +92,13 @@ public class WeixinUtil {
 		// }
 
 		// test2
-		List<RequestCall> todayDatas = new ArrayList<RequestCall>();
-		todayDatas.add(data1);
-		todayDatas.add(data2);
-		for (RequestCall message : todayDatas) {
-			addTimerGroupMessage(message);
+		List<RequestCall> testCalls = new ArrayList<RequestCall>();
+		testCalls.add(data1);
+		testCalls.add(data2);
+		for (RequestCall call : testCalls) {
+			addTimerGroupMessage(call);
 		}
 		System.out.println("完成数据获取");
-	}
-
-	/**
-	 * 添加定时群发消息，目前只群发数据库每日跑批
-	 * 且日期大于等于系统日期，格式为yyyy-MM-dd8位
-	 * 
-	 */
-	public static boolean addTimerGroupMessage(RequestCall message) {
-		try {
-			Date today = sdf.parse(sdf.format(new Date()));
-			String sendTime = message.getSendTime();
-			if (null == sendTime || sendTime.length() != 8) {
-				return false;
-			}
-			Date sendTimeDate = sdf.parse(sendTime);
-			if ("database".equals(message.getFromUser())
-					&& !sendTimeDate.before(today)) {
-				if (null == groupMessagePool.get(sendTime)) {
-					groupMessagePool.put(sendTime, new HashSet<RequestCall>());
-				}
-				groupMessagePool.get(sendTime).add(message);
-				return true;
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-			log.error("获取的数据: " + message.getTitle() + message.getToUser()
-					+ ", 日期: " + message.getSendTime() + ", 不正确");
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		return false;
 	}
 
 	/**
@@ -161,15 +129,53 @@ public class WeixinUtil {
 	public static Map<String, HashSet<RequestCall>> getGroupMessagePool() {
 		return groupMessagePool;
 	}
-	
+
+	public static Map<String, HashMap<String, String>> getUseridPool() {
+		return useridPool;
+	}
+
 	public static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr) {
 		return httpsRequest(requestUrl, requestMethod, outputStr, null);
 	}
-	
+
 	public static JSONObject httpsRequestMedia(String requestUrl,
 			String requestMethod, File uploadMedia) {
 		return httpsRequest(requestUrl, requestMethod, null, uploadMedia);
+	}
+
+	public static DelayQueue<CorpBaseJsonMessage> getDelayJsonMessageQueue() {
+		return delayJsonMessageQueue;
+	}
+
+	/**
+	 * 添加定时群发消息，目前只群发数据库每日跑批 且日期大于等于系统日期，格式为yyyy-MM-dd8位
+	 * 
+	 */
+	public static boolean addTimerGroupMessage(RequestCall call) {
+		try {
+			Date today = sdf.parse(sdf.format(new Date()));
+			String sendTime = call.getSendTime();
+			if (null == sendTime || sendTime.length() != 8) {
+				return false;
+			}
+			Date sendTimeDate = sdf.parse(sendTime);
+			if ("database".equals(call.getFromUser())
+					&& !sendTimeDate.before(today)) {
+				if (null == groupMessagePool.get(sendTime)) {
+					groupMessagePool.put(sendTime, new HashSet<RequestCall>());
+				}
+				groupMessagePool.get(sendTime).add(call);
+				return true;
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+			log.error("获取的数据: " + call.getTitle() + call.getToUser() + ", 日期: "
+					+ call.getSendTime() + ", 不正确");
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
@@ -188,10 +194,11 @@ public class WeixinUtil {
 	private static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr, File uploadMedia) {
 		// return null;
-
-		requestUrl = requestUrl.replace("ACCESS_TOKEN",
-				WeixinUtil.getAvailableAccessToken()).replace("AGENTID",
-				WeixinUtil.getAgentid());
+		if (null != WeixinUtil.accessToken) {
+			requestUrl = requestUrl.replace("ACCESS_TOKEN",
+					WeixinUtil.accessToken.getToken());
+		}
+		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
 		JSONObject jsonObject = null;
 		StringBuffer buffer = new StringBuffer();
 		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
@@ -218,7 +225,7 @@ public class WeixinUtil {
 			// 获得输出流
 			OutputStream out = new DataOutputStream(
 					httpUrlConn.getOutputStream());
-			
+
 			// 当字符串形式请求时，如json、xml
 			if (null != outputStr) {
 				out.write(outputStr.getBytes("UTF-8"));
@@ -252,7 +259,8 @@ public class WeixinUtil {
 				out.write(head);
 				// 文件正文部分
 				// 把文件已流文件的方式 推入到url中
-				DataInputStream in = new DataInputStream(new FileInputStream(uploadMedia));
+				DataInputStream in = new DataInputStream(new FileInputStream(
+						uploadMedia));
 				int bytes = 0;
 				byte[] bufferOut = new byte[1024];
 				while ((bytes = in.read(bufferOut)) != -1) {
@@ -260,7 +268,8 @@ public class WeixinUtil {
 				}
 				in.close();
 				// 结尾部分
-				byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");// 定义最后数据分隔线
+				byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n")
+						.getBytes("utf-8");// 定义最后数据分隔线
 				out.write(foot);
 				out.flush();
 				out.close();
@@ -309,7 +318,8 @@ public class WeixinUtil {
 	public static AccessToken getNewAccessToken() {
 		String requestUrl = ACCESS_TOKEN_URL.replace("APPID", appid).replace(
 				"APPSECRET", appsecret);
-		JSONObject jsonObject = httpsRequest(requestUrl, GET_REQUEST_METHOD, null, null);
+		JSONObject jsonObject = httpsRequest(requestUrl, GET_REQUEST_METHOD,
+				null, null);
 		// 如果请求成功
 		if (null != jsonObject) {
 			System.out.println("access_token init success");

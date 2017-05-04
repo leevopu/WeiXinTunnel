@@ -3,11 +3,15 @@ package com.weixin.corp.main;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import net.sf.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
+import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.service.MessageService;
+import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -42,9 +46,11 @@ public class TimerTaskServlet extends HttpServlet {
 				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
 			// 启动定时获取access_token的线程，access_token每隔2小时会失效
-			// new Thread(new TokenTimerTaskThread()).start();
+			new Thread(new TokenTimerTaskThread()).start();
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
-			 MessageService.dailyGroupOnTimeTask();
+			MessageService.dailyGroupOnTimeTask();
+			// 启动定时发送用户自定义发送时间的消息
+			new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
 	}
 
@@ -57,7 +63,6 @@ public class TimerTaskServlet extends HttpServlet {
 		public void run() {
 			while (true) {
 				try {
-					System.out.println(WeixinUtil.getToken());
 					accessToken = WeixinUtil.getNewAccessToken();
 					if (null != accessToken) {
 						log.info(String.format(
@@ -80,5 +85,28 @@ public class TimerTaskServlet extends HttpServlet {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 定时发送json消息的线程
+	 * 
+	 */
+	public static class DelayJsonMessageTimerTaskThread implements Runnable {
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					CorpBaseJsonMessage jsonMessage = WeixinUtil
+							.getDelayJsonMessageQueue().take();
+					// 定时触发响应，不论是否成功
+					MessageUtil.sendMessage(jsonMessage);
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+
 	}
 }

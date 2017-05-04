@@ -23,7 +23,10 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.weixin.corp.entity.message.RequestCall;
-import com.weixin.corp.entity.message.json.TextJsonMessage;
+import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.message.json.FileJsonMessage;
+import com.weixin.corp.entity.message.json.ImageJsonMessage;
+import com.weixin.corp.entity.message.json.VideoJsonMessage;
 import com.weixin.corp.entity.message.pojo.Article;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
 import com.weixin.corp.entity.message.xml.NewsXMLMessage;
@@ -35,7 +38,14 @@ import com.weixin.corp.entity.message.xml.TextXMLMessage;
 public class MessageUtil {
 	private static Log log = LogFactory.getLog(MessageUtil.class);
 
-	public static String GROUP_MESSAGE_URL = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
+	public static String MESSAGE_SEND = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
+
+	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
+
+	public static final String TEXT_MSG_TYPE = "text";
+	public static final String IMAGE_MSG_TYPE = "image";
+	public static final String VIDEO_MSG_TYPE = "video";
+	public static final String FILE_MSG_TYPE = "file";
 
 	/**
 	 * 解析微信发来的请求（XML）
@@ -79,12 +89,11 @@ public class MessageUtil {
 	 */
 	public static String textMessageToXml(CorpBaseXMLMessage message) {
 		xstream.alias("xml", message.getClass());
-		if(message instanceof NewsXMLMessage){
+		if (message instanceof NewsXMLMessage) {
 			xstream.alias("item", new Article().getClass());
 		}
 		return xstream.toXML(message);
 	}
-
 
 	/**
 	 * 扩展xstream，使其支持CDATA块
@@ -179,24 +188,10 @@ public class MessageUtil {
 		int result = 0;
 		Set<RequestCall> successMessages = new HashSet<RequestCall>();
 
-		for (RequestCall message : WeixinUtil.getGroupMessagePool().get(
-				todayStr)) {
-			TextJsonMessage tm = changeMessageToTm(message);
-			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
-					WeixinUtil.POST_REQUEST_METHOD, JSONObject.fromObject(tm).toString());
-			if (null != jsonObject) {
-				if (0 != jsonObject.getInt("errcode")) {
-					result = jsonObject.getInt("errcode");
-					log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
-							+ "，errmsg:" + jsonObject.getString("errmsg")
-							+ "，invaliduser:"
-							+ jsonObject.getString("invaliduser"));
-				} else if (!"".equals(jsonObject.getString("invaliduser"))) {
-					log.error("丢失接收人:" + jsonObject.getString("invaliduser")
-							+ "，请确认用户更新情况");
-				} else {
-					successMessages.add(message);
-				}
+		for (RequestCall call : WeixinUtil.getGroupMessagePool().get(todayStr)) {
+			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
+			if (sendMessage(jsonMessage)) {
+				successMessages.add(call);
 			}
 			try {
 				// 间隔发送，降低调用微信服务器压力
@@ -211,15 +206,37 @@ public class MessageUtil {
 		return result;
 	}
 
+	public static boolean sendMessage(CorpBaseJsonMessage jsonMessage) {
+		jsonMessage.setAgentid(WeixinUtil.getAgentid());
+		JSONObject jsonObject = WeixinUtil.httpsRequest(
+				MESSAGE_SEND,
+				WeixinUtil.POST_REQUEST_METHOD,
+				JSONObject.fromObject(jsonMessage).toString()
+						.replace("mediaId", "media_id"));
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+						+ "，errmsg:" + jsonObject.getString("errmsg"));
+				return false;
+			}
+			if (!"".equals(jsonObject.getString("invaliduser"))) {
+				log.error("丢失接收人:" + jsonObject.getString("invaliduser")
+						+ "，请确认用户更新情况");
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public static int warnFailureMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
-		for (RequestCall message : WeixinUtil.getGroupMessagePool().get(
-				todayStr)) {
-			TextJsonMessage tm = changeMessageToTm(message);
-			tm.setTouser("管理员");
-			JSONObject jsonObject = WeixinUtil.httpsRequest(GROUP_MESSAGE_URL,
-					WeixinUtil.POST_REQUEST_METHOD, JSONObject.fromObject(tm).toString());
+		for (RequestCall call : WeixinUtil.getGroupMessagePool().get(todayStr)) {
+			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
+			jsonMessage.setTouser("管理员");
+			JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
+					WeixinUtil.POST_REQUEST_METHOD,
+					JSONObject.fromObject(jsonMessage).toString());
 			if (null != jsonObject) {
 				if (0 != jsonObject.getInt("errcode")) {
 					result = jsonObject.getInt("errcode");
@@ -237,11 +254,27 @@ public class MessageUtil {
 		return result;
 	}
 
-	private static TextJsonMessage changeMessageToTm(RequestCall message) {
-		TextJsonMessage tm = new TextJsonMessage(message.getText());
-		tm.setAgentid(WeixinUtil.getAgentid());
-		tm.setTouser(message.getToUser());
-		return tm;
+	public static CorpBaseJsonMessage changeMessageToJson(RequestCall call) {
+		CorpBaseJsonMessage jsonMessage = null;
+		switch (call.getMsgType()) {
+		case IMAGE_MSG_TYPE:
+			jsonMessage = new ImageJsonMessage(call.getMediaId());
+			break;
+		case VIDEO_MSG_TYPE:
+			jsonMessage = new VideoJsonMessage(call.getMediaId());
+			break;
+		case FILE_MSG_TYPE:
+			jsonMessage = new FileJsonMessage(call.getMediaId());
+			break;
+		default:
+			break;
+		}
+		jsonMessage.setAgentid(WeixinUtil.getAgentid());
+		// 转换
+		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
+		// jsonMessage.setTouser(call.getToUser());
+		jsonMessage.setTouser(call.getToUser());
+		return jsonMessage;
 	}
 
 	/**

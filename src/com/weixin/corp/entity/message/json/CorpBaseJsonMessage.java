@@ -1,6 +1,9 @@
 package com.weixin.corp.entity.message.json;
 
-public class CorpBaseJsonMessage {
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
+public class CorpBaseJsonMessage implements Delayed {
 
 	private String MsgType;
 
@@ -11,8 +14,10 @@ public class CorpBaseJsonMessage {
 	private String toparty;
 
 	private String totag;
-	
+
 	private int safe = 0;
+
+	private long sendTime = 0;
 
 	public String getMsgType() {
 		return MsgType;
@@ -62,5 +67,32 @@ public class CorpBaseJsonMessage {
 		this.safe = safe;
 	}
 
+	public long getSendTime() {
+		return sendTime;
+	}
+
+	public void setSendTime(long sendTime) {
+		this.sendTime = sendTime;
+	}
+
+	@Override
+	public int compareTo(Delayed o) {
+		CorpBaseJsonMessage another = (CorpBaseJsonMessage) o;
+		// o如果没有sendTime则靠前放，优先执行
+		if (0 == another.getSendTime()) {
+			return -1;
+		}
+		if (this.getSendTime() > another.getSendTime()) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+
+	@Override
+	public long getDelay(TimeUnit unit) {
+		return unit.convert(this.getSendTime() - System.currentTimeMillis(),
+				TimeUnit.MILLISECONDS);
+	}
 
 }
