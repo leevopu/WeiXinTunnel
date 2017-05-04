@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.weixin.corp.utils.MenuUtil;
+import com.weixin.corp.service.MenuService;
 
 public class MenuServlet extends HttpServlet{
 
@@ -32,14 +32,13 @@ public class MenuServlet extends HttpServlet{
 	    String path = uri.substring(uri.lastIndexOf("/"),uri.lastIndexOf("."));
 	    String action = path.substring(1, path.length());
 	    System.out.println("action:"+action);
-	    MenuUtil menuUtil = new MenuUtil();
 	    
 	    if("get".equals(action)){
 	    	//Menu menu = new Menu();
 	    	//menu = MenuService.getMenu();
 	    	//String str = JSONObject.fromObject(menu).toString();
 	    	
-	    	String str = menuUtil.get();
+	    	String str = MenuService.get();
 	    	System.out.println(str);
 	    	req.setAttribute("str",str); 
 	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");

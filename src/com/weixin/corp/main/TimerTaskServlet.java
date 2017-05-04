@@ -14,9 +14,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
-import com.weixin.corp.service.UserService;
+import com.weixin.corp.service.MessageService;
 import com.weixin.corp.utils.CommonUtil;
-import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -94,7 +93,7 @@ public class TimerTaskServlet extends HttpServlet {
 				// 模拟定时取数据，真实环境需连接数据库 groupMessagePool
 				WeixinUtil.testFetchData();
 				// 群发消息
-				MessageUtil.groupMessage();
+				MessageService.groupMessage();
 				// 未成功发送的记录会保留，可以进一步处理
 				// 之前失败的消息通知管理员
 				// MessageUtil.warnFailureMessage();
@@ -168,7 +167,7 @@ public class TimerTaskServlet extends HttpServlet {
 					CorpBaseJsonMessage jsonMessage = WeixinUtil
 							.getDelayJsonMessageQueue().take();
 					// 定时触发响应，不论是否成功
-					MessageUtil.sendMessage(jsonMessage);
+					MessageService.sendMessage(jsonMessage);
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}

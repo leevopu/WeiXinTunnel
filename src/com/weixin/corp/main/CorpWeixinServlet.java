@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.aes.AesException;
 import com.weixin.aes.WXBizMsgCrypt;
-import com.weixin.corp.utils.MessageUtil;
+import com.weixin.corp.service.MessageService;
 import com.weixin.corp.utils.WeixinUtil;
 
 /**
@@ -126,7 +126,7 @@ public class CorpWeixinServlet extends HttpServlet {
 
 		Map<String, String> requestMap = null;
 		try {
-			requestMap = MessageUtil.parseXml(bais);
+			requestMap = MessageService.parseXml(bais);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			log.error("ParseXml Error: " + e1.getMessage());
@@ -134,7 +134,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		}
 		requestCachePool.put(requestId, requestMap);
 		//¥¶¿Ì
-		String responseMsg = MessageUtil.processRequest(requestMap);
+		String responseMsg = MessageService.processRequest(requestMap);
 		if (null == responseMsg) {
 			return;
 		}

@@ -25,9 +25,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.service.MessageService;
 import com.weixin.corp.utils.CommonUtil;
-import com.weixin.corp.utils.MessageUtil;
-import com.weixin.corp.utils.UploadUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 /**
@@ -35,8 +34,12 @@ import com.weixin.corp.utils.WeixinUtil;
  * 
  */
 public class UploadServlet extends HttpServlet {
+
 	private static final long serialVersionUID = 5941583433272362854L;
+
 	private static Log log = LogFactory.getLog(UploadServlet.class);
+
+	public static final String UPLOAD_TEMP_URL = "D:/temp/";
 
 	@Override
 	protected void doGet(HttpServletRequest request,
@@ -68,17 +71,17 @@ public class UploadServlet extends HttpServlet {
 		String size = CommonUtil.convertFileSize(contentLength);
 		System.out.println("大小为：" + size);
 		response.setContentType("text/html;charset=UTF-8");
-		
+
 		// =================================================================
-		// 判断文件大小  超过20M返回提示
+		// 判断文件大小 超过20M返回提示
 		// =================================================================
 		if (contentLength > MXA_SEGSIZE) {
 			System.out.println("文件大小超过20M，请重新操作！！！！");
-//			response.sendRedirect("index.jsp");
+			// response.sendRedirect("index.jsp");
 			response.getWriter().write("文件大小超过20M，请重新操作！！！！");
 			return;
 		}
-		
+
 		RequestCall call = parseRequestCall(request);
 		// 解析失败
 		if (null != call.getErrorInfo()) {
@@ -113,7 +116,7 @@ public class UploadServlet extends HttpServlet {
 		}
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传素材，获取素材id
-		if (MessageUtil.TEXT_MSG_TYPE != (msgType)) {
+		if (MessageService.TEXT_MSG_TYPE != (msgType)) {
 			JSONObject jsonObject = null;
 			String mediaId = null;
 			// 无接收人则素材入库
@@ -132,22 +135,22 @@ public class UploadServlet extends HttpServlet {
 				} else {
 					// 临时素材接口
 					jsonObject = WeixinUtil.httpsRequestMedia(
-							UploadUtil.MEDIA_TEMP_UPLOAD_URL.replace("TYPE",
-									call.getMsgType()),
+							MessageService.MEDIA_TEMP_UPLOAD_URL.replace(
+									"TYPE", call.getMsgType()),
 							WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
 				}
 				mediaId = jsonObject.getString("media_id");
 				call.setMediaId(mediaId);
 			}
 		}
-		CorpBaseJsonMessage jsonMessage = MessageUtil.changeMessageToJson(call);
+		CorpBaseJsonMessage jsonMessage = MessageService
+				.changeMessageToJson(call);
 		// 立即发送消息
 		if (null == call.getSendTime()) {
-			if(MessageUtil.sendMessage(jsonMessage)){
+			if (MessageService.sendMessage(jsonMessage)) {
 				// 回复提示发送成功
 				response.getWriter().write("发送成功");
-			}
-			else {
+			} else {
 				// 回复发送失败
 				response.getWriter().write("发送失败");
 			}
@@ -269,14 +272,15 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
-		if("".equals(fileName.trim()) && "".equals(call.getText().trim())){
+		if ("".equals(fileName.trim()) && "".equals(call.getText().trim())) {
 			call.setErrorInfo("文本内容和素材文件不能同时为空");
 			return call;
 		}
-		if("".equals(fileName.trim()) && MessageUtil.TEXT_MSG_TYPE == call.getMsgType()){
+		if ("".equals(fileName.trim())
+				&& MessageService.TEXT_MSG_TYPE == call.getMsgType()) {
 			return call;
 		}
-		File uploadFolder = new File(UploadUtil.TEMP_URL
+		File uploadFolder = new File(UPLOAD_TEMP_URL
 				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
 		if (!uploadFolder.exists()) {
 			uploadFolder.mkdir();
