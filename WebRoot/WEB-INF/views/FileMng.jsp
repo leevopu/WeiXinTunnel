@@ -106,9 +106,12 @@
 				素材管理 
 				<span>企业公众号素材管理.</span>
 			</h1>
+			<label>
+				<span>人员以部门名称+手机号唯一确认，请及时更新保证用户信息一致</span>
+			</label>
 			<label> 
 				<span>发 送 人 :</span> 
-				<input id="fromUser" type="text"name="fromUser" placeholder="                                                                                                                                部门名称+手机号唯一" />
+				<input id="fromUser" type="text"name="fromUser" placeholder="素材入库时校验身份用" />
 			</label> 
 			<label> 
 				<span>接 收 人 :</span> 

@@ -311,9 +311,10 @@ public class WeixinUtil {
 	}
 
 	/**
-	 * 获取新的access_token <br>
+	 * 获取新的access_token
 	 * <br>
-	 * 调用access_token的接口地址（GET） 限200（次/天）
+	 * <br>
+	 * 调用access_token的接口地址（GET）
 	 */
 	public static AccessToken getNewAccessToken() {
 		String requestUrl = ACCESS_TOKEN_URL.replace("APPID", appid).replace(

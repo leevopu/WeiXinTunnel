@@ -1,24 +1,27 @@
 package com.weixin.corp.main;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
-import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
-import com.weixin.corp.service.MessageService;
+import com.weixin.corp.service.UserService;
+import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
-
-	public static AccessToken accessToken = null;
 
 	public void init() throws ServletException {
 		// 获取web.xml中配置的参数
@@ -31,9 +34,6 @@ public class TimerTaskServlet extends HttpServlet {
 		// agentid第三方用户应用ID
 		String agentid = getInitParameter("agentid");
 
-		log.info("weixin api appid: " + appid);
-		log.info("weixin api appsecret: " + appsecret);
-
 		// 未配置appid、appsecret、aeskey时给出提示
 		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey)
 				|| aeskey.length() != 43 || "".equals(agentid)) {
@@ -45,12 +45,80 @@ public class TimerTaskServlet extends HttpServlet {
 			if (null != token) {
 				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
-			// 启动定时获取access_token的线程，access_token每隔2小时会失效
-			new Thread(new TokenTimerTaskThread()).start();
+			
+			
+			
+			
+			
+			
+			//??
+			Runnable x = new DailyGroupMessageTimerTask();
+			x.run();
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
-			MessageService.dailyGroupOnTimeTask();
-			// 启动定时发送用户自定义发送时间的消息
+			dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
+			// 启动定时更新用户信息，每天6点触发1次更新缓存
+			// dailyUpdateUserOnTimeTask();
+			// 启动循环获取access_token的线程，access_token每隔2小时会失效
+			new Thread(new TokenTimerTaskThread()).start();
+			// 启动循环监控用户自定义发送时间的消息
 			new Thread(new DelayJsonMessageTimerTaskThread()).start();
+		}
+	}
+
+	/**
+	 * 
+	 * @param fixHour
+	 *            0-23
+	 * @param runnable
+	 *            task
+	 */
+	public static void dailyFixOnTimeTask(int fixHour, Runnable runnable) {
+		long oneDay = 24 * 60 * 60 * 1000;
+		Calendar fixTime = Calendar.getInstance();
+		fixTime.setTime(new Date());
+		fixTime.set(Calendar.HOUR_OF_DAY, fixHour);
+		fixTime.set(Calendar.MINUTE, 0);
+		fixTime.set(Calendar.SECOND, 0);
+		long initDelay = fixTime.getTimeInMillis() - System.currentTimeMillis();
+		initDelay = initDelay > 0 ? initDelay : oneDay + initDelay;
+		ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+		exec.scheduleAtFixedRate(runnable, initDelay, oneDay,
+				TimeUnit.MILLISECONDS);
+	}
+
+	public static class DailyGroupMessageTimerTask implements Runnable {
+		@Override
+		public void run() {
+			try {
+				System.out.println("开始执行每日定时群发消息");
+				// 模拟定时取数据，真实环境需连接数据库 groupMessagePool
+				WeixinUtil.testFetchData();
+				// 群发消息
+				MessageUtil.groupMessage();
+				// 未成功发送的记录会保留，可以进一步处理
+				// 之前失败的消息通知管理员
+				// MessageUtil.warnFailureMessage();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static class DailyUpdateUserTimerTask implements Runnable {
+		@Override
+		public void run() {
+			try {
+				System.out.println("开始执行每日定时更新用户");
+				// 清空用户缓存<部门名称<手机号,userid>>
+				WeixinUtil.getUseridPool().clear();
+				// 获取微信全部部门信息
+				UserService.
+				// 遍历部门获取用户信息
+
+				// 放入用户缓存
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -63,7 +131,7 @@ public class TimerTaskServlet extends HttpServlet {
 		public void run() {
 			while (true) {
 				try {
-					accessToken = WeixinUtil.getNewAccessToken();
+					AccessToken accessToken = WeixinUtil.getNewAccessToken();
 					if (null != accessToken) {
 						log.info(String.format(
 								"获取access_token成功，有效时长%d秒 token:%s",
@@ -107,6 +175,20 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 
 		}
+
+	}
+
+	public static void main(String[] args) {
+		String a = "1970-01-01 8:00:00";
+		Date x = CommonUtil.getStrDate(a, "yyyy-MM-dd HH:mm:ss");
+		System.out.println(x.getTime());
+		Calendar fixTime = Calendar.getInstance();
+		fixTime.setTime(x);
+		// fixTime.set(Calendar.HOUR_OF_DAY, 8);
+		// fixTime.set(Calendar.MINUTE, 0);
+		// fixTime.set(Calendar.SECOND, 0);
+		System.out.println(fixTime.getTimeInMillis());
+		System.out.println(fixTime.getTime().getTime());
 
 	}
 }

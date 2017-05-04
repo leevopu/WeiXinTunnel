@@ -69,8 +69,6 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("大小为：" + size);
 		response.setContentType("text/html;charset=UTF-8");
 		
-		RequestCall call = parseRequestCall(request);
-		
 		// =================================================================
 		// 判断文件大小  超过20M返回提示
 		// =================================================================
@@ -81,6 +79,7 @@ public class UploadServlet extends HttpServlet {
 			return;
 		}
 		
+		RequestCall call = parseRequestCall(request);
 		// 解析失败
 		if (null != call.getErrorInfo()) {
 			response.getWriter().write(call.getErrorInfo());
@@ -113,10 +112,10 @@ public class UploadServlet extends HttpServlet {
 			call.setSendTime(null);
 		}
 		String msgType = call.getMsgType();
-		JSONObject jsonObject = null;
-		String mediaId = null;
 		// 如果不是文本，先上传素材，获取素材id
 		if (MessageUtil.TEXT_MSG_TYPE != (msgType)) {
+			JSONObject jsonObject = null;
+			String mediaId = null;
 			// 无接收人则素材入库
 			if ("".equals(call.getToUser().trim())) {
 				// 永久素材接口
@@ -139,30 +138,24 @@ public class UploadServlet extends HttpServlet {
 				}
 				mediaId = jsonObject.getString("media_id");
 				call.setMediaId(mediaId);
-				CorpBaseJsonMessage jsonMessage = MessageUtil.changeMessageToJson(call);
-				// 立即发送消息
-				if (null == call.getSendTime()) {
-					if(MessageUtil.sendMessage(jsonMessage)){
-						// 回复提示发送成功
-						response.getWriter().write("发送成功");
-					}
-					else {
-						// 回复发送失败
-						response.getWriter().write("发送失败");
-					}
-				} else {
-					// 放入消息队列，定时触发
-					WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
-					response.getWriter().write("放入消息队列，定时触发");
-				}
 			}
 		}
-		File media = call.getMedia();
-		// 判断文件是否上传成功
-		System.out.println(media.exists());
-
-		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
-		
+		CorpBaseJsonMessage jsonMessage = MessageUtil.changeMessageToJson(call);
+		// 立即发送消息
+		if (null == call.getSendTime()) {
+			if(MessageUtil.sendMessage(jsonMessage)){
+				// 回复提示发送成功
+				response.getWriter().write("发送成功");
+			}
+			else {
+				// 回复发送失败
+				response.getWriter().write("发送失败");
+			}
+		} else {
+			// 放入消息队列，定时触发
+			WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
+			response.getWriter().write("放入消息队列，定时触发");
+		}
 	}
 
 	private RequestCall parseRequestCall(HttpServletRequest request)
@@ -276,8 +269,11 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
-		if("".equals(fileName) && "".equals(call.getText())){
+		if("".equals(fileName.trim()) && "".equals(call.getText().trim())){
 			call.setErrorInfo("文本内容和素材文件不能同时为空");
+			return call;
+		}
+		if("".equals(fileName.trim()) && MessageUtil.TEXT_MSG_TYPE == call.getMsgType()){
 			return call;
 		}
 		File uploadFolder = new File(UploadUtil.TEMP_URL

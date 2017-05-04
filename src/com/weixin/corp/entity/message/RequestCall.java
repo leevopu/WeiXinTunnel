@@ -2,16 +2,12 @@ package com.weixin.corp.entity.message;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
-
-import com.weixin.corp.utils.CommonUtil;
 
 /**
  * 数据库结果群发和用户主动调用的封装消息
  * 
  */
-public class RequestCall implements Serializable, Delayed {
+public class RequestCall implements Serializable {
 
 	private static final long serialVersionUID = 5570817032197190881L;
 
@@ -20,11 +16,15 @@ public class RequestCall implements Serializable, Delayed {
 	 */
 	private String title;
 	/**
-	 * 发送人（database, user）
+	 * 发送人（"database"|user=部门名称+手机号）
+	 * <br>
+	 * <br>
+	 * 主动调用user赋值时校验身份
 	 */
 	private String fromUser;
 	/**
-	 * 接收人（用部门名称+手机号来唯一确定用户） <br>
+	 * 接收人（用部门名称+手机号来唯一确定用户）
+	 * <br>
 	 * <br>
 	 * 用逗号或竖线分割多个接收人，确保及时更新用户信息，否则只有能匹配上的用户能接收到消息
 	 */
@@ -103,33 +103,6 @@ public class RequestCall implements Serializable, Delayed {
 		this.text = text;
 		this.fromUser = "database";
 		this.msgType = "text";
-	}
-
-	//
-	@Override
-	public int compareTo(Delayed o) {
-		RequestCall another = (RequestCall) o;
-		// o如果没有sendTime则靠前放，优先执行
-		if (null == another.getSendTime()) {
-			return -1;
-		}
-		if (CommonUtil.getStrDate(this.getSendTime(), "yyyy-MM-dd HH:mm:ss")
-				.getTime() > CommonUtil.getStrDate(another.getSendTime(),
-				"yyyy-MM-dd HH:mm:ss").getTime()) {
-			return 1;
-		} else {
-			return -1;
-		}
-	}
-
-	@Override
-	public long getDelay(TimeUnit unit) {
-
-		return unit.convert(
-				CommonUtil
-						.getStrDate(this.getSendTime(), "yyyy-MM-dd HH:mm:ss")
-						.getTime()
-						- System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	public String getTitle() {

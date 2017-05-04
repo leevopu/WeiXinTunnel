@@ -174,9 +174,30 @@ public class MessageUtil {
 				}
 			}
 		}
-
 		responseMsg = textMessageToXml(defaultMessage);
 		return responseMsg;
+	}
+
+	public static boolean sendMessage(CorpBaseJsonMessage jsonMessage) {
+		jsonMessage.setAgentid(WeixinUtil.getAgentid());
+		JSONObject jsonObject = WeixinUtil.httpsRequest(
+				MESSAGE_SEND,
+				WeixinUtil.POST_REQUEST_METHOD,
+				JSONObject.fromObject(jsonMessage).toString()
+						.replace("mediaId", "media_id"));
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+						+ "，errmsg:" + jsonObject.getString("errmsg"));
+				return false;
+			}
+			if (!"".equals(jsonObject.getString("invaliduser"))) {
+				log.error("丢失接收人:" + jsonObject.getString("invaliduser")
+						+ "，请确认用户更新情况");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -202,54 +223,34 @@ public class MessageUtil {
 		// 移除成功发送的消息
 		WeixinUtil.getGroupMessagePool().get(todayStr)
 				.removeAll(successMessages);
-		log.info("群发消息完成");
+		log.info("日期：" + todayStr + "，群发消息完成");
 		return result;
-	}
-
-	public static boolean sendMessage(CorpBaseJsonMessage jsonMessage) {
-		jsonMessage.setAgentid(WeixinUtil.getAgentid());
-		JSONObject jsonObject = WeixinUtil.httpsRequest(
-				MESSAGE_SEND,
-				WeixinUtil.POST_REQUEST_METHOD,
-				JSONObject.fromObject(jsonMessage).toString()
-						.replace("mediaId", "media_id"));
-		if (null != jsonObject) {
-			if (0 != jsonObject.getInt("errcode")) {
-				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
-						+ "，errmsg:" + jsonObject.getString("errmsg"));
-				return false;
-			}
-			if (!"".equals(jsonObject.getString("invaliduser"))) {
-				log.error("丢失接收人:" + jsonObject.getString("invaliduser")
-						+ "，请确认用户更新情况");
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public static int warnFailureMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
 		for (RequestCall call : WeixinUtil.getGroupMessagePool().get(todayStr)) {
+			call.setToUser("管理员");
 			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
-			jsonMessage.setTouser("管理员");
-			JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
-					WeixinUtil.POST_REQUEST_METHOD,
-					JSONObject.fromObject(jsonMessage).toString());
-			if (null != jsonObject) {
-				if (0 != jsonObject.getInt("errcode")) {
-					result = jsonObject.getInt("errcode");
-					log.error("警告消息出错 errcode:" + jsonObject.getInt("errcode")
-							+ "，errmsg:" + jsonObject.getString("errmsg"));
-				}
-			}
-			try {
-				// 间隔发送，降低压力
-				Thread.sleep(2 * 1000);
-			} catch (InterruptedException e) {
-			}
+			sendMessage(jsonMessage);
+			// JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
+			// WeixinUtil.POST_REQUEST_METHOD,
+			// JSONObject.fromObject(jsonMessage).toString());
+			// if (null != jsonObject) {
+			// if (0 != jsonObject.getInt("errcode")) {
+			// result = jsonObject.getInt("errcode");
+			// log.error("警告消息出错 errcode:" + jsonObject.getInt("errcode")
+			// + "，errmsg:" + jsonObject.getString("errmsg"));
+			// }
+			// }
+			// try {
+			// // 间隔发送，降低压力
+			// Thread.sleep(2 * 1000);
+			// } catch (InterruptedException e) {
+			// }
 		}
+		WeixinUtil.getGroupMessagePool().get(todayStr).clear();
 		log.info("警告消息发送完成");
 		return result;
 	}
@@ -257,6 +258,9 @@ public class MessageUtil {
 	public static CorpBaseJsonMessage changeMessageToJson(RequestCall call) {
 		CorpBaseJsonMessage jsonMessage = null;
 		switch (call.getMsgType()) {
+		case TEXT_MSG_TYPE:
+			jsonMessage = new ImageJsonMessage(call.getText());
+			break;
 		case IMAGE_MSG_TYPE:
 			jsonMessage = new ImageJsonMessage(call.getMediaId());
 			break;
@@ -269,6 +273,8 @@ public class MessageUtil {
 		default:
 			break;
 		}
+		jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
+				"yyyy-MM-dd HH:mm:ss").getTime());
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		// 转换
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
