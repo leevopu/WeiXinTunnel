@@ -24,7 +24,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
+import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.utils.CommonUtil;
+import com.weixin.corp.utils.MessageUtil;
 import com.weixin.corp.utils.UploadUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -63,32 +65,15 @@ public class UploadServlet extends HttpServlet {
 		}
 		System.out.println("lenth: " + request.getContentLength()); // 判断文件长度
 		// 超过20M返回提示
+		if(true){
+			response.getWriter().write("zzz");
+			return;
+		}
 		RequestCall call = parseRequestCall(request);
 
 		// 解析失败
 		if (null != call.getErrorInfo()) {
 			response.getWriter().write(call.getErrorInfo());
-			return;
-		}
-
-		// 判断是否格式符合要求，是否有缺失的字段
-		if (null == call.getFromUser() || null == call.getToUser()
-				|| null == call.getMsgType()
-				|| (null == call.getText() && null == call.getMedia())) {
-			StringBuffer missFieldValue = new StringBuffer();
-			missFieldValue.append("缺少必要的信息请检查，fromUser:");
-			missFieldValue.append(call.getFromUser());
-			missFieldValue.append("，toUser:");
-			missFieldValue.append(call.getToUser());
-			missFieldValue.append("，msgType:");
-			missFieldValue.append(call.getMsgType());
-			missFieldValue.append("，text:");
-			missFieldValue.append(call.getText());
-			missFieldValue.append("，media:");
-			if (null != call.getMedia()) {
-				missFieldValue.append(call.getMedia().getName());
-			}
-			response.getWriter().write(missFieldValue.toString());
 			return;
 		}
 
@@ -119,19 +104,46 @@ public class UploadServlet extends HttpServlet {
 		}
 		String msgType = call.getMsgType();
 		JSONObject jsonObject = null;
-		// 如果不是文本，先上传临时素材，获取素材id
-		if (UploadUtil.TEXT_MSG_TYPE != (msgType)) {
+		String mediaId = null;
+		// 如果不是文本，先上传素材，获取素材id
+		if (MessageUtil.TEXT_MSG_TYPE != (msgType)) {
+			// 无接收人则素材入库
+			if ("".equals(call.getToUser().trim())) {
+				// 永久素材接口
+			}
 			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
-			if (null != call.getSendTime()) {
-				if (CommonUtil.getStrDate(call.getSendTime(),
-						"yyyy-MM-dd HH:mm:ss").before(
-						new Date(System.currentTimeMillis() + 1000 * 60 * 60
-								* 24 * 3))) {
-//					调用临时素材接口
-					jsonObject = WeixinUtil.httpsRequestMedia(UploadUtil.MEDIA_TEMP_UPLOAD_URL.replace("TYPE", call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
-				}else {
+			else {
+				if (null != call.getSendTime()
+						&& CommonUtil.getStrDate(call.getSendTime(),
+								"yyyy-MM-dd HH:mm:ss").after(
+								new Date(System.currentTimeMillis() + 1000 * 60
+										* 60 * 24 * 3))) {
 					// 永久素材接口
-//					jsonObject = 
+					// jsonObject =
+				} else {
+					// 临时素材接口
+					jsonObject = WeixinUtil.httpsRequestMedia(
+							UploadUtil.MEDIA_TEMP_UPLOAD_URL.replace("TYPE",
+									call.getMsgType()),
+							WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
+				}
+				mediaId = jsonObject.getString("media_id");
+				call.setMediaId(mediaId);
+				CorpBaseJsonMessage jsonMessage = MessageUtil.changeMessageToJson(call);
+				// 立即发送消息
+				if (null == call.getSendTime()) {
+					if(MessageUtil.sendMessage(jsonMessage)){
+						// 回复提示发送成功
+						response.getWriter().write("发送成功");
+					}
+					else {
+						// 回复发送失败
+						response.getWriter().write("发送失败");
+					}
+				} else {
+					// 放入消息队列，定时触发
+					WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
+					response.getWriter().write("放入消息队列，定时触发");
 				}
 			}
 		}
@@ -271,6 +283,10 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
+		if("".equals(fileName) && "".equals(call.getText())){
+			call.setErrorInfo("文本内容和素材文件不能同时为空");
+			return call;
+		}
 		File uploadFolder = new File(UploadUtil.TEMP_URL
 				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
 		if (!uploadFolder.exists()) {
@@ -337,11 +353,10 @@ public class UploadServlet extends HttpServlet {
 			String fieldValue) {
 		try {
 			Field declaredField = RequestCall.class.getDeclaredField(fieldName);
-			System.out.println(declaredField.getName());
 			Method method = call.getClass().getMethod(
-					"set" + StringUtils.capitalize("sendTime"),
+					"set" + StringUtils.capitalize(declaredField.getName()),
 					declaredField.getType());
-			method.invoke(call, fieldName);
+			method.invoke(call, fieldValue);
 		} catch (Exception e) {
 			e.printStackTrace();
 			call.setErrorInfo(e.getMessage());
