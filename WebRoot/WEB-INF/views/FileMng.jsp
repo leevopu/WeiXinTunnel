@@ -119,10 +119,6 @@
 				<input type="text" class="sang_Calender"id="sendTime"name="sendTime"/>
 			</label> 
 			<label> 
-				<span>说明 :</span> 
-				<textarea id="text"name="text" placeholder="..."></textarea>
-			</label> 
-			<label> 
 				<span>素材类型 :</span> 
 				<select name="msgType" id="msgType">
 					<option value="">请选择...</option> 
@@ -131,6 +127,10 @@
 					<option value="video">视频</option> 
 					<option value="file">文件</option> 
 				</select>
+			</label> 
+			<label> 
+				<span>文本 :</span> 
+				<textarea id="text"name="text" placeholder="若素材类型为文本则填，否则不必填..."></textarea>
 			</label> 
 			<label> 
 				<span>请选择文件 :</span>

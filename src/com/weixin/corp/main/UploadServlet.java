@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -50,7 +51,6 @@ public class UploadServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
 		long startDoPostTime = System.currentTimeMillis();
-		response.setContentType("text/html;charset=UTF-8");
 
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
@@ -61,10 +61,25 @@ public class UploadServlet extends HttpServlet {
 		while (headerNames.hasMoreElements()) {
 			System.out.println(headerNames.nextElement());
 		}
-		System.out.println("lenth: " + request.getContentLength()); // 判断文件长度
-		// 超过20M返回提示
+		long contentLength = request.getContentLength();
+		// 判断文件长度
+		System.out.println("lenth: " + contentLength);
+		String size = CommonUtil.convertFileSize(contentLength);
+		System.out.println("大小为：" + size);
+		response.setContentType("text/html;charset=UTF-8");
+		
 		RequestCall call = parseRequestCall(request);
-
+		
+		// =================================================================
+		// 判断文件大小  超过20M返回提示
+		// =================================================================
+		if (contentLength > MXA_SEGSIZE) {
+			System.out.println("文件大小超过20M，请重新操作！！！！");
+//			response.sendRedirect("index.jsp");
+			response.getWriter().write("文件大小超过20M，请重新操作！！！！");
+			return;
+		}
+		
 		// 解析失败
 		if (null != call.getErrorInfo()) {
 			response.getWriter().write(call.getErrorInfo());
@@ -140,24 +155,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println(media.exists());
 
 		// 最好再建个UploadServlet，下面的代码是响应手机端请求的。
-		long contentLength = request.getContentLength();
-		// 判断文件长度
-		System.out.println("lenth: " + contentLength);
-		// 超过20M返回提示
-		String size = CommonUtil.convertFileSize(contentLength);
-		System.out.println("====================" + size);
-		// =================================================================
-		// 判断文件大小
-		// =================================================================
-		if (contentLength > MXA_SEGSIZE) {
-			/*
-			 * PrintWriter out;前台页面提示 out = response.getWriter();
-			 * out.print("<script>alert('文件大小超过20M，请重新操作！！！！');</script>");
-			 * out.close();
-			 */
-			System.out.println("文件大小超过20M，请重新操作！！！！");
-			return;
-		}
+		
 	}
 
 	private RequestCall parseRequestCall(HttpServletRequest request)
