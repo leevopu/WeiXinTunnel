@@ -112,7 +112,7 @@ public class TimerTaskServlet extends HttpServlet {
 				// 清空用户缓存<部门名称<手机号,userid>>
 				WeixinUtil.getUseridPool().clear();
 				// 获取微信全部部门信息
-				UserService.
+
 				// 遍历部门获取用户信息
 
 				// 放入用户缓存
