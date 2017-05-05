@@ -65,17 +65,6 @@ public class MenuService {
 	/**
 	 * 查询菜单
 	 * 
-	 * @return 菜单结构json字符串
-	 */
-	private static JSONObject getMenuJson() {
-		JSONObject result = null;
-		
-		return result;
-	}
-
-	/**
-	 * 查询菜单
-	 * 
 	 * @return Menu 菜单对象
 	 */
 	public static Menu getMenu() {
@@ -93,7 +82,7 @@ public class MenuService {
 		}
 		JSONObject menuJson = jsonObject.getJSONObject("menu");
 		System.out.println(menuJson);
-		Menu menu = (Menu) JSONObject.toBean(json, Menu.class);
+		Menu menu = (Menu) JSONObject.toBean(menuJson, Menu.class);
 		return menu;
 	}
 
