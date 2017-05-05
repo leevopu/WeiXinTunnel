@@ -15,8 +15,10 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -46,6 +48,9 @@ import com.weixin.corp.entity.message.pojo.Article;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
 import com.weixin.corp.entity.message.xml.NewsXMLMessage;
 import com.weixin.corp.entity.message.xml.TextXMLMessage;
+import com.weixin.corp.entity.user.Department;
+import com.weixin.corp.entity.user.User;
+import com.weixin.corp.main.TimerTaskServlet.DailyUpdateUserTimerTask;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.MyX509TrustManager;
 import com.weixin.corp.utils.WeixinUtil;
@@ -295,10 +300,29 @@ public class MessageService {
 		// 转换
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
 		// jsonMessage.setTouser(call.getToUser());
+		String userId = convert(call.getToUser());
 		jsonMessage.setTouser(call.getToUser());
 		return jsonMessage;
 	}
-
+	/**
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static String convert(String str){
+		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
+		x.run();
+		List<Department> departmentList =UserService.getDepartment();
+		for (Department department : departmentList) {
+			System.out.println(department.getId()+":"+department.getName());
+			List<User> userList =  UserService.getUserByDepartment(department.getId());
+			
+			}
+			
+		return null;
+	}
+	
+	
 	/**
 	 * 消息类型：文本
 	 */

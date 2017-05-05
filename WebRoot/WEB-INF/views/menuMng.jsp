@@ -54,6 +54,7 @@
 		<input id="add" 	class="input" type="button"		value="新增" />
 		&nbsp;
 		<input id="remove"  class="input" type="button" 	value="删除" /> 
+		&nbsp;<span style="color: red">新增、修改或删除操作后需点击提交按钮才可生效！ </span>
 	</div>
 	
 	<div style="border:1px solid #F00;overflow-y: true;">
@@ -70,7 +71,7 @@
 	<form action="save.do" method="post">
 		<div align="center">
 			<input id= "result" name="result" type="hidden" />
-			<input  class="input"  align="middle" type="submit" onclick="saveBefore()" value="保存" />
+			<input  class="input"  align="middle" type="submit" onclick="saveBefore()" value="提交" />
 		</div>
 	</form>
 </div>
@@ -87,6 +88,7 @@
     	
     	//初始化加载菜单列表
     	function load(){
+    		debugger;
     		var datas =<%=str %>;
     		menusList = dataFormat(datas.button);
     		for (var i = 0; i < menusList.length; i++) {
@@ -107,7 +109,7 @@
     			var childsMenu = [];//子菜单集合
     			var data = datas[i];
     			data.parent="无";
-    			if(data.hasOwnProperty("sub_button")&&data.sub_button.length>1){
+    			if(data.hasOwnProperty("sub_button")&&data.sub_button.length>0){
     				data.key = "FIRST_FLOOR";
     				data.type= "click";
     				var buttons = data.sub_button;

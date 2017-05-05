@@ -152,9 +152,9 @@ public class TimerTaskServlet extends HttpServlet {
 				// 遍历部门获取用户信息
 				 List<User> userList = null;
 				for (Department department : departmentList) {
+					System.out.println(department.getId()+":"+department.getName());
 					// 有新增部门，放入缓存
-					if (null == WeixinUtil.getUseridPool().get(
-							department.getName())) {
+					if (null == WeixinUtil.getUseridPool().get(department.getName())) {
 						WeixinUtil.getUseridPool().put(department.getName(),
 								new HashMap<String, User>());
 					}

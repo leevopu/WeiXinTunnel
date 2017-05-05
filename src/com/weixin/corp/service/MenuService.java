@@ -58,8 +58,9 @@ public class MenuService {
 	 *            菜单实例
 	 * @return 0表示成功，其他值表示失败
 	 */
-	public static int createMenu(Menu menu) {
-		return createMenu(JSONObject.fromObject(menu).toString());
+	public static int createMenuIndex(String menu) {
+		//JSONObject.fromObject(menu).toString()
+		return createMenu(menu);
 	}
 
 	/**
@@ -67,23 +68,13 @@ public class MenuService {
 	 * 
 	 * @return Menu 菜单对象
 	 */
-	public static Menu getMenu() {
+	public static JSONObject getMenu() {
 		// 调用接口查询菜单
 		JSONObject jsonObject = WeixinUtil.httpsRequest(MENU_GET, "GET", null);
-
-		if (null != jsonObject) {
-			if (0 != jsonObject.getInt("errcode")) {
-				log.error("创建菜单失败 errcode:" + jsonObject.getInt("errcode")
-						+ "，errmsg:" + jsonObject.getString("errmsg"));
-				return null;
-			}
-		} else {
-			return null;
-		}
 		JSONObject menuJson = jsonObject.getJSONObject("menu");
 		System.out.println(menuJson);
-		Menu menu = (Menu) JSONObject.toBean(menuJson, Menu.class);
-		return menu;
+		//Menu menu = (Menu) JSONObject.toBean(menuJson, Menu.class);
+		return menuJson;
 	}
 
 	/**
@@ -97,8 +88,7 @@ public class MenuService {
 		// "{    \"menu\": {        \"button\": [            {                \"name\": \"预报\",                \"sub_button\": [                    {                        \"type\": \"click\",                        \"name\": \"北京天气\",                        \"key\": \"天气北京\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"上海天气\",                        \"key\": \"天气上海\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"广州天气\",                        \"key\": \"天气广州\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"深圳天气\",                        \"key\": \"天气深圳\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"view\",                        \"name\": \"本地天气\",                        \"url\": \"http://m.hao123.com/a/tianqi\",                        \"sub_button\": [ ]                    }                ]            },            {                \"name\": \"方倍工作室\",                \"sub_button\": [                    {                        \"type\": \"click\",                        \"name\": \"公司简介\",                        \"key\": \"company\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"趣味游戏\",                        \"key\": \"游戏\",                        \"sub_button\": [ ]                    },                    {                        \"type\": \"click\",                        \"name\": \"ddddd\",                        \"key\": \"ddddd\",                        \"sub_button\": [ ]                    }                ]            }        ]    }}";
 					String xx =	  JSONObject.fromObject(testgetMenuUrl).getString("menu");
 					System.out.println(xx);
-		JSONObject json = JSONObject.fromObject(testgetMenuUrl).getJSONObject(
-				"menu");
+		JSONObject json = JSONObject.fromObject(testgetMenuUrl).getJSONObject("menu");
 		System.out.println(json);
 		Menu menu = (Menu) JSONObject.toBean(json, Menu.class);
 		System.out.println(menu);

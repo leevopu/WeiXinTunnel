@@ -8,7 +8,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSONObject;
+
+import com.weixin.corp.main.TimerTaskServlet.DailyUpdateUserTimerTask;
 import com.weixin.corp.service.MenuService;
+import com.weixin.corp.service.MessageService;
 
 public class MenuServlet extends HttpServlet{
 
@@ -34,22 +38,25 @@ public class MenuServlet extends HttpServlet{
 	    System.out.println("action:"+action);
 	    
 	    if("get".equals(action)){
-	    	//Menu menu = new Menu();
-	    	//menu = MenuService.getMenu();
-	    	//String str = JSONObject.fromObject(menu).toString();
+	    	//测试数据项
+	    	//String str = MenuService.get();
+	    	//System.out.println(str);
+			String str = "东证资管测试号-ecology15955126618,东证资管测试号-ecology15955126618|东证资管测试号-ecology15955126618";
+			System.out.println(MessageService.convert(str));
 	    	
-	    	String str = MenuService.get();
-	    	System.out.println(str);
-	    	req.setAttribute("str",str); 
+	    	//调用微信接口返回数据项
+	    	JSONObject menu = MenuService.getMenu();
+	    	req.setAttribute("str",menu.toString()); 
 	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");
 			dispatcher.forward(req, resp);
 	    }
 	    if("save".equals(action)){
 	    	String menus = req.getParameter("result");
-	    	System.out.println(menus);
-//	    	String strNew = menuUtil.get();
-//	    	System.out.println(strNew);
-	    	req.setAttribute("str",menus); 
+	    	int it = MenuService.createMenuIndex(menus);
+	    	System.out.println(it);
+	    	JSONObject menu = MenuService.getMenu();
+	    	System.out.println(menu);
+	    	req.setAttribute("str",menu.toString()); 
 	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");
 	    	dispatcher.forward(req, resp);
 	    }

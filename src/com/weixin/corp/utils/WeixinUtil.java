@@ -228,11 +228,11 @@ public class WeixinUtil {
 				httpUrlConn.connect();
 
 			// 获得输出流
-			OutputStream out = new DataOutputStream(
-					httpUrlConn.getOutputStream());
+			OutputStream out = null;
 
 			// 当字符串形式请求时，如json、xml
 			if (null != outputStr) {
+				out = new DataOutputStream(httpUrlConn.getOutputStream());
 				out.write(outputStr.getBytes("UTF-8"));
 				out.close();
 			}
@@ -259,7 +259,7 @@ public class WeixinUtil {
 				sb.append("Content-Type:application/octet-stream\r\n\r\n");
 
 				byte[] head = sb.toString().getBytes("utf-8");
-
+				out = new DataOutputStream(httpUrlConn.getOutputStream());
 				// 输出表头
 				out.write(head);
 				// 文件正文部分
@@ -301,6 +301,7 @@ public class WeixinUtil {
 		} catch (ConnectException ce) {
 			log.error("Weixin server connection timed out.", ce);
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("https request error:{}", e);
 		}
 		return jsonObject;
@@ -316,8 +317,7 @@ public class WeixinUtil {
 	}
 
 	/**
-	 * 获取新的access_token
-	 * <br>
+	 * 获取新的access_token <br>
 	 * <br>
 	 * 调用access_token的接口地址（GET）
 	 */

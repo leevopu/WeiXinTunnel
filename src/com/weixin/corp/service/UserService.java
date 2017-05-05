@@ -197,11 +197,9 @@ public class UserService {
 			return null;
 		}
 		// JSONArray jsonArray = jsonObject.getJSONArray("department");
-		String testDepartStr = "{  \"errcode\": 0, \"errmsg\": \"ok\", \"department\": [       {           \"id\": 2,   \"idx\": 2,           \"name\": \"广州研发中心\",               \"order\": 10       },       {           \"id\": 3,      \"ifx\": \"abc\",           \"name\": \"邮箱产品部\",           \"parentid\": 2,           \"order\": 40       }   ]}";
-		JSONArray jsonArray = JSONObject.fromObject(testDepartStr)
-				.getJSONArray("department");
-		Collection collection = JSONArray.toCollection(jsonArray,
-				Department.class);
+		//String testDepartStr = "{  \"errcode\": 0, \"errmsg\": \"ok\", \"department\": [       {           \"id\": 2,   \"idx\": 2,           \"name\": \"广州研发中心\",               \"order\": 10       },       {           \"id\": 3,      \"ifx\": \"abc\",           \"name\": \"邮箱产品部\",           \"parentid\": 2,           \"order\": 40       }   ]}";
+		JSONArray jsonArray = JSONObject.fromObject(jsonObject).getJSONArray("department");
+		Collection collection = JSONArray.toCollection(jsonArray,Department.class);
 		departmentList = (List<Department>) collection;
 		return departmentList;
 	}

@@ -45,8 +45,7 @@ public class UploadServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("doGet..............................");
-		RequestDispatcher dispatcher = request
-				.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
 		dispatcher.forward(request, response);
 	}
 
