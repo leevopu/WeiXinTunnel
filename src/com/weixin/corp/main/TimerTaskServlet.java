@@ -2,6 +2,8 @@ package com.weixin.corp.main;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,8 +16,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.user.Department;
+import com.weixin.corp.entity.user.User;
 import com.weixin.corp.service.MessageService;
-import com.weixin.corp.utils.CommonUtil;
+import com.weixin.corp.service.UserService;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -44,21 +48,16 @@ public class TimerTaskServlet extends HttpServlet {
 			if (null != token) {
 				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
-			
-			
-			
-			
-			
-			
-			//??
-			Runnable x = new DailyGroupMessageTimerTask();
-			x.run();
+
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
 			dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
 			// 启动定时更新用户信息，每天6点触发1次更新缓存
-			// dailyUpdateUserOnTimeTask();
+			dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
+			// 首次初始化缓存
+			Runnable userPoolInit = new DailyUpdateUserTimerTask();
+			userPoolInit.run();
 			// 启动循环获取access_token的线程，access_token每隔2小时会失效
-			new Thread(new TokenTimerTaskThread()).start();
+			new Thread(new WeixinAccessTokenTimerTaskThread()).start();
 			// 启动循环监控用户自定义发送时间的消息
 			new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
@@ -106,15 +105,81 @@ public class TimerTaskServlet extends HttpServlet {
 	public static class DailyUpdateUserTimerTask implements Runnable {
 		@Override
 		public void run() {
+//		测试			
+//			Department department1 = new Department();
+//			department1.setId("1");
+//			department1.setName("财务");
+//			department1.setOrder(1);
+//			department1.setParentid(2);
+//
+//			Department department2 = new Department();
+//			department2.setId("2");
+//			department2.setName("后勤");
+//			department2.setOrder(1);
+//			department2.setParentid(2);
+//
+//			User user1 = new User();
+//			user1.setDepartment("1");
+//			user1.setMobile("13777777777");
+//			user1.setUserid("431");
+//
+//			User user2 = new User();
+//			user2.setDepartment("2");
+//			user2.setMobile("13888888888");
+//			user2.setUserid("567");
+//
+//			User user3 = new User();
+//			user3.setDepartment("2");
+//			user3.setMobile("13999999999");
+//			user3.setUserid("617");
+			
+//			List<Department> departmentList = new ArrayList<Department>();
+//			departmentList.add(department1);
+//			departmentList.add(department2);
+//			List<User> userList = new ArrayList<User>();
+//			userList.add(user1);
+//			userList.add(user2);
+//			userList.add(user3);
 			try {
 				System.out.println("开始执行每日定时更新用户");
-				// 清空用户缓存<部门名称<手机号,userid>>
-				WeixinUtil.getUseridPool().clear();
+
 				// 获取微信全部部门信息
-
+				 List<Department> departmentList =
+				 UserService.getDepartment();
+				 if (null == departmentList) {
+				 return;
+				 }
 				// 遍历部门获取用户信息
-
-				// 放入用户缓存
+				 List<User> userList = null;
+				for (Department department : departmentList) {
+					// 有新增部门，放入缓存
+					if (null == WeixinUtil.getUseridPool().get(
+							department.getName())) {
+						WeixinUtil.getUseridPool().put(department.getName(),
+								new HashMap<String, User>());
+					}
+					 userList = UserService.getUserByDepartment(department
+					 .getId());
+					if (null != userList) {
+						// 清空用户缓存
+						WeixinUtil.getUseridPool().get(department.getName())
+								.clear();
+						// 放入用户缓存
+						for (User user : userList) {
+							if (department.getId().equals(user.getDepartment())) {
+								WeixinUtil.getUseridPool()
+										.get(department.getName())
+										.put(user.getMobile(), user);
+							}
+						}
+					}
+				}
+				System.out.println("用户信息缓存更新完成");
+				log.info("用户信息缓存更新完成");
+//				System.out.println(WeixinUtil.getUseridPool().get("财务")
+//						.get("13999999999"));
+//				System.out.println(WeixinUtil.getUseridPool().get("财务")
+//						.get("13777777777"));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -125,7 +190,7 @@ public class TimerTaskServlet extends HttpServlet {
 	 * 定时获取微信access_token的线程
 	 * 
 	 */
-	public static class TokenTimerTaskThread implements Runnable {
+	public static class WeixinAccessTokenTimerTaskThread implements Runnable {
 
 		public void run() {
 			while (true) {
@@ -178,16 +243,7 @@ public class TimerTaskServlet extends HttpServlet {
 	}
 
 	public static void main(String[] args) {
-		String a = "1970-01-01 8:00:00";
-		Date x = CommonUtil.getStrDate(a, "yyyy-MM-dd HH:mm:ss");
-		System.out.println(x.getTime());
-		Calendar fixTime = Calendar.getInstance();
-		fixTime.setTime(x);
-		// fixTime.set(Calendar.HOUR_OF_DAY, 8);
-		// fixTime.set(Calendar.MINUTE, 0);
-		// fixTime.set(Calendar.SECOND, 0);
-		System.out.println(fixTime.getTimeInMillis());
-		System.out.println(fixTime.getTime().getTime());
-
+		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
+		x.run();
 	}
 }

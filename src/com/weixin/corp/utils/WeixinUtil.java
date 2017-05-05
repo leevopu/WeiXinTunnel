@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.user.User;
 
 public class WeixinUtil {
 
@@ -56,9 +57,15 @@ public class WeixinUtil {
 	 */
 	private static Map<String, HashSet<RequestCall>> groupMessagePool = new HashMap<String, HashSet<RequestCall>>();
 
+	/**
+	 * 定时消息发送队列
+	 */
 	private static DelayQueue<CorpBaseJsonMessage> delayJsonMessageQueue = new DelayQueue<CorpBaseJsonMessage>();
 
-	private static Map<String, HashMap<String, String>> useridPool = new HashMap<String, HashMap<String, String>>();
+	/**
+	 * 用户信息缓存池，外层key为部门名称，内层key为手机号
+	 */
+	private static Map<String, HashMap<String, User>> useridPool = new HashMap<String, HashMap<String, User>>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -128,7 +135,7 @@ public class WeixinUtil {
 		return groupMessagePool;
 	}
 
-	public static Map<String, HashMap<String, String>> getUseridPool() {
+	public static Map<String, HashMap<String, User>> getUseridPool() {
 		return useridPool;
 	}
 
