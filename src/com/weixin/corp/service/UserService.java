@@ -185,22 +185,22 @@ public class UserService {
 	public static List<Department> getDepartment() {
 		List<Department> departmentList = null;
 //		// 调用接口获取部门列表
-//		JSONObject jsonObject = WeixinUtil.httpsRequest(DEPARTMENT_GET,
-//				WeixinUtil.GET_REQUEST_METHOD, null);
-//		if (null != jsonObject) {
-//			if (0 != jsonObject.getInt("errcode")) {
-//				log.error("获取部门列表失败 errcode:" + jsonObject.getInt("errcode")
-//						+ "，errmsg:" + jsonObject.getString("errmsg"));
-//				return null;
-//			}
-//		} else {
-//			return null;
-//		}
+		JSONObject jsonObject = WeixinUtil.httpsRequest(DEPARTMENT_GET,
+				WeixinUtil.GET_REQUEST_METHOD, null);
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("获取部门列表失败 errcode:" + jsonObject.getInt("errcode")
+						+ "，errmsg:" + jsonObject.getString("errmsg"));
+				return null;
+			}
+		} else {
+			return null;
+		}
 		// JSONArray jsonArray = jsonObject.getJSONArray("department");
 		String testDepartStr = "{  \"errcode\": 0, \"errmsg\": \"ok\", \"department\": [       {           \"id\": 2,   \"idx\": 2,           \"name\": \"广州研发中心\",               \"order\": 10       },       {           \"id\": 3,      \"ifx\": \"abc\",           \"name\": \"邮箱产品部\",           \"parentid\": 2,           \"order\": 40       }   ]}";
 		JSONArray jsonArray = JSONObject.fromObject(testDepartStr)
 				.getJSONArray("department");
-		Collection collection = jsonArray.toCollection(jsonArray,
+		Collection collection = JSONArray.toCollection(jsonArray,
 				Department.class);
 		departmentList = (List<Department>) collection;
 		return departmentList;
