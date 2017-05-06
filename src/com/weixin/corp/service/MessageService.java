@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -305,21 +307,70 @@ public class MessageService {
 		return jsonMessage;
 	}
 	/**
-	 * 
+	 * 将传入的toUser与微信端信息匹配 转化为userID
 	 * @param str
 	 * @return
 	 */
-	public static String convert(String str){
+	public static String convert(String toUser){
+		if("".equals(toUser)||null == toUser){//touser为空
+			return null;
+		}
+		String depts[] = new String[]{};
+		if(toUser.indexOf("|")!=-1){//  根据 ","  "|"来进行分割
+			//System.out.println("包含");
+			String users[] = toUser.split("|");
+			for (int i = 0; i < users.length; i++) {
+				String user = users[i];
+				String dep  = "";
+				String ph   = "";
+				if(user.length()>11){
+					//取最后11位
+					ph = user.substring(user.length()-11, user.length());
+					//判断是否全为数字  flag： TRUE FALSE
+					boolean flag = isNum(ph);
+					if(flag){
+						dep = user.substring(0,user.length()-11); 
+					}else{
+						dep=user;
+					}
+				}else{//肯定没有填手机号
+					dep = user;
+				}
+			}
+		}else{//只有一位,进行分割
+			//ph = toUser.substring(toUser.length()-11, toUser.length());
+		}
+		//从微信端取通讯录数据  :问题：根据部门id从微信端取人员详情  不成功  url正常
 		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
 		x.run();
-		List<Department> departmentList =UserService.getDepartment();
-		for (Department department : departmentList) {
-			System.out.println(department.getId()+":"+department.getName());
-			List<User> userList =  UserService.getUserByDepartment(department.getId());
-			
-			}
+		Map<String, HashMap<String, User>> maps =WeixinUtil.getUseridPool();
+		System.out.println(maps.keySet().toString());
+		Object[] strs = maps.keySet().toArray();
+		
+		for (int i = 0; i < depts.length; i++) {
+			String department = "ecology";
+//			HashMap<String, User> depart = WeixinUtil.getUseridPool().get(department);
+			/*List<User> userList =  UserService.getUserByDepartment(depart.get(key));
+			for (User user : userList) {
+				System.out.println(user.getUserid()+"-"+user.getMobile()+"-"+user.getDepartment());
+			}*/
+		}
+		
+		
+		
 			
 		return null;
+	}
+	
+	private static boolean isNum(String ph){
+		//正则判断
+		Pattern pattern = Pattern.compile("[0-9]*");
+        Matcher isNum = pattern.matcher(ph);
+        if( !isNum.matches() ){
+            // 不全是数字，可能没有填手机号
+        	return false;
+           }
+		return true;
 	}
 	
 	

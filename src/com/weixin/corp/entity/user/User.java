@@ -10,7 +10,7 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 3349073660021645866L;
 	private String userid;
 	private String name;
-	private String department;
+	private Object department[];
 	private String position;
 	private String mobile;
 	private String gender;
@@ -34,20 +34,20 @@ public class User implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
-	public String getDepartment() {
+	
+	public Object[] getDepartment() {
 		return department;
 	}
 
-	public void setDepartment(String department) {
+	public void setDepartment(Object[] department) {
 		this.department = department;
 	}
 	
-	public void setDepartment(int departmentId) {
-		this.department = departmentId + "";
-	} 
+	/*public void setDepartment(int departmentId) {
+	this.department = departmentId + "";
+	} */
 
+	
 	public String getGender() {
 		return this.gender;
 	}
