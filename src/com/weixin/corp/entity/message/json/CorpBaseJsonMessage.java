@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CorpBaseJsonMessage implements Delayed {
 
-	private String MsgType;
+	private String msgtype;
 
 	private String agentid;
 
@@ -19,12 +19,13 @@ public class CorpBaseJsonMessage implements Delayed {
 
 	private long sendTime = 0;
 
-	public String getMsgType() {
-		return MsgType;
+
+	public String getMsgtype() {
+		return msgtype;
 	}
 
-	public void setMsgType(String msgType) {
-		MsgType = msgType;
+	public void setMsgtype(String msgtype) {
+		this.msgtype = msgtype;
 	}
 
 	public String getAgentid() {

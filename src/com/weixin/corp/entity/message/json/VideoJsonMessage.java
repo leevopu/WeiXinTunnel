@@ -15,7 +15,7 @@ public class VideoJsonMessage extends CorpBaseJsonMessage {
 	public VideoJsonMessage(String mediaId){
 		super();
 		this.video = new Video(mediaId);
-		this.setMsgType("video");
+		this.setMsgtype("video");
 	}
 
 }

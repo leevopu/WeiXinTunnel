@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -146,7 +147,15 @@ public class WeixinUtil {
 
 	public static JSONObject httpsRequestMedia(String requestUrl,
 			String requestMethod, File uploadMedia) {
-		return httpsRequest(requestUrl, requestMethod, null, uploadMedia);
+		JSONObject jsonObject = httpsRequest(requestUrl, requestMethod, null,
+				uploadMedia);
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("请求素材接口失败 errcode:" + jsonObject.getInt("errcode")
+						+ "，errmsg:" + jsonObject.getString("errmsg"));
+			}
+		}
+		return jsonObject;
 	}
 
 	public static DelayQueue<CorpBaseJsonMessage> getDelayJsonMessageQueue() {
@@ -204,7 +213,7 @@ public class WeixinUtil {
 					WeixinUtil.accessToken.getToken());
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
-		JSONObject jsonObject = null;
+		JSONObject jsonObject = new JSONObject();
 		StringBuffer buffer = new StringBuffer();
 		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
 			TrustManager[] tm = { new MyX509TrustManager() };
@@ -255,7 +264,8 @@ public class WeixinUtil {
 				sb.append(BOUNDARY);
 				sb.append("\r\n");
 				sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-						+ uploadMedia.getName() + "\"\r\n");
+						+ URLEncoder.encode(uploadMedia.getName(), "UTF-8")
+						+ "\"\r\n");
 				sb.append("Content-Type:application/octet-stream\r\n\r\n");
 
 				byte[] head = sb.toString().getBytes("utf-8");

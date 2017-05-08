@@ -15,7 +15,7 @@ public class ImageJsonMessage extends CorpBaseJsonMessage {
 	public ImageJsonMessage(String mediaId){
 		super();
 		this.image = new Image(mediaId);
-		this.setMsgType("image");
+		this.setMsgtype("image");
 	}
 
 }
