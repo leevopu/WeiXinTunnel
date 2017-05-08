@@ -366,7 +366,7 @@ public class MessageService {
 		default:
 			break;
 		}
-		if (CommonUtil.isEmpty(call.getSendTime())) {
+		if (!CommonUtil.StringisEmpty(call.getSendTime())) {
 			jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
 					"yyyy-MM-dd HH:mm:ss").getTime());
 			if (!TEXT_MSG_TYPE.equals(jsonMessage.getMsgtype())
@@ -384,6 +384,7 @@ public class MessageService {
 		// jsonMessage.setTouser(call.getToUser());
 		String userId = convert(call.getToUser());
 		System.out.println(userId);
+		userId = "";
 		jsonMessage.setTouser(userId);
 		// jsonMessage.setTouser("leevo_pu");
 		return jsonMessage;
