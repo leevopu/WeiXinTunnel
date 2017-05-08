@@ -64,11 +64,11 @@ public class MessageService {
 	public static String MESSAGE_SEND = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
 
 	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
-	
+
 	public static String MEDIA_PERMANENT_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
-	
+
 	public static String MEDIA_PERMANENT_COUNT_GET_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
-	
+
 	public static String MEDIA_PERMANENT_LIST_GET_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
 
 	public static final String TEXT_MSG_TYPE = "text";
@@ -220,7 +220,8 @@ public class MessageService {
 						+ "，errmsg:" + jsonObject.getString("errmsg"));
 				return false;
 			}
-			if (jsonObject.has("invaliduser") && !"".equals(jsonObject.getString("invaliduser"))) {
+			if (jsonObject.has("invaliduser")
+					&& !"".equals(jsonObject.getString("invaliduser"))) {
 				log.error("丢失接收人:" + jsonObject.getString("invaliduser")
 						+ "，请确认用户更新情况");
 				return false;
@@ -302,7 +303,7 @@ public class MessageService {
 		default:
 			break;
 		}
-		if(null != call.getSendTime() && !"".equals(call.getSendTime())){
+		if (null != call.getSendTime() && !"".equals(call.getSendTime())) {
 			jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
 					"yyyy-MM-dd HH:mm:ss").getTime());
 		}
@@ -310,79 +311,81 @@ public class MessageService {
 		// 转换
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
 		// jsonMessage.setTouser(call.getToUser());
-//		String userId = convert(call.getToUser());
-//		jsonMessage.setTouser(call.getToUser());
+		// String userId = convert(call.getToUser());
+		// jsonMessage.setTouser(call.getToUser());
 		jsonMessage.setTouser("leevo_pu");
 		return jsonMessage;
 	}
+
 	/**
 	 * 将传入的toUser与微信端信息匹配 转化为userID
+	 * 
 	 * @param str
 	 * @return
 	 */
-	public static String convert(String toUser){
-		if("".equals(toUser)||null == toUser){//touser为空
+	public static String convert(String toUser) {
+		if ("".equals(toUser) || null == toUser) {// touser为空
 			return null;
 		}
-		String depts[] = new String[]{};
-		if(toUser.indexOf("|")!=-1){//  根据 ","  "|"来进行分割
-			//System.out.println("包含");
+		String depts[] = new String[] {};
+		if (toUser.indexOf("|") != -1) {// 根据 "," "|"来进行分割
+			// System.out.println("包含");
 			String users[] = toUser.split("|");
 			for (int i = 0; i < users.length; i++) {
 				String user = users[i];
-				String dep  = "";
-				String ph   = "";
-				if(user.length()>11){
-					//取最后11位
-					ph = user.substring(user.length()-11, user.length());
-					//判断是否全为数字  flag： TRUE FALSE
+				String dep = "";
+				String ph = "";
+				if (user.length() > 11) {
+					// 取最后11位
+					ph = user.substring(user.length() - 11, user.length());
+					// 判断是否全为数字 flag： TRUE FALSE
 					boolean flag = isNum(ph);
-					if(flag){
-						dep = user.substring(0,user.length()-11); 
-					}else{
-						dep=user;
+					if (flag) {
+						dep = user.substring(0, user.length() - 11);
+					} else {
+						dep = user;
 					}
-				}else{//肯定没有填手机号
+				} else {// 肯定没有填手机号
 					dep = user;
 				}
 			}
-		}else{//只有一位,进行分割
-			//ph = toUser.substring(toUser.length()-11, toUser.length());
+		} else {// 只有一位,进行分割
+				// ph = toUser.substring(toUser.length()-11, toUser.length());
 		}
-		//从微信端取通讯录数据  :问题：根据部门id从微信端取人员详情  不成功  url正常
+		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
 		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
 		x.run();
-		Map<String, HashMap<String, User>> maps =WeixinUtil.getUseridPool();
+		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
 		Object[] strs = maps.keySet().toArray();
-		
+
 		for (int i = 0; i < depts.length; i++) {
 			String department = "ecology";
-//			HashMap<String, User> depart = WeixinUtil.getUseridPool().get(department);
-			/*List<User> userList =  UserService.getUserByDepartment(depart.get(key));
-			for (User user : userList) {
-				System.out.println(user.getUserid()+"-"+user.getMobile()+"-"+user.getDepartment());
-			}*/
+			// HashMap<String, User> depart =
+			// WeixinUtil.getUseridPool().get(department);
+			/*
+			 * List<User> userList =
+			 * UserService.getUserByDepartment(depart.get(key)); for (User user
+			 * : userList) {
+			 * System.out.println(user.getUserid()+"-"+user.getMobile
+			 * ()+"-"+user.getDepartment()); }
+			 */
 		}
-		
-		
-		
-			
+
 		return null;
 	}
-	
-	private static boolean isNum(String ph){
-		//正则判断
+
+	private static boolean isNum(String ph) {
+		// 正则判断
 		Pattern pattern = Pattern.compile("[0-9]*");
-        Matcher isNum = pattern.matcher(ph);
-        if( !isNum.matches() ){
-            // 不全是数字，可能没有填手机号
-        	return false;
-           }
+		Matcher isNum = pattern.matcher(ph);
+		if (!isNum.matches()) {
+			// 不全是数字，可能没有填手机号
+			return false;
+		}
 		return true;
 	}
-	
-	
+
 	/**
 	 * 消息类型：文本
 	 */
@@ -412,7 +415,7 @@ public class MessageService {
 	 * 事件类型：CLICK(自定义菜单点击事件)
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
-	
+
 	/**
 	 * 模拟上层应用调用请求
 	 */

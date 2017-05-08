@@ -15,7 +15,7 @@ public class FileJsonMessage extends CorpBaseJsonMessage {
 	public FileJsonMessage(String mediaId){
 		super();
 		this.file = new File(mediaId);
-		this.setMsgType("file");
+		this.setMsgtype("file");
 	}
 
 }

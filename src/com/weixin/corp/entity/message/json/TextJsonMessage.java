@@ -15,7 +15,7 @@ public class TextJsonMessage extends CorpBaseJsonMessage {
 	public TextJsonMessage(String content) {
 		super();
 		this.text = new Text(content);
-		this.setMsgType("text");
+		this.setMsgtype("text");
 	}
 
 }
