@@ -213,7 +213,7 @@ public class WeixinUtil {
 					WeixinUtil.accessToken.getToken());
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
-		JSONObject jsonObject = new JSONObject();
+		JSONObject jsonObject = null;
 		StringBuffer buffer = new StringBuffer();
 		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
 			TrustManager[] tm = { new MyX509TrustManager() };
@@ -264,7 +264,7 @@ public class WeixinUtil {
 				sb.append(BOUNDARY);
 				sb.append("\r\n");
 				sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-						+ URLEncoder.encode(uploadMedia.getName(), "UTF-8")
+						+ uploadMedia.getName()
 						+ "\"\r\n");
 				sb.append("Content-Type:application/octet-stream\r\n\r\n");
 
