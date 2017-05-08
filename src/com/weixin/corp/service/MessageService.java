@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
@@ -34,6 +35,10 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.core.util.QuickWriter;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
+import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.entity.message.json.FileJsonMessage;
@@ -120,7 +125,24 @@ public class MessageService {
 	 * 扩展xstream，使其支持CDATA块
 	 * 
 	 */
-	private static XStream xstream = new XStream();
+	private static XStream xstream = new XStream(new XppDriver() {
+		public HierarchicalStreamWriter createWriter(Writer out) {
+			return new PrettyPrintWriter(out) {
+				// 对所有xml节点的转换都增加CDATA标记
+				boolean cdata = true;
+
+				protected void writeText(QuickWriter writer, String text) {
+					if (cdata) {
+						writer.write("<![CDATA[");
+						writer.write(text);
+						writer.write("]]>");
+					} else {
+						writer.write(text);
+					}
+				}
+			};
+		}
+	});
 
 	/**
 	 * 

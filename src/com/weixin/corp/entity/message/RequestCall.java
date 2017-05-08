@@ -16,15 +16,13 @@ public class RequestCall implements Serializable {
 	 */
 	private String title;
 	/**
-	 * 发送人（"database"|user=部门名称+手机号）
-	 * <br>
+	 * 发送人（"database"|user=部门名称+手机号） <br>
 	 * <br>
 	 * 主动调用user赋值时校验身份
 	 */
 	private String fromUser;
 	/**
-	 * 接收人（用部门名称+手机号来唯一确定用户）
-	 * <br>
+	 * 接收人（用部门名称+手机号来唯一确定用户） <br>
 	 * <br>
 	 * 用逗号或竖线分割多个接收人，确保及时更新用户信息，否则只有能匹配上的用户能接收到消息
 	 */
@@ -51,7 +49,7 @@ public class RequestCall implements Serializable {
 	 * 响应后的错误消息用于提醒
 	 */
 	private String errorInfo;
-	
+
 	/**
 	 * 素材上传后获得的ID
 	 */
@@ -134,6 +132,9 @@ public class RequestCall implements Serializable {
 	}
 
 	public void setMsgType(String msgType) {
+		if ("".equals(msgType)) {
+			msgType = null;
+		}
 		this.msgType = msgType;
 	}
 
@@ -142,6 +143,9 @@ public class RequestCall implements Serializable {
 	}
 
 	public void setText(String text) {
+		if ("".equals(text)) {
+			text = null;
+		}
 		this.text = text;
 	}
 
@@ -158,6 +162,9 @@ public class RequestCall implements Serializable {
 	}
 
 	public void setSendTime(String sendTime) {
+		if ("".equals(sendTime)) {
+			sendTime = null;
+		}
 		this.sendTime = sendTime;
 	}
 
