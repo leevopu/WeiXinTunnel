@@ -62,6 +62,12 @@ public class MessageService {
 	public static String MESSAGE_SEND = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
 
 	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
+	
+	public static String MEDIA_PERMANENT_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
+	
+	public static String MEDIA_PERMANENT_COUNT_GET_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
+	
+	public static String MEDIA_PERMANENT_LIST_GET_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
 
 	public static final String TEXT_MSG_TYPE = "text";
 	public static final String IMAGE_MSG_TYPE = "image";
@@ -212,7 +218,7 @@ public class MessageService {
 						+ "，errmsg:" + jsonObject.getString("errmsg"));
 				return false;
 			}
-			if (!"".equals(jsonObject.getString("invaliduser"))) {
+			if (jsonObject.has("invaliduser") && !"".equals(jsonObject.getString("invaliduser"))) {
 				log.error("丢失接收人:" + jsonObject.getString("invaliduser")
 						+ "，请确认用户更新情况");
 				return false;
@@ -294,14 +300,17 @@ public class MessageService {
 		default:
 			break;
 		}
-		jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
-				"yyyy-MM-dd HH:mm:ss").getTime());
+		if(null != call.getSendTime() && !"".equals(call.getSendTime())){
+			jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
+					"yyyy-MM-dd HH:mm:ss").getTime());
+		}
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		// 转换
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
 		// jsonMessage.setTouser(call.getToUser());
-		String userId = convert(call.getToUser());
-		jsonMessage.setTouser(call.getToUser());
+//		String userId = convert(call.getToUser());
+//		jsonMessage.setTouser(call.getToUser());
+		jsonMessage.setTouser("leevo_pu");
 		return jsonMessage;
 	}
 	/**
