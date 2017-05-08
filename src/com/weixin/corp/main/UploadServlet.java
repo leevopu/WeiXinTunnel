@@ -112,13 +112,13 @@ public class UploadServlet extends HttpServlet {
 			response.getWriter().write(missFieldValue.toString());
 			return;
 		}
-		// 如果发送时间选的不对，早于系统时间30分钟内，那就清空，默认立刻发送。
-		if (!CommonUtil.StringisEmpty(call.getSendTime())
-				&& CommonUtil.getStrDate(call.getSendTime(),
-						"yyyy-MM-dd HH:mm:ss").before(
-						new Date(System.currentTimeMillis() + 1000 * 60 * 30))) {
-			call.setSendTime(null);
-		}
+		// 如果发送时间选的不对，在当前系统时间2分钟内，那就清空，默认立刻发送。
+//		if (!CommonUtil.StringisEmpty(call.getSendTime())
+//				&& CommonUtil.getStrDate(call.getSendTime(),
+//						"yyyy-MM-dd HH:mm:ss").before(
+//						new Date(System.currentTimeMillis() + 1000 * 60 * 2))) {
+//			call.setSendTime(null);
+//		}
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传素材，获取素材id
 		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
@@ -167,6 +167,7 @@ public class UploadServlet extends HttpServlet {
 			WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
 			result = "放入消息队列，等待定时触发";
 		}
+		response.getWriter().write(result);
 	}
 
 	private RequestCall parseRequestCall(HttpServletRequest request)

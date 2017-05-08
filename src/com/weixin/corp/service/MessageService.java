@@ -43,6 +43,7 @@ import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.entity.message.json.FileJsonMessage;
 import com.weixin.corp.entity.message.json.ImageJsonMessage;
+import com.weixin.corp.entity.message.json.TextJsonMessage;
 import com.weixin.corp.entity.message.json.VideoJsonMessage;
 import com.weixin.corp.entity.message.pojo.Article;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
@@ -352,7 +353,7 @@ public class MessageService {
 		CorpBaseJsonMessage jsonMessage = null;
 		switch (call.getMsgType()) {
 		case TEXT_MSG_TYPE:
-			jsonMessage = new ImageJsonMessage(call.getText());
+			jsonMessage = new TextJsonMessage(call.getText());
 			break;
 		case IMAGE_MSG_TYPE:
 			jsonMessage = new ImageJsonMessage(call.getMediaId());
@@ -383,8 +384,6 @@ public class MessageService {
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
 		// jsonMessage.setTouser(call.getToUser());
 		String userId = convert(call.getToUser());
-		System.out.println(userId);
-		userId = "";
 		jsonMessage.setTouser(userId);
 		// jsonMessage.setTouser("leevo_pu");
 		return jsonMessage;
