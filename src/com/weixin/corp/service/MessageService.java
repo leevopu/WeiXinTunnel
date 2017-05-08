@@ -60,13 +60,15 @@ public class MessageService {
 
 	public static String MESSAGE_SEND = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=ACCESS_TOKEN";
 
-	public static String MEDIA_TEMP_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
+	public static String MEDIA_TEMP_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
 
-	public static String MEDIA_PERMANENT_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
+	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
 
-	public static String MEDIA_PERMANENT_COUNT_GET_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
+	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
 
-	public static String MEDIA_PERMANENT_LIST_GET_URL = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
+	public static String MEDIA_PERMANENT_LIST_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
+
+	public static String MEDIA_PERMANENT_DELETE = "https://qyapi.weixin.qq.com/cgi-bin/material/del?access_token=ACCESS_TOKEN&media_id=MEDIA_ID";
 
 	public static final String TEXT_MSG_TYPE = "text";
 	public static final String IMAGE_MSG_TYPE = "image";
@@ -227,6 +229,69 @@ public class MessageService {
 		return true;
 	}
 
+	public static JSONObject uploadPermanentMedia(RequestCall call) {
+		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
+				MessageService.MEDIA_PERMANENT_UPLOAD.replace("TYPE",
+						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
+				call.getMedia());
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("请求永久素材上传接口失败 errcode:"
+						+ jsonObject.getInt("errcode") + "，errmsg:"
+						+ jsonObject.getString("errmsg"));
+			}
+		}
+		return jsonObject;
+	}
+
+	public static JSONObject uploadTempMedia(RequestCall call) {
+		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
+				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE",
+						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
+				call.getMedia());
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("请求临时素材上传接口失败 errcode:"
+						+ jsonObject.getInt("errcode") + "，errmsg:"
+						+ jsonObject.getString("errmsg"));
+			}
+		}
+		return jsonObject;
+	}
+
+	public static JSONObject getPermanentMediaList(String type) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("type", type);
+		map.put("offset", 0);
+		map.put("count", 10);
+
+		JSONObject jsonObject = WeixinUtil.httpsRequest(
+				MessageService.MEDIA_PERMANENT_LIST_GET,
+				WeixinUtil.GET_REQUEST_METHOD, JSONObject.fromObject(map).toString());
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("获取永久素材列表接口失败 errcode:"
+						+ jsonObject.getInt("errcode") + "，errmsg:"
+						+ jsonObject.getString("errmsg"));
+			}
+		}
+		return jsonObject;
+	}
+
+	public static boolean deletePermanentMedia(String media_id) {
+		JSONObject jsonObject = WeixinUtil.httpsRequest(
+				MEDIA_PERMANENT_DELETE.replace("MEDIA_ID", media_id),
+				WeixinUtil.GET_REQUEST_METHOD, null);
+		if (null != jsonObject) {
+			if (0 != jsonObject.getInt("errcode")) {
+				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+						+ "，errmsg:" + jsonObject.getString("errmsg"));
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * 
 	 * @return 成功为0，失败则为errcode
@@ -303,6 +368,14 @@ public class MessageService {
 		if (null != call.getSendTime() && !"".equals(call.getSendTime())) {
 			jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
 					"yyyy-MM-dd HH:mm:ss").getTime());
+			if (TEXT_MSG_TYPE != jsonMessage.getMsgtype()
+					&& CommonUtil.getStrDate(call.getSendTime(),
+							"yyyy-MM-dd HH:mm:ss").after(
+							new Date(System.currentTimeMillis() + 1000 * 60
+									* 60 * 24 * 3))) {
+				// 说明是上传到永久库的素材消息
+				jsonMessage.setPermanent(true);
+			}
 		}
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		// 转换
@@ -326,7 +399,7 @@ public class MessageService {
 			return null;
 		}
 		String userIds = "";
-		//从微信端取通讯录数据  :问题：根据部门id从微信端取人员详情  不成功  url正常
+		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
 		String depts[] = new String[] {};
 		if (toUser.indexOf("|") != -1) {// 根据 "," "|"来进行分割
 			// System.out.println("包含");
@@ -358,54 +431,54 @@ public class MessageService {
 		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
 		Object[] strs = maps.keySet().toArray();
-		if(toUser.indexOf(",")!=-1){//  根据 ","  来进行分割 
-			//System.out.println("包含");
+		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
+			// System.out.println("包含");
 			String users[] = toUser.split(",");
 			for (int i = 0; i < users.length; i++) {
 				String user = users[i];
-				String ph   = "";
-				if(user.length()>11){
-					//取最后11位   如果没填手机号则不做处理
-					ph = user.substring(user.length()-11, user.length());
-					String dep  = "";
-					//判断是否全为数字  flag： TRUE FALSE
-					if(isNum(ph)){
-						//拿到部门名称
-						dep = user.substring(0,user.length()-11); 
-						//遍历部门名称，匹配信息
+				String ph = "";
+				if (user.length() > 11) {
+					// 取最后11位 如果没填手机号则不做处理
+					ph = user.substring(user.length() - 11, user.length());
+					String dep = "";
+					// 判断是否全为数字 flag： TRUE FALSE
+					if (isNum(ph)) {
+						// 拿到部门名称
+						dep = user.substring(0, user.length() - 11);
+						// 遍历部门名称，匹配信息
 						for (int j = 0; j < strs.length; j++) {
-							//部门匹配   
-							if(strs[j].equals(dep)){
+							// 部门匹配
+							if (strs[j].equals(dep)) {
 								HashMap<String, User> datas = maps.get(dep);
 								User data = datas.get(ph);
-								if(null!=data){
-									userIds +=data.getUserid()+"|";
+								if (null != data) {
+									userIds += data.getUserid() + "|";
 								}
 							}
 						}
 					}
 				}
 			}
-		}else{//只有一个单独的字符串,进行分割
-			String ph   = toUser.substring(toUser.length()-11, toUser.length());
-			if(isNum(ph)){
-				String dep = toUser.substring(0,toUser.length()-11);
+		} else {// 只有一个单独的字符串,进行分割
+			String ph = toUser.substring(toUser.length() - 11, toUser.length());
+			if (isNum(ph)) {
+				String dep = toUser.substring(0, toUser.length() - 11);
 				for (int j = 0; j < strs.length; j++) {
-					//部门匹配   
-					if(strs[j].equals(dep)){
+					// 部门匹配
+					if (strs[j].equals(dep)) {
 						HashMap<String, User> datas = maps.get(dep);
 						User data = datas.get(ph);
-						if(null!=data){
+						if (null != data) {
 							userIds = data.getUserid();
 						}
 					}
 				}
 			}
 		}
-		//处理字符串最后一位"|"
-		String s = userIds.substring(userIds.length()-1, userIds.length());
-		if("|".equals(s)){
-			userIds = userIds.substring(0, userIds.length()-1);
+		// 处理字符串最后一位"|"
+		String s = userIds.substring(userIds.length() - 1, userIds.length());
+		if ("|".equals(s)) {
+			userIds = userIds.substring(0, userIds.length() - 1);
 		}
 		return userIds;
 	}
@@ -629,8 +702,8 @@ public class MessageService {
 	}
 
 	public static void main(String[] args) {
-		TextXMLMessage textXMLMessage = new TextXMLMessage("abc");
-		System.out.println(textMessageToXml(textXMLMessage));
+		String a = "abc";
+		a.replace("ab", null);
 	}
 
 }
