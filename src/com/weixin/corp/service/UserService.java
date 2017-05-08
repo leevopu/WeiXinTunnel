@@ -29,7 +29,7 @@ public class UserService {
 	/**
 	 * 用户按部门号获取列表（GET）指定departmentId
 	 */
-	private static String USER_GET_BY_DEPARTMENT = "https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=ACCESS_TOKEN&department_id=DEPARTMENTID";
+	private static String USER_GET_BY_DEPARTMENT = "https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=ACCESS_TOKEN&department_id=DEPARTMENTID&fetch_child=FETCHCHILD&status=STATUS";
 	/**
 	 * 用户删除 （GET）指定userId
 	 */
@@ -153,11 +153,11 @@ public class UserService {
 	 * @param departmentId
 	 * 
 	 */
-	public static List<User> getUserByDepartment(String departmentId) {
+	public static List<User> getUserByDepartment(String departmentId,String fetchChild,String status) {
 		List<User> userList = new ArrayList<User>();
 		// 调用接口获取用户列表
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
-				USER_GET_BY_DEPARTMENT.replace("DEPARTMENTID", departmentId),
+				USER_GET_BY_DEPARTMENT.replace("DEPARTMENTID", departmentId).replace("FETCHCHILD", fetchChild).replace("STATUS", status),
 				WeixinUtil.GET_REQUEST_METHOD, null);
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
@@ -169,10 +169,9 @@ public class UserService {
 		} else {
 			return null;
 		}
-		// JSONArray jsonArray = jsonObject.getJSONArray("userlist");
-		String testUserStr = "{				 \"errcode\": 0,				 \"errmsg\": \"ok\",				 \"userlist\": [				 {				 \"userid\": \"zhangsan\",				 \"name\": \"李四\"				 }				 ]				 }			";
-		JSONArray jsonArray = JSONObject.fromObject(testUserStr).getJSONArray(
-				"userlist");
+		//JSONArray jsonArray = jsonObject.getJSONArray("userlist");
+		//String testUserStr = "{				 \"errcode\": 0,				 \"errmsg\": \"ok\",				 \"userlist\": [				 {				 \"userid\": \"zhangsan\",				 \"name\": \"李四\",	\"department\":[1]			 }				 ]				 }			";
+		JSONArray jsonArray = JSONObject.fromObject(jsonObject).getJSONArray("userlist");
 		Collection collection = jsonArray.toCollection(jsonArray, User.class);
 		userList = (List<User>) collection;
 		return userList;

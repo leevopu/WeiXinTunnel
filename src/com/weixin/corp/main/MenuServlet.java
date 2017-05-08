@@ -41,7 +41,7 @@ public class MenuServlet extends HttpServlet{
 	    	//测试数据项
 	    	//String str = MenuService.get();
 	    	//System.out.println(str);
-			String str = "东证资管测试号-ecology15955126618,东证资管测试号-ecology15955126618|东证资管测试号-ecology15955126618";
+			String str = "东证资管测试号-ecology13761485990|东证资管测试号-ecology|东证资管测试号15955126618";
 			System.out.println(MessageService.convert(str));
 	    	
 	    	//调用微信接口返回数据项
