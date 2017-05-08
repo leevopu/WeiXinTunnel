@@ -235,7 +235,7 @@ public class MessageService {
 						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
 				call.getMedia());
 		if (null != jsonObject) {
-			if (0 != jsonObject.getInt("errcode")) {
+			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
 				log.error("请求永久素材上传接口失败 errcode:"
 						+ jsonObject.getInt("errcode") + "，errmsg:"
 						+ jsonObject.getString("errmsg"));
@@ -250,7 +250,7 @@ public class MessageService {
 						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
 				call.getMedia());
 		if (null != jsonObject) {
-			if (0 != jsonObject.getInt("errcode")) {
+			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
 				log.error("请求临时素材上传接口失败 errcode:"
 						+ jsonObject.getInt("errcode") + "，errmsg:"
 						+ jsonObject.getString("errmsg"));
@@ -366,10 +366,10 @@ public class MessageService {
 		default:
 			break;
 		}
-		if (null != call.getSendTime() && !"".equals(call.getSendTime())) {
+		if (CommonUtil.isEmpty(call.getSendTime())) {
 			jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
 					"yyyy-MM-dd HH:mm:ss").getTime());
-			if (TEXT_MSG_TYPE != jsonMessage.getMsgtype()
+			if (!TEXT_MSG_TYPE.equals(jsonMessage.getMsgtype())
 					&& CommonUtil.getStrDate(call.getSendTime(),
 							"yyyy-MM-dd HH:mm:ss").after(
 							new Date(System.currentTimeMillis() + 1000 * 60
@@ -502,8 +502,16 @@ public class MessageService {
 	public String testUploadToServer(String requestUrl, RequestCall call) {
 		String result = null;
 		String msgType = call.getMsgType();
-		if (TEXT_MSG_TYPE != msgType && IMAGE_MSG_TYPE != msgType
-				&& VIDEO_MSG_TYPE != msgType && FILE_MSG_TYPE != msgType) {
+		switch (msgType) {
+		case TEXT_MSG_TYPE:
+			System.out.println("123");
+		case IMAGE_MSG_TYPE:
+			System.out.println(234);
+		case VIDEO_MSG_TYPE:
+			System.out.println(345);
+		case FILE_MSG_TYPE:
+			break;
+		default:
 			return "发送的消息类型不正确，只允许text,image,video和file";
 		}
 		URL url = null;
@@ -597,7 +605,7 @@ public class MessageService {
 			sb.append("--"); // 必须多两道线
 			sb.append(BOUNDARY);
 			sb.append(newLine);
-			if (TEXT_MSG_TYPE == msgType) {
+			if (TEXT_MSG_TYPE.equals(msgType)) {
 				sb.append("Content-Disposition: form-data;name=\"text\"");
 				sb.append(newLine);
 				sb.append(newLine);
@@ -674,8 +682,10 @@ public class MessageService {
 	}
 
 	public static void main(String[] args) {
-		String a = "abc";
-		a.replace("ab", null);
+		MessageService x = new MessageService();
+		RequestCall call = new RequestCall();
+		call.setMsgType("");
+		x.testUploadToServer("abc", call);
 	}
 
 }

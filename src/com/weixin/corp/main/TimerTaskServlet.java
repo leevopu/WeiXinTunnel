@@ -21,6 +21,7 @@ import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.entity.user.User;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UserService;
+import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -106,74 +107,79 @@ public class TimerTaskServlet extends HttpServlet {
 	public static class DailyUpdateUserTimerTask implements Runnable {
 		@Override
 		public void run() {
-//		测试			
-//			Department department1 = new Department();
-//			department1.setId("1");
-//			department1.setName("财务");
-//			department1.setOrder(1);
-//			department1.setParentid(2);
-//
-//			Department department2 = new Department();
-//			department2.setId("2");
-//			department2.setName("后勤");
-//			department2.setOrder(1);
-//			department2.setParentid(2);
-//
-//			User user1 = new User();
-//			user1.setDepartment("1");
-//			user1.setMobile("13777777777");
-//			user1.setUserid("431");
-//
-//			User user2 = new User();
-//			user2.setDepartment("2");
-//			user2.setMobile("13888888888");
-//			user2.setUserid("567");
-//
-//			User user3 = new User();
-//			user3.setDepartment("2");
-//			user3.setMobile("13999999999");
-//			user3.setUserid("617");
-			
-//			List<Department> departmentList = new ArrayList<Department>();
-//			departmentList.add(department1);
-//			departmentList.add(department2);
-//			List<User> userList = new ArrayList<User>();
-//			userList.add(user1);
-//			userList.add(user2);
-//			userList.add(user3);
+			// 测试
+			// Department department1 = new Department();
+			// department1.setId("1");
+			// department1.setName("财务");
+			// department1.setOrder(1);
+			// department1.setParentid(2);
+			//
+			// Department department2 = new Department();
+			// department2.setId("2");
+			// department2.setName("后勤");
+			// department2.setOrder(1);
+			// department2.setParentid(2);
+			//
+			// User user1 = new User();
+			// user1.setDepartment("1");
+			// user1.setMobile("13777777777");
+			// user1.setUserid("431");
+			//
+			// User user2 = new User();
+			// user2.setDepartment("2");
+			// user2.setMobile("13888888888");
+			// user2.setUserid("567");
+			//
+			// User user3 = new User();
+			// user3.setDepartment("2");
+			// user3.setMobile("13999999999");
+			// user3.setUserid("617");
+
+			// List<Department> departmentList = new ArrayList<Department>();
+			// departmentList.add(department1);
+			// departmentList.add(department2);
+			// List<User> userList = new ArrayList<User>();
+			// userList.add(user1);
+			// userList.add(user2);
+			// userList.add(user3);
 			try {
 				System.out.println("开始执行每日定时更新用户");
 
 				// 获取微信全部部门信息
-				 List<Department> departmentList =
-				 UserService.getDepartment();
-				 if (null == departmentList) {
-				 return;
-				 }
+				List<Department> departmentList = UserService.getDepartment();
+				if (null == departmentList) {
+					return;
+				}
 				// 遍历部门获取用户信息
-				 List<User> userList = null;
+				List<User> userList = null;
 				for (Department department : departmentList) {
-					System.out.println(department.getId()+":"+department.getName());
-					Map<String, HashMap<String, User>> maps =WeixinUtil.getUseridPool();
+					System.out.println(department.getId() + ":"
+							+ department.getName());
+					Map<String, HashMap<String, User>> maps = WeixinUtil
+							.getUseridPool();
 					// 有新增部门，放入缓存
 					if (null == maps.get(department.getName())) {
-						maps.put(department.getName(),new HashMap<String, User>());
+						maps.put(department.getName(),
+								new HashMap<String, User>());
 					}
-					//是否递归获取子部门下面的成员  1/0
+					// 是否递归获取子部门下面的成员 1/0
 					String feachChild = "1";
-					//0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
+					// 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
 					String status = "0";
-					userList = UserService.getUserByDepartment(department.getId(),feachChild,status);
+					userList = UserService.getUserByDepartment(
+							department.getId(), feachChild, status);
 					if (null != userList) {
 						// 清空用户缓存
 						maps.get(department.getName()).clear();
-						HashMap<String, User> datas = maps.get(department.getName());
+						HashMap<String, User> datas = maps.get(department
+								.getName());
 						// 放入用户缓存
 						for (User user : userList) {
-							//user.getDepartment()是一个object数组 
-							if (null != user.getMobile()&& !("".equals(user.getMobile())) ) {
-							//WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(), user);
-							datas.put(user.getMobile(), user);
+							// user.getDepartment()是一个object数组
+							if (!CommonUtil.isEmpty(user.getMobile())) {
+								// WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(),
+								// user);
+								datas.put(user.getMobile(), user);
 							}
 						}
 					}
@@ -233,9 +239,10 @@ public class TimerTaskServlet extends HttpServlet {
 							.getDelayJsonMessageQueue().take();
 					// 定时触发响应，不论是否成功
 					MessageService.sendMessage(jsonMessage);
-					if(jsonMessage.isPermanent()){
+					if (jsonMessage.isPermanent()) {
 						// 删除永久库素材消息
-						MessageService.deletePermanentMedia(jsonMessage.getMediaId());
+						MessageService.deletePermanentMedia(jsonMessage
+								.getMediaId());
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();

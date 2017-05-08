@@ -132,9 +132,6 @@ public class RequestCall implements Serializable {
 	}
 
 	public void setMsgType(String msgType) {
-		if ("".equals(msgType)) {
-			msgType = null;
-		}
 		this.msgType = msgType;
 	}
 
@@ -143,9 +140,6 @@ public class RequestCall implements Serializable {
 	}
 
 	public void setText(String text) {
-		if ("".equals(text)) {
-			text = null;
-		}
 		this.text = text;
 	}
 
@@ -162,9 +156,6 @@ public class RequestCall implements Serializable {
 	}
 
 	public void setSendTime(String sendTime) {
-		if ("".equals(sendTime)) {
-			sendTime = null;
-		}
 		this.sendTime = sendTime;
 	}
 
