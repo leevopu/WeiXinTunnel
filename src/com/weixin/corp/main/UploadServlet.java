@@ -45,129 +45,118 @@ public class UploadServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("doGet..............................");
-		RequestDispatcher dispatcher = request
-				.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/FileMng.jsp");
 		dispatcher.forward(request, response);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String result = "";
-		 final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
-		 long startDoPostTime = System.currentTimeMillis();
-		
-		 System.out.println("doPost");
-		 System.out.println("start doPost Time = " + startDoPostTime);
-		 System.out.println("ContentType: " + request.getContentType());
-		 request.getContentLength();
-		 System.out.println(request.getHeader("Content-Disposition"));
-		 Enumeration<String> headerNames = request.getHeaderNames();
-		 while (headerNames.hasMoreElements()) {
-		 System.out.println(headerNames.nextElement());
-		 }
-		 long contentLength = request.getContentLength();
-		 // 判断文件长度
-		 System.out.println("lenth: " + contentLength);
-		 String size = CommonUtil.convertFileSize(contentLength);
-		 System.out.println("大小为：" + size);
-		 response.setContentType("text/html;charset=UTF-8");
-		
-		 // =================================================================
-		 // 判断文件大小 超过20M返回提示
-		 // =================================================================
-		 if (contentLength > MXA_SEGSIZE) {
-		 System.out.println("文件大小超过20M，请重新操作！！！！");
-		 // response.sendRedirect("index.jsp");
-		 response.getWriter().write("文件大小超过20M，请重新操作！！！！");
-		 return;
-		 }
-		
-		RequestCall call = parseRequestCall(request);
-		 // 解析失败
-		 if (null != call.getErrorInfo()) {
-		 response.getWriter().write(call.getErrorInfo());
-		 return;
-		 }
-		
-		 // 判断是否格式符合要求，是否有缺失的字段
-		 if (null == call.getFromUser() || null == call.getToUser()
-		 || null == call.getMsgType()
-		 || (null == call.getText() && null == call.getMedia())) {
-		 StringBuffer missFieldValue = new StringBuffer();
-		 missFieldValue.append("缺少必要的信息请检查，fromUser:");
-		 missFieldValue.append(call.getFromUser());
-		 missFieldValue.append("，toUser:");
-		 missFieldValue.append(call.getToUser());
-		 missFieldValue.append("，msgType:");
-		 missFieldValue.append(call.getMsgType());
-		 missFieldValue.append("，text:");
-		 missFieldValue.append(call.getText());
-		 missFieldValue.append("，media:");
-		 if (null != call.getMedia()) {
-		 missFieldValue.append(call.getMedia().getName());
-		 }
-		 response.getWriter().write(missFieldValue.toString());
-		 return;
-		 }
-		 // 如果发送时间选的不对，早于系统时间30分钟内，那就清空，默认立刻发送。
-		 if (CommonUtil.getStrDate(call.getSendTime(), "yyyy-MM-dd HH:mm:ss")
-		 .before(new Date(System.currentTimeMillis() + 1000 * 60 * 30))) {
-		 call.setSendTime(null);
-		 }
-		 String msgType = call.getMsgType();
-		 // 如果不是文本，先上传素材，获取素材id
-		 if (MessageService.TEXT_MSG_TYPE != (msgType)) {
-		JSONObject jsonObject = null;
-		String mediaId = null;
-		 // 无接收人则素材入库
-		 if ("".equals(call.getToUser().trim())) {
-		 // 永久素材接口
-		 }
-		 // 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
-		 else {
-		 if (null != call.getSendTime()
-		 && CommonUtil.getStrDate(call.getSendTime(),
-		 "yyyy-MM-dd HH:mm:ss").after(
-		 new Date(System.currentTimeMillis() + 1000 * 60
-		 * 60 * 24 * 3))) {
-		 // 永久素材接口
-		  jsonObject = WeixinUtil.httpsRequestMedia(
-				MessageService.MEDIA_PERMANENT_UPLOAD_URL.replace("TYPE",
-						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
-				call.getMedia());
-		 } else {
-		// 临时素材接口
-		jsonObject = WeixinUtil.httpsRequestMedia(
-				MessageService.MEDIA_TEMP_UPLOAD_URL.replace("TYPE",
-						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
-				call.getMedia());
-		 }
-		if (null == jsonObject) {
-			result = "请求素材接口失败";
+		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
+		long startDoPostTime = System.currentTimeMillis();
+
+		System.out.println("doPost");
+		System.out.println("start doPost Time = " + startDoPostTime);
+		System.out.println("ContentType: " + request.getContentType());
+		request.getContentLength();
+		System.out.println(request.getHeader("Content-Disposition"));
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			System.out.println(headerNames.nextElement());
 		}
-		else if (jsonObject.has("media_id")) {
-			mediaId = jsonObject.getString("media_id");
-			call.setMediaId(mediaId);
+		long contentLength = request.getContentLength();
+		// 判断文件长度
+		System.out.println("lenth: " + contentLength);
+		String size = CommonUtil.convertFileSize(contentLength);
+		System.out.println("大小为：" + size);
+		response.setContentType("text/html;charset=UTF-8");
+
+		// =================================================================
+		// 判断文件大小 超过20M返回提示
+		// =================================================================
+		if (contentLength > MXA_SEGSIZE) {
+			System.out.println("文件大小超过20M，请重新操作！！！！");
+			// response.sendRedirect("index.jsp");
+			response.getWriter().write("文件大小超过20M，请重新操作！！！！");
+			return;
 		}
 
-		 }
-		 }
+		RequestCall call = parseRequestCall(request);
+		// 解析失败
+		if (null != call.getErrorInfo()) {
+			response.getWriter().write(call.getErrorInfo());
+			return;
+		}
+
+		// 判断是否格式符合要求，是否有缺失的字段
+		if (null == call.getFromUser() || null == call.getToUser()
+				|| null == call.getMsgType()
+				|| (null == call.getText() && null == call.getMedia())) {
+			StringBuffer missFieldValue = new StringBuffer();
+			missFieldValue.append("缺少必要的信息请检查，fromUser:");
+			missFieldValue.append(call.getFromUser());
+			missFieldValue.append("，toUser:");
+			missFieldValue.append(call.getToUser());
+			missFieldValue.append("，msgType:");
+			missFieldValue.append(call.getMsgType());
+			missFieldValue.append("，text:");
+			missFieldValue.append(call.getText());
+			missFieldValue.append("，media:");
+			if (null != call.getMedia()) {
+				missFieldValue.append(call.getMedia().getName());
+			}
+			response.getWriter().write(missFieldValue.toString());
+			return;
+		}
+		// 如果发送时间选的不对，早于系统时间30分钟内，那就清空，默认立刻发送。
+		if (CommonUtil.getStrDate(call.getSendTime(), "yyyy-MM-dd HH:mm:ss")
+				.before(new Date(System.currentTimeMillis() + 1000 * 60 * 30))) {
+			call.setSendTime(null);
+		}
+		String msgType = call.getMsgType();
+		// 如果不是文本，先上传素材，获取素材id
+		if (MessageService.TEXT_MSG_TYPE != (msgType)) {
+			JSONObject jsonObject = null;
+			String mediaId = null;
+			// 无接收人则素材入库
+			if ("".equals(call.getToUser().trim())) {
+				// 永久素材接口
+			}
+			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
+			else {
+				if (null != call.getSendTime()
+						&& CommonUtil.getStrDate(call.getSendTime(),
+								"yyyy-MM-dd HH:mm:ss").after(
+								new Date(System.currentTimeMillis() + 1000 * 60
+										* 60 * 24 * 3))) {
+					// 永久素材接口
+					// jsonObject =
+				} else {
+					// 临时素材接口
+					jsonObject = WeixinUtil.httpsRequestMedia(
+							MessageService.MEDIA_TEMP_UPLOAD_URL.replace(
+									"TYPE", call.getMsgType()),
+							WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
+				}
+				mediaId = jsonObject.getString("media_id");
+				call.setMediaId(mediaId);
+			}
+		}
 		CorpBaseJsonMessage jsonMessage = MessageService
 				.changeMessageToJson(call);
 		// 立即发送消息
-		if (null == call.getSendTime() || "".equals(call.getSendTime())) {
+		if (null == call.getSendTime()) {
 			if (MessageService.sendMessage(jsonMessage)) {
 				// 回复提示发送成功
-				result = "发送成功";
+				response.getWriter().write("发送成功");
 			} else {
 				// 回复发送失败
-				result = "发送失败";
+				response.getWriter().write("发送失败");
 			}
 		} else {
 			// 放入消息队列，定时触发
 			WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
-			result = "放入消息队列，等待定时触发";
+			response.getWriter().write("放入消息队列，定时触发");
 		}
 	}
 

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
@@ -34,6 +35,10 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.core.util.QuickWriter;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
+import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.entity.message.json.FileJsonMessage;
@@ -120,7 +125,24 @@ public class MessageService {
 	 * 扩展xstream，使其支持CDATA块
 	 * 
 	 */
-	private static XStream xstream = new XStream();
+	private static XStream xstream = new XStream(new XppDriver() {
+		public HierarchicalStreamWriter createWriter(Writer out) {
+			return new PrettyPrintWriter(out) {
+				// 对所有xml节点的转换都增加CDATA标记
+				boolean cdata = true;
+
+				protected void writeText(QuickWriter writer, String text) {
+					if (cdata) {
+						writer.write("<![CDATA[");
+						writer.write(text);
+						writer.write("]]>");
+					} else {
+						writer.write(text);
+					}
+				}
+			};
+		}
+	});
 
 	/**
 	 * 
@@ -305,35 +327,9 @@ public class MessageService {
 		}
 		String userIds = "";
 		//从微信端取通讯录数据  :问题：根据部门id从微信端取人员详情  不成功  url正常
-		String depts[] = new String[] {};
-		if (toUser.indexOf("|") != -1) {// 根据 "," "|"来进行分割
-			// System.out.println("包含");
-			String users[] = toUser.split("|");
-			for (int i = 0; i < users.length; i++) {
-				String user = users[i];
-				String dep = "";
-				String ph = "";
-				if (user.length() > 11) {
-					// 取最后11位
-					ph = user.substring(user.length() - 11, user.length());
-					// 判断是否全为数字 flag： TRUE FALSE
-					boolean flag = isNum(ph);
-					if (flag) {
-						dep = user.substring(0, user.length() - 11);
-					} else {
-						dep = user;
-					}
-				} else {// 肯定没有填手机号
-					dep = user;
-				}
-			}
-		} else {// 只有一位,进行分割
-				// ph = toUser.substring(toUser.length()-11, toUser.length());
-		}
-		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
 		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
 		x.run();
-		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
+		Map<String, HashMap<String, User>> maps =WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
 		Object[] strs = maps.keySet().toArray();
 		if(toUser.indexOf(",")!=-1){//  根据 ","  来进行分割 
