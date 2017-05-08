@@ -11,12 +11,15 @@ public class ImageJsonMessage extends CorpBaseJsonMessage {
 	public Image getImage() {
 		return image;
 	}
-	
-	public ImageJsonMessage(String mediaId){
+
+	public ImageJsonMessage(String mediaId) {
 		super();
 		this.image = new Image(mediaId);
 		this.setMsgtype("image");
 	}
 
+	@Override
+	public String getMediaId() {
+		return this.image.getMediaId();
+	}
 }
-

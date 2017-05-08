@@ -233,6 +233,10 @@ public class TimerTaskServlet extends HttpServlet {
 							.getDelayJsonMessageQueue().take();
 					// 定时触发响应，不论是否成功
 					MessageService.sendMessage(jsonMessage);
+					if(jsonMessage.isPermanent()){
+						// 删除永久库素材消息
+						MessageService.deletePermanentMedia(jsonMessage.getMediaId());
+					}
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}

@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -43,8 +42,6 @@ public class WeixinUtil {
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-	public static final String TEMP_URL = "D:/temp/";
 
 	public static final String POST_REQUEST_METHOD = "POST";
 	public static final String GET_REQUEST_METHOD = "GET";
@@ -147,15 +144,7 @@ public class WeixinUtil {
 
 	public static JSONObject httpsRequestMedia(String requestUrl,
 			String requestMethod, File uploadMedia) {
-		JSONObject jsonObject = httpsRequest(requestUrl, requestMethod, null,
-				uploadMedia);
-		if (null != jsonObject) {
-			if (0 != jsonObject.getInt("errcode")) {
-				log.error("ÇëÇóËØ²Ä½Ó¿ÚÊ§°Ü errcode:" + jsonObject.getInt("errcode")
-						+ "£¬errmsg:" + jsonObject.getString("errmsg"));
-			}
-		}
-		return jsonObject;
+		return httpsRequest(requestUrl, requestMethod, null, uploadMedia);
 	}
 
 	public static DelayQueue<CorpBaseJsonMessage> getDelayJsonMessageQueue() {
@@ -264,8 +253,7 @@ public class WeixinUtil {
 				sb.append(BOUNDARY);
 				sb.append("\r\n");
 				sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-						+ uploadMedia.getName()
-						+ "\"\r\n");
+						+ uploadMedia.getName() + "\"\r\n");
 				sb.append("Content-Type:application/octet-stream\r\n\r\n");
 
 				byte[] head = sb.toString().getBytes("utf-8");

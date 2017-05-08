@@ -18,5 +18,9 @@ public class VideoJsonMessage extends CorpBaseJsonMessage {
 		this.setMsgtype("video");
 	}
 
+	@Override
+	public String getMediaId() {
+		return this.video.getMediaId();
+	}
 }
 

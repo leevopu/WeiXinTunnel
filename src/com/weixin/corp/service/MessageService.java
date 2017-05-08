@@ -267,7 +267,8 @@ public class MessageService {
 
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				MessageService.MEDIA_PERMANENT_LIST_GET,
-				WeixinUtil.GET_REQUEST_METHOD, JSONObject.fromObject(map).toString());
+				WeixinUtil.GET_REQUEST_METHOD, JSONObject.fromObject(map)
+						.toString());
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("获取永久素材列表接口失败 errcode:"
@@ -381,9 +382,10 @@ public class MessageService {
 		// 转换
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
 		// jsonMessage.setTouser(call.getToUser());
-		// String userId = convert(call.getToUser());
-		// jsonMessage.setTouser(call.getToUser());
-		jsonMessage.setTouser("leevo_pu");
+		String userId = convert(call.getToUser());
+		System.out.println(userId);
+		jsonMessage.setTouser(userId);
+		// jsonMessage.setTouser("leevo_pu");
 		return jsonMessage;
 	}
 
@@ -394,37 +396,7 @@ public class MessageService {
 	 * @return
 	 */
 	public static String convert(String toUser) {
-		if ("".equals(toUser) || null == toUser) {// touser为空
-			log.error("toUser为空");
-			return null;
-		}
 		String userIds = "";
-		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
-		String depts[] = new String[] {};
-		if (toUser.indexOf("|") != -1) {// 根据 "," "|"来进行分割
-			// System.out.println("包含");
-			String users[] = toUser.split("|");
-			for (int i = 0; i < users.length; i++) {
-				String user = users[i];
-				String dep = "";
-				String ph = "";
-				if (user.length() > 11) {
-					// 取最后11位
-					ph = user.substring(user.length() - 11, user.length());
-					// 判断是否全为数字 flag： TRUE FALSE
-					boolean flag = isNum(ph);
-					if (flag) {
-						dep = user.substring(0, user.length() - 11);
-					} else {
-						dep = user;
-					}
-				} else {// 肯定没有填手机号
-					dep = user;
-				}
-			}
-		} else {// 只有一位,进行分割
-				// ph = toUser.substring(toUser.length()-11, toUser.length());
-		}
 		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
 		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
 		x.run();
@@ -447,7 +419,7 @@ public class MessageService {
 						dep = user.substring(0, user.length() - 11);
 						// 遍历部门名称，匹配信息
 						for (int j = 0; j < strs.length; j++) {
-							// 部门匹配
+							// 部门匹配 拼接userId
 							if (strs[j].equals(dep)) {
 								HashMap<String, User> datas = maps.get(dep);
 								User data = datas.get(ph);
@@ -477,7 +449,7 @@ public class MessageService {
 		}
 		// 处理字符串最后一位"|"
 		String s = userIds.substring(userIds.length() - 1, userIds.length());
-		if ("|".equals(s)) {
+		if ("|".equals(s)) {// 去除最后一个"|"
 			userIds = userIds.substring(0, userIds.length() - 1);
 		}
 		return userIds;

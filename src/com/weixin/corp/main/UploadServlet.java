@@ -122,7 +122,7 @@ public class UploadServlet extends HttpServlet {
 			String mediaId = null;
 			// 无接收人则素材入库
 			if ("".equals(call.getToUser().trim())) {
-				// 永久素材接口
+				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
 				return;
 			}
 			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
@@ -133,16 +133,10 @@ public class UploadServlet extends HttpServlet {
 								new Date(System.currentTimeMillis() + 1000 * 60
 										* 60 * 24 * 3))) {
 					// 永久素材接口
-					jsonObject = WeixinUtil.httpsRequestMedia(
-							MessageService.MEDIA_PERMANENT_UPLOAD_URL.replace(
-									"TYPE", call.getMsgType()),
-							WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
+					jsonObject = MessageService.uploadPermanentMedia(call);
 				} else {
 					// 临时素材接口
-					jsonObject = WeixinUtil.httpsRequestMedia(
-							MessageService.MEDIA_TEMP_UPLOAD_URL.replace(
-									"TYPE", call.getMsgType()),
-							WeixinUtil.POST_REQUEST_METHOD, call.getMedia());
+					jsonObject = MessageService.uploadTempMedia(call);
 				}
 				if (null == jsonObject) {
 					result = "请求素材接口失败";

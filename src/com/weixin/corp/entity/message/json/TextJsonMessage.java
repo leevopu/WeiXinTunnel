@@ -18,4 +18,9 @@ public class TextJsonMessage extends CorpBaseJsonMessage {
 		this.setMsgtype("text");
 	}
 
+	@Override
+	public String getMediaId() {
+		return null;
+	}
 }
+

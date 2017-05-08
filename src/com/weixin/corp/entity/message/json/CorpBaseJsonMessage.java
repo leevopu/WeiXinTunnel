@@ -3,7 +3,7 @@ package com.weixin.corp.entity.message.json;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-public class CorpBaseJsonMessage implements Delayed {
+public abstract class CorpBaseJsonMessage implements Delayed {
 
 	private String msgtype;
 
@@ -17,8 +17,17 @@ public class CorpBaseJsonMessage implements Delayed {
 
 	private int safe = 0;
 
+	/**
+	 * 给定时发送用作倒计时
+	 */
 	private long sendTime = 0;
+	
+	/**
+	 * 是否为永久库素材消息，是则发送完后主动删除
+	 */
+	private boolean isPermanent = false;
 
+	public abstract String getMediaId();
 
 	public String getMsgtype() {
 		return msgtype;
@@ -74,6 +83,14 @@ public class CorpBaseJsonMessage implements Delayed {
 
 	public void setSendTime(long sendTime) {
 		this.sendTime = sendTime;
+	}
+
+	public boolean isPermanent() {
+		return isPermanent;
+	}
+
+	public void setPermanent(boolean isPermanent) {
+		this.isPermanent = isPermanent;
 	}
 
 	@Override
