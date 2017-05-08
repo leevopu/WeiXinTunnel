@@ -176,7 +176,7 @@ public class TimerTaskServlet extends HttpServlet {
 						// 放入用户缓存
 						for (User user : userList) {
 							// user.getDepartment()是一个object数组
-							if (!CommonUtil.isEmpty(user.getMobile())) {
+							if (!CommonUtil.StringisEmpty(user.getMobile())) {
 								// WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(),
 								// user);
 								datas.put(user.getMobile(), user);

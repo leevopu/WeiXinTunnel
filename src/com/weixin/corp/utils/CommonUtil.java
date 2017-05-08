@@ -48,7 +48,7 @@ public class CommonUtil {
 		return strDate;
 	}
 	
-	public static boolean isEmpty(String value){
+	public static boolean StringisEmpty(String value){
 		if(null == value){
 			return true;
 		}

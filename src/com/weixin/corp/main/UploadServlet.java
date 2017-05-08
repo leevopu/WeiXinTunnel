@@ -91,19 +91,21 @@ public class UploadServlet extends HttpServlet {
 		}
 
 		// 判断是否格式符合要求，是否有缺失的字段
-		if (null == call.getFromUser() || null == call.getToUser()
-				|| null == call.getMsgType()
-				|| (null == call.getText() && null == call.getMedia())) {
+		if (/* CommonUtil.StringisEmpty(call.getFromUser()) || */CommonUtil
+				.StringisEmpty(call.getToUser())
+				|| CommonUtil.StringisEmpty(call.getMsgType())
+				|| (CommonUtil.StringisEmpty(call.getText()) && null == call
+						.getMedia())) {
 			StringBuffer missFieldValue = new StringBuffer();
-			missFieldValue.append("缺少必要的信息请检查，fromUser:");
+			missFieldValue.append("缺少必要的信息请检查，发送人:");
 			missFieldValue.append(call.getFromUser());
-			missFieldValue.append("，toUser:");
+			missFieldValue.append("，接收人:");
 			missFieldValue.append(call.getToUser());
-			missFieldValue.append("，msgType:");
+			missFieldValue.append("，消息类型:");
 			missFieldValue.append(call.getMsgType());
-			missFieldValue.append("，text:");
+			missFieldValue.append("，文本:");
 			missFieldValue.append(call.getText());
-			missFieldValue.append("，media:");
+			missFieldValue.append("，素材:");
 			if (null != call.getMedia()) {
 				missFieldValue.append(call.getMedia().getName());
 			}
@@ -111,23 +113,25 @@ public class UploadServlet extends HttpServlet {
 			return;
 		}
 		// 如果发送时间选的不对，早于系统时间30分钟内，那就清空，默认立刻发送。
-		if (null != call.getSendTime() && CommonUtil.getStrDate(call.getSendTime(), "yyyy-MM-dd HH:mm:ss")
-				.before(new Date(System.currentTimeMillis() + 1000 * 60 * 30))) {
+		if (!CommonUtil.StringisEmpty(call.getSendTime())
+				&& CommonUtil.getStrDate(call.getSendTime(),
+						"yyyy-MM-dd HH:mm:ss").before(
+						new Date(System.currentTimeMillis() + 1000 * 60 * 30))) {
 			call.setSendTime(null);
 		}
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传素材，获取素材id
-		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)){
+		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
 			JSONObject jsonObject = null;
 			String mediaId = null;
 			// 无接收人则素材入库
-			if (CommonUtil.isEmpty(call.getToUser())) {
+			if (CommonUtil.StringisEmpty(call.getToUser())) {
 				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
 				return;
 			}
 			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
 			else {
-				if (null != call.getSendTime()
+				if (!CommonUtil.StringisEmpty(call.getSendTime())
 						&& CommonUtil.getStrDate(call.getSendTime(),
 								"yyyy-MM-dd HH:mm:ss").after(
 								new Date(System.currentTimeMillis() + 1000 * 60
@@ -150,7 +154,7 @@ public class UploadServlet extends HttpServlet {
 		CorpBaseJsonMessage jsonMessage = MessageService
 				.changeMessageToJson(call);
 		// 立即发送消息
-		if (CommonUtil.isEmpty(call.getSendTime())) {
+		if (CommonUtil.StringisEmpty(call.getSendTime())) {
 			if (MessageService.sendMessage(jsonMessage)) {
 				// 回复提示发送成功
 				result = "发送成功";
@@ -276,12 +280,12 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
-		if (CommonUtil.isEmpty(fileName) && CommonUtil.isEmpty(call.getText())) {
-			call.setErrorInfo("文本内容和素材文件不能同时为空");
-			return call;
-		}
-		if (CommonUtil.isEmpty(fileName)
-				&& MessageService.TEXT_MSG_TYPE.equals(call.getMsgType())) {
+		if (CommonUtil.StringisEmpty(fileName)) {
+			if (CommonUtil.StringisEmpty(call.getText())) {
+				call.setErrorInfo("文本内容和素材文件不能同时为空");
+			} else {
+				call.setMsgType(MessageService.TEXT_MSG_TYPE);
+			}
 			return call;
 		}
 		File uploadFolder = new File(UPLOAD_TEMP_URL
