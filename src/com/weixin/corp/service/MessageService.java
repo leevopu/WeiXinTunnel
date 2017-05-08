@@ -448,10 +448,12 @@ public class MessageService {
 				}
 			}
 		}
-		// 处理字符串最后一位"|"
-		String s = userIds.substring(userIds.length() - 1, userIds.length());
-		if ("|".equals(s)) {// 去除最后一个"|"
-			userIds = userIds.substring(0, userIds.length() - 1);
+		if(!("".equals(userIds)) ){
+			// 处理字符串最后一位"|"
+			String s = userIds.substring(userIds.length() - 1, userIds.length());
+			if ("|".equals(s)) {// 去除最后一个"|"
+				userIds = userIds.substring(0, userIds.length() - 1);
+			}
 		}
 		return userIds;
 	}

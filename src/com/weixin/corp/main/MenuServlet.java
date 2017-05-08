@@ -41,8 +41,8 @@ public class MenuServlet extends HttpServlet{
 	    	//测试数据项
 	    	//String str = MenuService.get();
 	    	//System.out.println(str);
-			String str = "运营部13989460692,ecology13761485990,东证资管测试号";
-			System.out.println(MessageService.convert(str));
+			//String str = "运营部13989460692,ecology13761485990,东证资管测试号";
+			//System.out.println(MessageService.convert(str));
 	    	
 	    	//调用微信接口返回数据项
 	    	JSONObject menu = MenuService.getMenu();
