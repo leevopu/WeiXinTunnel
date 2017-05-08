@@ -21,7 +21,7 @@ public class UserServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("userServlet doGet");
-		if (request.getRemoteAddr().contains("192.168")) {
+//		if (request.getRemoteAddr().contains("192.168")) {
 			// String userRequest = request.getRequestURI();
 
 			// http://192.168.103.43/WeixinTest3/userServlet?type=update&userid=wangwu&name=wangwu...封装
@@ -32,7 +32,7 @@ public class UserServlet extends HttpServlet {
 			newUser.setUserid("wangwu");
 			newUser.setName("wangwu");
 			// department之后改成部门名称，目前断网测试用departmentId
-			newUser.setDepartment("1");
+			newUser.setDepartment(new Object[]{"1"});
 			newUser.setPosition("高级经理");
 			newUser.setMobile("13666666666");
 			newUser.setGender("1");
@@ -51,7 +51,8 @@ public class UserServlet extends HttpServlet {
 			updateUser.setUserid("lisi");
 			updateUser.setName("lisi");
 			// department之后改成部门名称，目前断网测试用departmentId
-			updateUser.setDepartment(28);
+			updateUser.setDepartment(new Object[]{"28"
+					+ ""});
 			updateUser.setPosition("工程师");
 			updateUser.setMobile("15888888888");
 			updateUser.setGender("1");
@@ -64,7 +65,7 @@ public class UserServlet extends HttpServlet {
 			} else {
 				log.info("更新用户" + newUser.getName() + "成功");
 			}
-		}
+//		}
 	}
 
 	@Override

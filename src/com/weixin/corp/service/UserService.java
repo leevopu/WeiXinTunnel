@@ -27,9 +27,9 @@ public class UserService {
 	 */
 	private static String USER_UPDATE = "https://qyapi.weixin.qq.com/cgi-bin/user/update?access_token=ACCESS_TOKEN";
 	/**
-	 * 用户按部门号获取列表（GET）指定departmentId
+	 * 用户按部门号获取列表（GET）指定departmentId 
 	 */
-	private static String USER_GET_BY_DEPARTMENT = "https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=ACCESS_TOKEN&department_id=DEPARTMENTID&fetch_child=FETCHCHILD&status=STATUS";
+	private static String USER_GET_BY_DEPARTMENT = "https://qyapi.weixin.qq.com/cgi-bin/user/list?access_token=ACCESS_TOKEN&department_id=DEPARTMENTID&fetch_child=FETCHCHILD&status=STATUS";
 	/**
 	 * 用户删除 （GET）指定userId
 	 */
@@ -184,8 +184,7 @@ public class UserService {
 	public static List<Department> getDepartment() {
 		List<Department> departmentList = null;
 //		// 调用接口获取部门列表
-		JSONObject jsonObject = WeixinUtil.httpsRequest(DEPARTMENT_GET,
-				WeixinUtil.GET_REQUEST_METHOD, null);
+		JSONObject jsonObject = WeixinUtil.httpsRequest(DEPARTMENT_GET,WeixinUtil.GET_REQUEST_METHOD, null);
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("获取部门列表失败 errcode:" + jsonObject.getInt("errcode")

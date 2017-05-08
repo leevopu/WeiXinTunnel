@@ -56,7 +56,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		WXBizMsgCrypt wxcpt;
 		try {
 			wxcpt = new WXBizMsgCrypt(WeixinUtil.getToken(),
-					WeixinUtil.getAppsecret(), WeixinUtil.getAppid());
+					WeixinUtil.getAeskey(), WeixinUtil.getAppid());
 			sEchoStr = wxcpt.VerifyURL(signature, timestamp, nonce, echostr);
 			// 验证URL成功，将sEchoStr返回
 			out.print(sEchoStr);
@@ -106,7 +106,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		WXBizMsgCrypt wxcpt = null;
 		try {
 			wxcpt = new WXBizMsgCrypt(WeixinUtil.getToken(),
-					WeixinUtil.getAppsecret(), WeixinUtil.getAppid());
+					WeixinUtil.getAeskey(), WeixinUtil.getAppid());
 			requestDecryptMsg = wxcpt.DecryptMsg(signature, timestamp, nonce,
 					requestMsg);
 			System.out.println("requestDecryptMsg: " + requestDecryptMsg);

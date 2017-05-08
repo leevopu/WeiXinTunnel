@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -153,38 +154,32 @@ public class TimerTaskServlet extends HttpServlet {
 				 List<User> userList = null;
 				for (Department department : departmentList) {
 					System.out.println(department.getId()+":"+department.getName());
+					Map<String, HashMap<String, User>> maps =WeixinUtil.getUseridPool();
 					// 有新增部门，放入缓存
-					if (null == WeixinUtil.getUseridPool().get(department.getName())) {
-						WeixinUtil.getUseridPool().put(department.getName(),
-								new HashMap<String, User>());
-						
+					if (null == maps.get(department.getName())) {
+						maps.put(department.getName(),new HashMap<String, User>());
 					}
 					//是否递归获取子部门下面的成员  1/0
 					String feachChild = "1";
 					//0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
 					String status = "0";
-					
 					userList = UserService.getUserByDepartment(department.getId(),feachChild,status);
 					if (null != userList) {
 						// 清空用户缓存
-						WeixinUtil.getUseridPool().get(department.getName())
-								.clear();
+						maps.get(department.getName()).clear();
+						HashMap<String, User> datas = maps.get(department.getName());
 						// 放入用户缓存
 						for (User user : userList) {
-							//user.getDepartment()是一个object数组
-//							if (department.getId().equals(user.getDepartment())) {
-								System.out.println(user.getUserid()+" : "+user.getDepartment()+" : "+user.getMobile());
-								WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(), user);
-//							}
+							//user.getDepartment()是一个object数组 
+							if (null != user.getMobile()&& !("".equals(user.getMobile())) ) {
+							//WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(), user);
+							datas.put(user.getMobile(), user);
+							}
 						}
 					}
 				}
 				System.out.println("用户信息缓存更新完成");
 				log.info("用户信息缓存更新完成");
-//				System.out.println(WeixinUtil.getUseridPool().get("财务")
-//						.get("13999999999"));
-//				System.out.println(WeixinUtil.getUseridPool().get("财务")
-//						.get("13777777777"));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
