@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -203,6 +202,13 @@ public class MessageService {
 				}
 			}
 		}
+		// test
+//		String mediaId = "2U3efl32gH-nXPgi30kLBdVjbI5IuwrizqblJift-Okdkpw3AT1FJi779H0HFOEnM0bcZv_qEadmPvyw5fkJDOg";
+//		ImageXMLMessage x = new ImageXMLMessage(mediaId);
+//		x.setAgentID(9);
+//		x.setCreateTime(new Date().getTime());
+//		x.setFromUserName("wx522a5f82e335b883");
+//		x.setToUserName("leevo_pu");
 		responseMsg = textMessageToXml(defaultMessage);
 		return responseMsg;
 	}
@@ -264,7 +270,7 @@ public class MessageService {
 		Map<String, Object> map = new HashMap<>();
 		map.put("type", type);
 		map.put("offset", 0);
-		map.put("count", 10);
+		map.put("count", 50);
 
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				MessageService.MEDIA_PERMANENT_LIST_GET,
@@ -501,7 +507,7 @@ public class MessageService {
 	/**
 	 * 模拟上层应用调用请求
 	 */
-	public String testUploadToServer(String requestUrl, RequestCall call) {
+	public static String testUploadToServer(String requestUrl, RequestCall call) {
 		String result = null;
 		String msgType = call.getMsgType();
 		switch (msgType) {
@@ -516,36 +522,35 @@ public class MessageService {
 		default:
 			return "发送的消息类型不正确，只允许text,image,video和file";
 		}
-		URL url = null;
-		HttpURLConnection con = null;
+		HttpURLConnection httpUrlConn = null;
 		try {
-			TrustManager[] tm = { new MyX509TrustManager() };
-			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom());
-			// 从上述SSLContext对象中得到SSLSocketFactory对象
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
+//			TrustManager[] tm = { new MyX509TrustManager() };
+//			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+//			sslContext.init(null, tm, new java.security.SecureRandom());
+//			// 从上述SSLContext对象中得到SSLSocketFactory对象
+//			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
-			url = new URL(requestUrl);
-			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
+			URL url = new URL(requestUrl);
+			httpUrlConn = (HttpURLConnection) url
 					.openConnection();
-			httpUrlConn.setSSLSocketFactory(ssf);
-			con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("POST"); // 以Post方式提交表单，默认get方式
-			con.setDoInput(true);
-			con.setDoOutput(true);
-			con.setUseCaches(false); // post方式不能使用缓存
+//			httpUrlConn.setSSLSocketFactory(ssf);
+			httpUrlConn = (HttpURLConnection) url.openConnection();
+			httpUrlConn.setRequestMethod("POST"); // 以Post方式提交表单，默认get方式
+			httpUrlConn.setDoInput(true);
+			httpUrlConn.setDoOutput(true);
+			httpUrlConn.setUseCaches(false); // post方式不能使用缓存
 			// 设置请求头信息
-			con.setRequestProperty("Connection", "Keep-Alive");
-			con.setRequestProperty("Charset", "UTF-8");
+			httpUrlConn.setRequestProperty("Connection", "Keep-Alive");
+			httpUrlConn.setRequestProperty("Charset", "UTF-8");
 			// 设置边界
 			String BOUNDARY = "---------------------------"
 					+ System.currentTimeMillis();
-			con.setRequestProperty("Content-Type",
+			httpUrlConn.setRequestProperty("Content-Type",
 					"multipart/form-data; boundary=" + BOUNDARY);
 			final String newLine = "\r\n";
 
 			// 获得输出流
-			OutputStream out = new DataOutputStream(con.getOutputStream());
+			OutputStream out = new DataOutputStream(httpUrlConn.getOutputStream());
 
 			// 请求正文信息
 			// 第一部分：
@@ -564,6 +569,7 @@ public class MessageService {
 			sb.append(newLine);
 			sb.append(newLine);
 
+			if(null != call.getFromUser()){
 			// 添加发送人
 			sb.append("--"); // 必须多两道线
 			sb.append(BOUNDARY);
@@ -576,6 +582,7 @@ public class MessageService {
 			sb.append("Content-Type:application/octet-stream");
 			sb.append(newLine);
 			sb.append(newLine);
+			}
 
 			// 添加接收人
 			sb.append("--"); // 必须多两道线
@@ -590,6 +597,7 @@ public class MessageService {
 			sb.append(newLine);
 			sb.append(newLine);
 
+			if(null != call.getSendTime()){
 			// 添加时间
 			sb.append("--"); // 必须多两道线
 			sb.append(BOUNDARY);
@@ -602,6 +610,7 @@ public class MessageService {
 			sb.append("Content-Type:application/octet-stream");
 			sb.append(newLine);
 			sb.append(newLine);
+			}
 
 			// 添加消息内容（文本或文件）
 			sb.append("--"); // 必须多两道线
@@ -659,7 +668,7 @@ public class MessageService {
 		try {
 			// 定义BufferedReader输入流来读取URL的响应
 			reader = new BufferedReader(new InputStreamReader(
-					con.getInputStream()));
+					httpUrlConn.getInputStream()));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				buffer.append(line);
@@ -683,11 +692,12 @@ public class MessageService {
 		return result;
 	}
 
-	public static void main(String[] args) {
-		MessageService x = new MessageService();
+	public static void main(String[] args) throws Exception {
 		RequestCall call = new RequestCall();
-		call.setMsgType("");
-		x.testUploadToServer("abc", call);
+		call.setMsgType("image");
+		call.setToUser("888");
+		call.setMedia(new File("C:/Users/Administrator/Desktop/abc.png"));
+		MessageService.testUploadToServer("http://localhost/WeixinTest3/uploadServlet", call);
 	}
 
 }

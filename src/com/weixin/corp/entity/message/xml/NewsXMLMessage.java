@@ -22,7 +22,6 @@ public class NewsXMLMessage extends CorpBaseXMLMessage {
 		return ArticleCount;
 	}
 
-
 	public List<Article> getArticles() {
 		return Articles;
 	}
@@ -33,6 +32,7 @@ public class NewsXMLMessage extends CorpBaseXMLMessage {
 			ArticleCount = articles.size();
 		}
 		Articles = articles;
+		this.setMsgType("news");
 	}
 
 }
