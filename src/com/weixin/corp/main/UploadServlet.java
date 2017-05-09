@@ -1,5 +1,6 @@
 package com.weixin.corp.main;
 
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -8,9 +9,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -53,6 +57,7 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("我被访问了。。。");
 		String result = "";
 		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
 		long startDoPostTime = System.currentTimeMillis();
@@ -70,16 +75,14 @@ public class UploadServlet extends HttpServlet {
 		// 判断文件长度
 		System.out.println("lenth: " + contentLength);
 		String size = CommonUtil.convertFileSize(contentLength);
-		System.out.println("大小为：" + size);
-		response.setContentType("text/html;charset=UTF-8");
-
+		System.out.println("文件大小为：" + size);
+		
 		// =================================================================
 		// 判断文件大小 超过20M返回提示
 		// =================================================================
 		if (contentLength > MXA_SEGSIZE) {
+			response.setContentType("application/xml;charset=UTF-8");
 			System.out.println("文件大小超过20M，请重新操作！！！！");
-			// response.sendRedirect("index.jsp");
-			response.getWriter().write("文件大小超过20M，请重新操作！！！！");
 			return;
 		}
 
@@ -289,19 +292,33 @@ public class UploadServlet extends HttpServlet {
 			}
 			return call;
 		}
-		File uploadFolder = new File(UPLOAD_TEMP_URL
-				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
+		
+		File uploadFolder = new File(UPLOAD_TEMP_URL+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
 		if (!uploadFolder.exists()) {
 			uploadFolder.mkdir();
 		}
-		File media = new File(uploadFolder.getAbsolutePath() + File.separator
-				+ fileName);
+		File media = new File(uploadFolder.getAbsolutePath() + File.separator+ fileName);
 		// 创建输出流
 		FileOutputStream outStream = new FileOutputStream(media);
 		// 写入数据
 		outStream.write(b, 0, b.length - 1);
 		// 关闭输出流
 		outStream.close();
+		
+		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())) {
+			String[] imagType={"jpg","jepg","png","bmp","gif"};
+			List<String> imageTyepLists=Arrays.asList(imagType);
+			String str = StringUtils.substringAfterLast(fileName, ".");
+			if(!imageTyepLists.contains(str)){
+				call.setErrorInfo("上传文件与选择素材类型不匹配");  
+				return call;
+			}
+			int width = 800;
+			int height = 650;
+			//图片压缩
+			CommonUtil.compressPic(media, height, width);
+		}
+		
 		call.setMedia(media);
 		return call;
 	}

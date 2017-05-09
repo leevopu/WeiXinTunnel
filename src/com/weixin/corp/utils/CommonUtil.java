@@ -55,6 +55,9 @@ public class CommonUtil {
 		return "".equals(value.trim());
 	}
 
+	public static boolean compressPic(File file, int outputHeight,int outputWidth){
+		return compressPict(file,  outputHeight, outputWidth );
+	}
 	/**
 	 * 图片处理 压缩
 	 * 
@@ -74,12 +77,10 @@ public class CommonUtil {
 	 *            是否是等比缩放 标记(默认为等比缩放)
 	 * @return
 	 */
-	public String compressPic(String inputDir, String outputDir,
-			String inputFileName, String outputFileName, int outputWidth,
-			int outputHeight, boolean proportion) {
-		File file = null; // 文件对象
+	private static boolean compressPict(File file, int outputHeight,int outputWidth ) {
+		boolean proportion = true;
 		try {
-			// 获得源文件
+			/*// 获得源文件
 			String filePath = inputDir + inputFileName;
 			file = new File(filePath);
 			System.out.println(filePath);
@@ -88,69 +89,51 @@ public class CommonUtil {
 			System.out.println("图片大小为:" + size);
 			// 转化为KB、M 等单位
 			System.out.println(convertFileSize(size));
-
 			if (!file.exists()) {
 				System.out.println("文件不存在.....");
-			}
+			}*/
 			BufferedImage img;
-			String[] arr = inputFileName.split("\\.");
-			System.out.println("--------"
-					+ StringUtils.substringAfterLast(inputFileName, ".")
-					+ "----------");
-			if ("jpg".equals(arr[arr.length - 1])
-					|| "JPEG".equals(arr[arr.length - 1])) {
-				System.out.println("此图片后缀为：" + arr[arr.length - 1]);
-				img = getImage(filePath);
+			String type = StringUtils.substringAfterLast(file.getName(), ".");
+			if ("jpg".equals(type)|| "JPEG".equals(type)) {
+				System.out.println("此图片后缀为：" + type);
+				img = getImage(file.toString());
 			} else {
 				img = ImageIO.read(file);
 			}
-
-			// 判断图片格式是否正确
-			if (img.getWidth(null) == -1) {
-				System.out.println(" can't read,retry!" + "<BR>");
-				return "no";
+			int newWidth;
+			int newHeight;
+			// 判断是否是等比缩放
+			if (proportion == true) {
+				// 为等比缩放计算输出的图片宽度及高度
+				double rate1 = ((double) img.getWidth(null))/ (double) outputWidth + 0.1;
+				double rate2 = ((double) img.getHeight(null))/ (double) outputHeight + 0.1;
+				// 根据缩放比率大的进行缩放控制
+				double rate = rate1 > rate2 ? rate1 : rate2;
+				newWidth = (int) (((double) img.getWidth(null)) / rate);
+				newHeight = (int) (((double) img.getHeight(null)) / rate);
 			} else {
-				int newWidth;
-				int newHeight;
-				// 判断是否是等比缩放
-				if (proportion == true) {
-					// 为等比缩放计算输出的图片宽度及高度
-					double rate1 = ((double) img.getWidth(null))
-							/ (double) outputWidth + 0.1;
-					double rate2 = ((double) img.getHeight(null))
-							/ (double) outputHeight + 0.1;
-					// 根据缩放比率大的进行缩放控制
-					double rate = rate1 > rate2 ? rate1 : rate2;
-					newWidth = (int) (((double) img.getWidth(null)) / rate);
-					newHeight = (int) (((double) img.getHeight(null)) / rate);
-				} else {
-					newWidth = outputWidth; // 输出的图片宽度
-					newHeight = outputHeight; // 输出的图片高度
-				}
-				BufferedImage tag = new BufferedImage((int) newWidth,
-						(int) newHeight, BufferedImage.TYPE_INT_RGB);
-
-				/*
-				 * Image.SCALE_SMOOTH 的缩略算法 生成缩略图片的平滑度的 优先级比速度高 生成的图片质量比较好 但速度慢
-				 */
-				tag.getGraphics().drawImage(
-						img.getScaledInstance(newWidth, newHeight,
-								Image.SCALE_SMOOTH), 0, 0, null);
-				File f = new File(outputDir);
-				if (!f.exists()) {
-					f.mkdirs();
-				}
-				FileOutputStream out = new FileOutputStream(outputDir
-						+ outputFileName);
-				// JPEGImageEncoder可适用于其他图片类型的转换
-				JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-				encoder.encode(tag);
-				out.close();
+				newWidth = outputWidth; // 输出的图片宽度
+				newHeight = outputHeight; // 输出的图片高度
 			}
+			BufferedImage tag = new BufferedImage((int) newWidth,(int) newHeight, BufferedImage.TYPE_INT_RGB);
+
+			/*
+			 * Image.SCALE_SMOOTH 的缩略算法 生成缩略图片的平滑度的 优先级比速度高 生成的图片质量比较好 但速度慢
+			 */
+			tag.getGraphics().drawImage(img.getScaledInstance(newWidth, newHeight,Image.SCALE_SMOOTH), 0, 0, null);
+			File f = new File(file.toString());
+			if (!f.exists()) {
+				f.mkdirs();
+			}
+			FileOutputStream out = new FileOutputStream(file);
+			// JPEGImageEncoder可适用于其他图片类型的转换
+			JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+			encoder.encode(tag);
+			out.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		return "ok";
+		return true;
 	}
 
 	/**

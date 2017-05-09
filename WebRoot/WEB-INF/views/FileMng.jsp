@@ -122,7 +122,7 @@
 				<input type="text" class="sang_Calender"id="sendTime"name="sendTime"/>
 			</label> 
 			<label> 
-				<span>素材类型 :</span> 
+				<span>消息类型 :</span> 
 				<select name="msgType" id="msgType">
 					<option value="">请选择...</option> 
 					<option value="image">图片</option> 
