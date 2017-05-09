@@ -19,6 +19,6 @@ public class ImageXMLMessage extends CorpBaseXMLMessage {
 	public ImageXMLMessage(String mediaId) {
 		super();
 		this.Image = new Image(mediaId);
-		this.setMsgType("text");
+		this.setMsgType("image");
 	}
 }

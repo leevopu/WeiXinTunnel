@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -182,8 +183,6 @@ public class WeixinUtil {
 	}
 
 	/**
-	 * 发起https请求并获取结果
-	 * 
 	 * @param requestUrl
 	 *            请求地址
 	 * @param requestMethod
@@ -192,11 +191,14 @@ public class WeixinUtil {
 	 *            提交的字符串形式请求
 	 * @param uploadMedia
 	 *            提交的文件素材形式请求
+	 * <br>
+	 * <br>
+	 * outputStr和uploadMedia二选一
+	 * 
 	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
 	 */
 	private static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr, File uploadMedia) {
-		// return null;
 		if (null != WeixinUtil.accessToken) {
 			requestUrl = requestUrl.replace("ACCESS_TOKEN",
 					WeixinUtil.accessToken.getToken());
@@ -252,8 +254,9 @@ public class WeixinUtil {
 				sb.append("--"); // 必须多两道线
 				sb.append(BOUNDARY);
 				sb.append("\r\n");
+				// 素材用中文名上传失败，随机改个名字
 				sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-						+ uploadMedia.getName() + "\"\r\n");
+						+ System.currentTimeMillis() + URLEncoder.encode(uploadMedia.getName(), "UTF-8").replaceAll("%", "") + "\"\r\n");
 				sb.append("Content-Type:application/octet-stream\r\n\r\n");
 
 				byte[] head = sb.toString().getBytes("utf-8");
