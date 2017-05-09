@@ -113,12 +113,12 @@ public class UploadServlet extends HttpServlet {
 			return;
 		}
 		// 如果发送时间选的不对，在当前系统时间2分钟内，那就清空，默认立刻发送。
-//		if (!CommonUtil.StringisEmpty(call.getSendTime())
-//				&& CommonUtil.getStrDate(call.getSendTime(),
-//						"yyyy-MM-dd HH:mm:ss").before(
-//						new Date(System.currentTimeMillis() + 1000 * 60 * 2))) {
-//			call.setSendTime(null);
-//		}
+		if (!CommonUtil.StringisEmpty(call.getSendTime())
+				&& CommonUtil.getStrDate(call.getSendTime(),
+						"yyyy-MM-dd HH:mm:ss").before(
+						new Date(System.currentTimeMillis() + 1000 * 60 * 2))) {
+			call.setSendTime(null);
+		}
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传素材，获取素材id
 		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
@@ -142,11 +142,12 @@ public class UploadServlet extends HttpServlet {
 					// 临时素材接口
 					jsonObject = MessageService.uploadTempMedia(call);
 				}
-				if (null == jsonObject) {
-					result = "请求素材接口失败";
-				} else if (jsonObject.has("media_id")) {
+				if (null != jsonObject && jsonObject.has("media_id")) {
 					mediaId = jsonObject.getString("media_id");
 					call.setMediaId(mediaId);
+				} else {
+					response.getWriter().write("上传素材失败，请检查文件是否符合要求");
+					return;
 				}
 
 			}
@@ -209,6 +210,7 @@ public class UploadServlet extends HttpServlet {
 
 		String line = null;
 		while (null != (line = br.readLine())) {
+			System.out.println(line);
 			switch (state) {
 			case NONE:
 				if (line.startsWith(boundary)) {
@@ -360,8 +362,7 @@ public class UploadServlet extends HttpServlet {
 					declaredField.getType());
 			method.invoke(call, fieldValue);
 		} catch (Exception e) {
-			e.printStackTrace();
-			call.setErrorInfo(e.getMessage());
+			call.setErrorInfo(e.getClass().getName() + ":" + e.getMessage());
 			log.error("解析用户消息请求失败: " + e.getMessage());
 		}
 		return call;
