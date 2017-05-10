@@ -126,6 +126,7 @@
 				<select name="msgType" id="msgType">
 					<option value="">请选择...</option> 
 					<option value="image">图片</option> 
+					<option value="mpnews">图文</option>
 					<option value="text">文本</option> 
 					<option value="video">视频</option> 
 					<option value="file">文件</option> 

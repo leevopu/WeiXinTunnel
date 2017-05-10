@@ -3,6 +3,8 @@ package com.weixin.corp.entity.message;
 import java.io.File;
 import java.io.Serializable;
 
+import com.weixin.corp.entity.message.pojo.MpNews;
+
 /**
  * 数据库结果群发和用户主动调用的封装消息
  * 
@@ -28,7 +30,7 @@ public class RequestCall implements Serializable {
 	 */
 	private String toUser;
 	/**
-	 * 消息类型（文本text，图片image，视频video，文件file）
+	 * 消息类型（文本text，图片image，视频video，文件file，图文mpnnews）
 	 */
 	private String msgType;
 	/**
@@ -39,6 +41,10 @@ public class RequestCall implements Serializable {
 	 * 若msgType不为text则需有值
 	 */
 	private File media;
+	/**
+	 * msgType为mpnews
+	 */
+	private MpNews mpnews;
 	/**
 	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
@@ -78,6 +84,25 @@ public class RequestCall implements Serializable {
 		this.msgType = msgType;
 		this.text = text;
 		this.media = new File(mediaPath);
+		this.sendTime = sendTime;
+	}
+	/**
+	 * 图文消息
+	 * @param fromUser
+	 * @param toUser
+	 * @param msgType
+	 * @param text
+	 * @param media
+	 * @param sendTime
+	 */
+	public RequestCall(String fromUser, String toUser, String msgType,
+			String text, MpNews media, String sendTime) {
+		super();
+		this.fromUser = fromUser;
+		this.toUser = toUser;
+		this.msgType = msgType;
+		this.text = text;
+		this.mpnews = media;
 		this.sendTime = sendTime;
 	}
 
@@ -175,4 +200,11 @@ public class RequestCall implements Serializable {
 		this.mediaId = mediaId;
 	}
 
+	public MpNews getMpnews() {
+		return mpnews;
+	}
+
+	public void setMpnews(MpNews mpnews) {
+		this.mpnews = mpnews;
+	}
 }

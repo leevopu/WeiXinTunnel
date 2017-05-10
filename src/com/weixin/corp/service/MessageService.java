@@ -42,9 +42,11 @@ import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.entity.message.json.FileJsonMessage;
 import com.weixin.corp.entity.message.json.ImageJsonMessage;
+import com.weixin.corp.entity.message.json.MpNewsJsonMessage;
 import com.weixin.corp.entity.message.json.TextJsonMessage;
 import com.weixin.corp.entity.message.json.VideoJsonMessage;
 import com.weixin.corp.entity.message.pojo.Article;
+import com.weixin.corp.entity.message.pojo.MpArticle;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
 import com.weixin.corp.entity.message.xml.NewsXMLMessage;
 import com.weixin.corp.entity.message.xml.TextXMLMessage;
@@ -74,6 +76,7 @@ public class MessageService {
 	public static final String IMAGE_MSG_TYPE = "image";
 	public static final String VIDEO_MSG_TYPE = "video";
 	public static final String FILE_MSG_TYPE = "file";
+	public static final String MPNEWS_MSG_TYPE = "mpnews";
 
 	/**
 	 * 解析微信发来的请求（XML）
@@ -173,7 +176,7 @@ public class MessageService {
 
 		// 文本消息
 		if (MESSAGE_TYPE_TEXT == msgType) {
-			respContent = "您发送的是文本ff消息！";
+			respContent = "您发送的是文本消息！";
 		}
 		// 图片消息
 		else if (MESSAGE_TYPE_IMAGE == msgType) {
@@ -214,12 +217,12 @@ public class MessageService {
 	}
 
 	public static boolean sendMessage(CorpBaseJsonMessage jsonMessage) {
+		JSONObject outputStr = JSONObject.fromObject(jsonMessage);
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				MESSAGE_SEND,
 				WeixinUtil.POST_REQUEST_METHOD,
-				JSONObject.fromObject(jsonMessage).toString()
-						.replace("mediaId", "media_id"));
+				outputStr.toString().replace("mediaId", "media_id"));
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
@@ -237,9 +240,14 @@ public class MessageService {
 	}
 
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
+		String msgType = call.getMsgType();
+		//如果是图文类型素材，修改以图片类型上传
+		if(MPNEWS_MSG_TYPE.equals(msgType)){
+			msgType=IMAGE_MSG_TYPE;
+		}
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
 				MessageService.MEDIA_PERMANENT_UPLOAD.replace("TYPE",
-						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
+						msgType), WeixinUtil.POST_REQUEST_METHOD,
 				call.getMedia());
 		if (null != jsonObject) {
 			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
@@ -252,9 +260,14 @@ public class MessageService {
 	}
 
 	public static JSONObject uploadTempMedia(RequestCall call) {
+		String msgType = call.getMsgType();
+		//如果是图文类型素材，修改以图片类型上传
+		if(MPNEWS_MSG_TYPE.equals(msgType)){
+			msgType=IMAGE_MSG_TYPE;
+		}
+		
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
-				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE",
-						call.getMsgType()), WeixinUtil.POST_REQUEST_METHOD,
+				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE",msgType), WeixinUtil.POST_REQUEST_METHOD,
 				call.getMedia());
 		if (null != jsonObject) {
 			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
@@ -369,6 +382,11 @@ public class MessageService {
 			break;
 		case FILE_MSG_TYPE:
 			jsonMessage = new FileJsonMessage(call.getMediaId());
+			break;
+		case MPNEWS_MSG_TYPE:
+			String title="Test";
+			String digest="模板";
+			jsonMessage = new MpNewsJsonMessage(title,call.getMediaId(),call.getText(),digest);
 			break;
 		default:
 			break;
@@ -488,6 +506,10 @@ public class MessageService {
 	 * 消息类型：图文
 	 */
 	public static final String MESSAGE_TYPE_NEWS = "news";
+	/**
+	 * 消息类型：图文11
+	 */
+	public static final String MESSAGE_TYPE_MPNEWS = "mpnews";
 
 	/**
 	 * 消息类型：推送

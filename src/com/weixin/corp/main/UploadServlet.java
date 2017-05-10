@@ -115,7 +115,7 @@ public class UploadServlet extends HttpServlet {
 			return;
 		}
 		//针对图片文件 如果文件过大，则进行压缩
-		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())) {
+		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
 			String[] imagType={"jpg","jepg","png","bmp","gif"};
 			List<String> imageTyepLists=Arrays.asList(imagType);
 			String str = StringUtils.substringAfterLast(call.getMedia().getName(), ".");
@@ -309,6 +309,10 @@ public class UploadServlet extends HttpServlet {
 				call.setMsgType(MessageService.TEXT_MSG_TYPE);
 			}
 			return call;
+		}
+		//校验：图文消息类型时
+		if(MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())){
+			
 		}
 		
 		File uploadFolder = new File(UPLOAD_TEMP_URL+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
