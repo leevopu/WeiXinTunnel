@@ -55,7 +55,6 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("我被访问了。。。");
 		String result = "";
 		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
 		long startDoPostTime = System.currentTimeMillis();
@@ -69,6 +68,14 @@ public class UploadServlet extends HttpServlet {
 		while (headerNames.hasMoreElements()) {
 			System.out.println(headerNames.nextElement());
 		}
+		response.setContentType("text/html;charset=UTF-8");
+		RequestCall call = parseRequestCall(request);
+		// 解析失败
+		if (null != call.getErrorInfo()) {
+			response.getWriter().write(call.getErrorInfo());
+			return;
+		}
+		
 		long contentLength = request.getContentLength();
 		// 判断文件长度
 		System.out.println("lenth: " + contentLength);
@@ -79,18 +86,12 @@ public class UploadServlet extends HttpServlet {
 		// 判断文件大小 超过20M返回提示
 		// =================================================================
 		if (contentLength > MXA_SEGSIZE) {
-			response.setContentType("application/xml;charset=UTF-8");
-			System.out.println("文件大小超过20M，请重新操作！！！！");
+			String msg = "文件大小超过20M，请重新操作！！！！";
+			System.out.println(msg);
+			response.getWriter().write(msg);
 			return;
 		}
-
-		RequestCall call = parseRequestCall(request);
-		// 解析失败
-		if (null != call.getErrorInfo()) {
-			response.getWriter().write(call.getErrorInfo());
-			return;
-		}
-
+		
 		// 判断是否格式符合要求，是否有缺失的字段
 		if (/* CommonUtil.StringisEmpty(call.getFromUser()) || */CommonUtil
 				.StringisEmpty(call.getToUser())
@@ -113,6 +114,23 @@ public class UploadServlet extends HttpServlet {
 			response.getWriter().write(missFieldValue.toString());
 			return;
 		}
+		//针对图片文件 如果文件过大，则进行压缩
+		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())) {
+			String[] imagType={"jpg","jepg","png","bmp","gif"};
+			List<String> imageTyepLists=Arrays.asList(imagType);
+			String str = StringUtils.substringAfterLast(call.getMedia().getName(), ".");
+			if(!imageTyepLists.contains(str)){
+				String msg ="上传文件与选择素材类型不匹配"; 
+				System.out.println(msg);
+				response.getWriter().write(msg);
+				return;
+			}
+			int width = 800;
+			int height = 650;
+			//图片压缩
+			CommonUtil.compressPic(call.getMedia(), height, width);
+		}
+		
 		// 如果发送时间选的不对，在当前系统时间2分钟内，那就清空，默认立刻发送。
 		if (!CommonUtil.StringisEmpty(call.getSendTime())
 				&& CommonUtil.getStrDate(call.getSendTime(),
@@ -311,21 +329,6 @@ public class UploadServlet extends HttpServlet {
 		outStream.write(b, 0, b.length - 1);
 		// 关闭输出流
 		outStream.close();
-		
-		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())) {
-			String[] imagType={"jpg","jepg","png","bmp","gif"};
-			List<String> imageTyepLists=Arrays.asList(imagType);
-			String str = StringUtils.substringAfterLast(fileName, ".");
-			if(!imageTyepLists.contains(str)){
-				call.setErrorInfo("上传文件与选择素材类型不匹配");  
-				return call;
-			}
-			int width = 800;
-			int height = 650;
-			//图片压缩
-			CommonUtil.compressPic(media, height, width);
-		}
-		
 		call.setMedia(media);
 		return call;
 	}
