@@ -69,6 +69,7 @@ public class UploadServlet extends HttpServlet {
 			System.out.println(headerNames.nextElement());
 		}
 		response.setContentType("text/html;charset=UTF-8");
+		long contentLength = request.getContentLength();
 		RequestCall call = parseRequestCall(request);
 		// 解析失败
 		if (null != call.getErrorInfo()) {
@@ -76,7 +77,6 @@ public class UploadServlet extends HttpServlet {
 			return;
 		}
 		
-		long contentLength = request.getContentLength();
 		// 判断文件长度
 		System.out.println("lenth: " + contentLength);
 		String size = CommonUtil.convertFileSize(contentLength);
@@ -216,6 +216,7 @@ public class UploadServlet extends HttpServlet {
 			lastBoundary = boundary + "--";
 		}
 		int state = NONE;
+		
 		// 得到数据输入流
 		DataInputStream in = new DataInputStream(request.getInputStream());
 
