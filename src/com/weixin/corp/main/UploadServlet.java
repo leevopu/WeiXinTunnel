@@ -217,12 +217,6 @@ public class UploadServlet extends HttpServlet {
 		}
 		int state = NONE;
 		
-		BufferedReader xx = new BufferedReader(request.getReader());
-		String linex = null;
-		while (null != (linex = xx.readLine())){
-			System.out.println(linex);
-		}
-//		System.out.println(xx.readLine());
 		// 得到数据输入流
 		DataInputStream in = new DataInputStream(request.getInputStream());
 

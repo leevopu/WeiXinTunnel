@@ -437,7 +437,7 @@ public class MessageService {
 					}
 				}
 			}
-		} else {// 只有一个单独的字符串,进行分割
+		} else if(toUser.length() > 11) {// 只有一个单独的字符串,进行分割
 			String ph = toUser.substring(toUser.length() - 11, toUser.length());
 			if (isNum(ph)) {
 				String dep = toUser.substring(0, toUser.length() - 11);
