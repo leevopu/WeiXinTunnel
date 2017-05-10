@@ -1,6 +1,5 @@
 package com.weixin.corp.main;
 
-import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -14,7 +13,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -200,6 +198,13 @@ public class UploadServlet extends HttpServlet {
 			lastBoundary = boundary + "--";
 		}
 		int state = NONE;
+		
+		BufferedReader xx = new BufferedReader(request.getReader());
+		String linex = null;
+		while (null != (linex = xx.readLine())){
+			System.out.println(linex);
+		}
+//		System.out.println(xx.readLine());
 		// 得到数据输入流
 		DataInputStream in = new DataInputStream(request.getInputStream());
 
