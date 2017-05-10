@@ -21,10 +21,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-
 import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
@@ -46,14 +42,12 @@ import com.weixin.corp.entity.message.json.MpNewsJsonMessage;
 import com.weixin.corp.entity.message.json.TextJsonMessage;
 import com.weixin.corp.entity.message.json.VideoJsonMessage;
 import com.weixin.corp.entity.message.pojo.Article;
-import com.weixin.corp.entity.message.pojo.MpArticle;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
 import com.weixin.corp.entity.message.xml.NewsXMLMessage;
 import com.weixin.corp.entity.message.xml.TextXMLMessage;
 import com.weixin.corp.entity.user.User;
 import com.weixin.corp.main.TimerTaskServlet.DailyUpdateUserTimerTask;
 import com.weixin.corp.utils.CommonUtil;
-import com.weixin.corp.utils.MyX509TrustManager;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class MessageService {
@@ -455,7 +449,7 @@ public class MessageService {
 					}
 				}
 			}
-		} else {// 只有一个单独的字符串,进行分割
+		} else if(toUser.length() > 11) {// 只有一个单独的字符串,进行分割
 			String ph = toUser.substring(toUser.length() - 11, toUser.length());
 			if (isNum(ph)) {
 				String dep = toUser.substring(0, toUser.length() - 11);
