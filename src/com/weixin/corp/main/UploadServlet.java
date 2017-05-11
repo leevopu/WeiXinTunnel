@@ -324,8 +324,8 @@ public class UploadServlet extends HttpServlet {
 			if(""==call.getTitle()||""==call.getDigest()){
 				call.setErrorInfo("图文类型消息，标题与模板必填");
 				System.out.println("图文类型消息，标题与模板必填");
+				return call;
 			}
-			return call;
 		}
 		
 		File uploadFolder = new File(UPLOAD_TEMP_URL+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
