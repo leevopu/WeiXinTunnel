@@ -3,8 +3,6 @@ package com.weixin.corp.entity.message;
 import java.io.File;
 import java.io.Serializable;
 
-import com.weixin.corp.entity.message.pojo.MpNews;
-
 /**
  * 数据库结果群发和用户主动调用的封装消息
  * 
@@ -34,6 +32,10 @@ public class RequestCall implements Serializable {
 	 */
 	private String msgType;
 	/**
+	 * 图文消息的描述，不超过512个字节，超过会自动截断  [这里用作模板描述]
+	 */
+	private String digest;
+	/**
 	 * 文本内容（若msgType为text则需有值)
 	 */
 	private String text;
@@ -41,10 +43,6 @@ public class RequestCall implements Serializable {
 	 * 若msgType不为text则需有值
 	 */
 	private File media;
-	/**
-	 * msgType为mpnews
-	 */
-	private MpNews mpnews;
 	/**
 	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
@@ -87,23 +85,27 @@ public class RequestCall implements Serializable {
 		this.sendTime = sendTime;
 	}
 	/**
-	 * 图文消息
+	 * 图文消息类型时
 	 * @param fromUser
 	 * @param toUser
 	 * @param msgType
 	 * @param text
 	 * @param media
 	 * @param sendTime
+	 * @param title
+	 * @param digest
 	 */
 	public RequestCall(String fromUser, String toUser, String msgType,
-			String text, MpNews media, String sendTime) {
+			String text, File media, String sendTime,String title,String digest) {
 		super();
 		this.fromUser = fromUser;
 		this.toUser = toUser;
 		this.msgType = msgType;
 		this.text = text;
-		this.mpnews = media;
+		this.media = media;
 		this.sendTime = sendTime;
+		this.title = title;
+		this.digest = digest;
 	}
 
 	/**
@@ -199,12 +201,11 @@ public class RequestCall implements Serializable {
 	public void setMediaId(String mediaId) {
 		this.mediaId = mediaId;
 	}
-
-	public MpNews getMpnews() {
-		return mpnews;
+	public String getDigest() {
+		return digest;
 	}
 
-	public void setMpnews(MpNews mpnews) {
-		this.mpnews = mpnews;
+	public void setDigest(String digest) {
+		this.digest = digest;
 	}
 }

@@ -128,7 +128,15 @@ public class UploadServlet extends HttpServlet {
 			int width = 800;
 			int height = 650;
 			//图片压缩
-			CommonUtil.compressPic(call.getMedia(), height, width);
+			boolean flag =CommonUtil.compressPic(call.getMedia(), height, width);
+			String info = "";
+			if(!flag){
+				info = "图片压缩失败，请检查图片大小及类型！";
+				response.getWriter().write(info);
+			}else{
+				info = "图片压缩完成！";
+			}
+			System.out.println(info);
 		}
 		
 		// 如果发送时间选的不对，在当前系统时间2分钟内，那就清空，默认立刻发送。
@@ -313,7 +321,11 @@ public class UploadServlet extends HttpServlet {
 		}
 		//校验：图文消息类型时
 		if(MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())){
-			
+			if(""==call.getTitle()||""==call.getDigest()){
+				call.setErrorInfo("图文类型消息，标题与模板必填");
+				System.out.println("图文类型消息，标题与模板必填");
+			}
+			return call;
 		}
 		
 		File uploadFolder = new File(UPLOAD_TEMP_URL+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));

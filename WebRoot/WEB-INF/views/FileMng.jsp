@@ -123,9 +123,9 @@
 			</label> 
 			<label> 
 				<span>消息类型 :</span> 
-				<select name="msgType" id="msgType">
+				<select name="msgType" id="msgType" onchange="typeChange(this.options[this.options.selectedIndex].value)">
 					<option value="">请选择...</option> 
-					<option value="image">图片</option> 
+					<option value="image">图片[支持：jpg、png、bmp]</option> 
 					<option value="mpnews">图文</option>
 					<option value="text">文本</option> 
 					<option value="video">视频</option> 
@@ -133,9 +133,17 @@
 				</select>
 			</label> 
 			<label> 
+				<span>标题 :</span> 
+				<input id="title"type="text" name="title" placeholder="若为图文素材则必填" style="display: none;"/>
+			</label>  
+			<label> 
+				<span>模板 :</span> 
+				<input id="digest"type="text" name="digest" placeholder="若为图文素材则必选" style="display: none;" />
+			</label>  
+			<label> 
 				<span>文本 :</span> 
-				<textarea id="text"name="text" placeholder="若素材类型为文本则填，否则不必填..."></textarea>
-			</label> 
+				<textarea id="text"name="text" placeholder="若素材类型为文本|图文类型则填，否则不必填..."></textarea>
+			</label>
 			<label> 
 				<span>请选择文件 :</span>
 				<br/><br/>
@@ -149,4 +157,16 @@
 	</div>
 </body>
  <script src="<%=path%>/js/datetime.js" type="text/javascript" ></script>
+ <script type="text/javascript">
+ 	function typeChange(v){
+ 		if ("mpnews"==v){
+ 			document.getElementById("title").style.display="block";
+ 			document.getElementById("digest").style.display="block";
+ 		}else
+ 		{
+ 			document.getElementById("title").style.display="none";
+			document.getElementById("digest").style.display="none";
+		}
+ 	}
+ </script>
 </html>

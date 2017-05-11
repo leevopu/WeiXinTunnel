@@ -80,23 +80,11 @@ public class CommonUtil {
 	private static boolean compressPict(File file, int outputHeight,int outputWidth ) {
 		boolean proportion = true;
 		try {
-			/*// 获得源文件
-			String filePath = inputDir + inputFileName;
-			file = new File(filePath);
-			System.out.println(filePath);
-			// 获得图片大小
-			long size = file.length();
-			System.out.println("图片大小为:" + size);
-			// 转化为KB、M 等单位
-			System.out.println(convertFileSize(size));
-			if (!file.exists()) {
-				System.out.println("文件不存在.....");
-			}*/
 			BufferedImage img;
 			String type = StringUtils.substringAfterLast(file.getName(), ".");
 			if ("jpg".equals(type)|| "JPEG".equals(type)) {
 				System.out.println("此图片后缀为：" + type);
-				img = getImage(file.toString());
+				img = getImage(file);
 			} else {
 				img = ImageIO.read(file);
 			}
@@ -132,6 +120,7 @@ public class CommonUtil {
 			out.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
+			return false;
 		}
 		return true;
 	}
@@ -143,8 +132,8 @@ public class CommonUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	private static BufferedImage getImage(String filename) throws IOException {
-		File file = new File(filename);
+	private static BufferedImage getImage(File file) throws IOException {
+		//File file = new File(filename);
 		// 创建输入流
 		ImageInputStream input = ImageIO.createImageInputStream(file);
 		Iterator<ImageReader> readers = ImageIO.getImageReaders(input);

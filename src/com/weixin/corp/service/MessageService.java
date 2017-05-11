@@ -378,9 +378,7 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
-			String title="Test";
-			String digest="Ä£°å";
-			jsonMessage = new MpNewsJsonMessage(title,call.getMediaId(),call.getText(),digest);
+			jsonMessage = new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText(),call.getDigest());
 			break;
 		default:
 			break;
