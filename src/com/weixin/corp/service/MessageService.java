@@ -59,6 +59,8 @@ public class MessageService {
 	public static String MEDIA_TEMP_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
 
 	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
+	
+	public static String MPNEWS_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_mpnews?access_token=ACCESS_TOKEN";
 
 	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
 
@@ -232,7 +234,25 @@ public class MessageService {
 		}
 		return true;
 	}
-
+	
+	public static JSONObject uploadMPNews(RequestCall call) {
+		//生成图文消息体
+		MpNewsJsonMessage jsonMessage = 
+		 new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText(),call.getDigest());
+		
+		JSONObject jsonObject = WeixinUtil.httpsRequest(
+				MessageService.MPNEWS_UPLOAD.replace("TYPE",MPNEWS_MSG_TYPE), WeixinUtil.POST_REQUEST_METHOD,
+				JSONObject.fromObject(jsonMessage).toString().replace("mediaId", "media_id"));
+		if (null != jsonObject) {
+			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
+				log.error("请求图文永久素材上传接口失败 errcode:"
+						+ jsonObject.getInt("errcode") + "，errmsg:"
+						+ jsonObject.getString("errmsg"));
+			}
+		}
+		return jsonObject;
+	}
+	
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
 		String msgType = call.getMsgType();
 		//如果是图文类型素材，修改以图片类型上传
@@ -255,11 +275,6 @@ public class MessageService {
 
 	public static JSONObject uploadTempMedia(RequestCall call) {
 		String msgType = call.getMsgType();
-		//如果是图文类型素材，修改以图片类型上传
-		if(MPNEWS_MSG_TYPE.equals(msgType)){
-			msgType=IMAGE_MSG_TYPE;
-		}
-		
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
 				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE",msgType), WeixinUtil.POST_REQUEST_METHOD,
 				call.getMedia());
@@ -378,7 +393,7 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
-			jsonMessage = new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText(),call.getDigest());
+			jsonMessage = new MpNewsJsonMessage(call.getMediaId());
 			break;
 		default:
 			break;

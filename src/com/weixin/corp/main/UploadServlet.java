@@ -151,6 +151,42 @@ public class UploadServlet extends HttpServlet {
 		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
 			JSONObject jsonObject = null;
 			String mediaId = null;
+			//图文消息类型：
+			//	若调用模板[只传入了title，content，未上传图片]，则通过永久素材库去除对应的图文素材，修改其title，content
+			//	若不调用模板，则先上传图片至永久素材库，取得mediaid，再将图文素材传入微信后台
+			if(MessageService.MPNEWS_MSG_TYPE.equals(msgType)){
+				System.out.println(""==call.getDigest());
+				//调用模板
+				if(!(CommonUtil.StringisEmpty(call.getDigest()))){
+					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jjH8d-mYAIEW-Q5kzriDul";
+					call.setMediaId(mediaId);
+				}
+				//未调用模板
+				else{
+					// 永久素材接口上传图片
+					jsonObject = MessageService.uploadPermanentMedia(call);
+					if (null != jsonObject && jsonObject.has("media_id")) {
+						mediaId = jsonObject.getString("media_id");
+						call.setMediaId(mediaId);
+						System.out.println("上传图片成功.");
+						//上传图文素材
+						jsonObject = MessageService.uploadMPNews(call);
+						if(null != jsonObject && jsonObject.has("media_id")){
+							mediaId = jsonObject.getString("media_id");
+							call.setMediaId(mediaId);
+							System.out.println("上传图文素材成功.");
+						}else{
+							response.getWriter().write("上传图文素材失败，请检查文件是否符合要求");
+							return;
+						}
+					} else {
+						response.getWriter().write("上传图片素材失败，请检查文件是否符合要求");
+						return;
+					}
+				}
+			}else
+			
+			
 			// 无接收人则素材入库
 			if (CommonUtil.StringisEmpty(call.getToUser())) {
 				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
@@ -311,6 +347,19 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
+		
+		//校验：图文消息类型时
+		if(MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())){
+			if(CommonUtil.StringisEmpty(call.getTitle())||CommonUtil.StringisEmpty(call.getText())){
+				call.setErrorInfo("图文消息类型，标题、文本必填!");
+				System.out.println("图文消息类型，标题、文本必填!");
+				return call;
+			}else if(CommonUtil.StringisEmpty(call.getDigest())&&CommonUtil.StringisEmpty(fileName)){
+				call.setErrorInfo("图文消息类型，模板与素材文件必选其一");
+				System.out.println("图文消息类型，模板与素材文件必选其一");
+				return call;
+			}
+		}
 		if (CommonUtil.StringisEmpty(fileName)) {
 			if (CommonUtil.StringisEmpty(call.getText())) {
 				call.setErrorInfo("文本内容和素材文件不能同时为空");
@@ -319,15 +368,6 @@ public class UploadServlet extends HttpServlet {
 			}
 			return call;
 		}
-		//校验：图文消息类型时
-		if(MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())){
-			if(""==call.getTitle()||""==call.getDigest()){
-				call.setErrorInfo("图文类型消息，标题与模板必填");
-				System.out.println("图文类型消息，标题与模板必填");
-				return call;
-			}
-		}
-		
 		File uploadFolder = new File(UPLOAD_TEMP_URL+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
 		if (!uploadFolder.exists()) {
 			uploadFolder.mkdir();
