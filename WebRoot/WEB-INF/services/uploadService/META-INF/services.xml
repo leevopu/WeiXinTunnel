@@ -1,0 +1,15 @@
+<service name="uploadService">
+	<description>
+		UploadService Service Example
+	</description>
+	<parameter name="ServiceClass">
+		test.UploadService
+	</parameter>
+	<operation name="uploadWeixin">
+		<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
+	</operation>
+	<excludeOperations>
+        <operation>uploadImageWithByte</operation>
+        <!-- 屏蔽掉bean里的get set方法,以及不需要包装成webservice接口的方法 -->
+    </excludeOperations>
+</service>

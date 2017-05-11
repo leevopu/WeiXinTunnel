@@ -43,6 +43,8 @@ public class RequestCall implements Serializable {
 	 * 若msgType不为text则需有值
 	 */
 	private File media;
+	
+	private byte[] fileByte;
 	/**
 	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
@@ -208,4 +210,13 @@ public class RequestCall implements Serializable {
 	public void setDigest(String digest) {
 		this.digest = digest;
 	}
+
+	public byte[] getFileByte() {
+		return fileByte;
+	}
+
+	public void setFileByte(byte[] fileByte) {
+		this.fileByte = fileByte;
+	}
+	
 }

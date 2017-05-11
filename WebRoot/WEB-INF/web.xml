@@ -100,5 +100,16 @@
 		<servlet-name>userServlet</servlet-name>
 		<url-pattern>/userServlet</url-pattern>
 	</servlet-mapping>
+	
+		<!--Axis2 config start -->
+	<servlet>
+		<servlet-name>AxisServlet</servlet-name>
+		<servlet-class>org.apache.axis2.transport.http.AxisServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
     
 </web-app>
