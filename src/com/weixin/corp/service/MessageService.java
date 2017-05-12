@@ -222,8 +222,7 @@ public class MessageService {
 		}
 		return ErrorCode.MESSAGE_NO_RETURN;
 	}
-	
-	
+    
 	public static JSONObject uploadMPNews(RequestCall call) {
 		//生成图文消息体
 		MpNewsJsonMessage jsonMessage = 
