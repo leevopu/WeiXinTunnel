@@ -171,14 +171,14 @@ public class UploadServlet extends HttpServlet {
 				System.out.println("图文消息类型，标题、文本必填!");
 				return call;
 			}
-			if (CommonUtil.StringisEmpty(call.getDigest())) {
-				if (CommonUtil.StringisEmpty(mediaName)) {
-					call.setErrorInfo("图文消息类型，模板与素材文件必选其一");
-					System.out.println("图文消息类型，模板与素材文件必选其一");
+			if (CommonUtil.StringisEmpty(mediaName)) {
+				if(CommonUtil.StringisEmpty(call.getDigest())){
+					call.setErrorInfo("图文消息类型，若文件素材为空，则模板必填！");
+					System.out.println("图文消息类型，若文件素材为空，则模板必填！");
+					return call;
+				}else{
 					return call;
 				}
-			} else {
-				return call;
 			}
 		}
 

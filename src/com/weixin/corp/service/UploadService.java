@@ -106,14 +106,17 @@ public class UploadService {
 					System.out.println(msg);
 					return msg;
 				}
-				int width = 800;
-				int height = 650;
-				// 图片压缩
-				boolean flag = CommonUtil.compressPic(media, height, width);
-				if (!flag) {
-					return "图片压缩失败，请检查图片大小及类型！";
+				//当图片大于1M的时候，对批片进行压缩
+				if(contentLength > 1 * 1024 * 1024){
+					int width = 800;
+					int height = 650;
+					// 图片压缩
+					boolean flag = CommonUtil.compressPic(media, height, width);
+					if (!flag) {
+						return "图片压缩失败，请检查图片大小及类型！";
+					}
+					System.out.println("图片压缩完成！");
 				}
-				System.out.println("图片压缩完成！");
 			}
 		}
 
@@ -124,25 +127,25 @@ public class UploadService {
 						new Date(System.currentTimeMillis() + 1000 * 60 * 2))) {
 			call.setSendTime(null);
 		}
+		Boolean isPermanent = false;
+		
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传素材，获取素材id
 		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
 			JSONObject jsonObject = null;
 			String mediaId = null;
-			// 图文消息类型：
-			// 若调用模板[只传入了title，content，未上传图片]，则通过永久素材库去除对应的图文素材，修改其title，content
-			// 若不调用模板，则先上传图片至永久素材库，取得mediaid，再将图文素材传入微信后台
+			// ========================图文消息类型：===============================
+			// 1.模板已填写：
+			//    1.)模板存在：调用模板，修改其中的：title，content以及图片url[若图片已上传]等字段信息
+			//	  2.)模板不存在：生成永久图文素材[图片已上传]
+			// 2.模板未填写：生成永久图文素材[标为临时使用]
+			// =================================================================
 			if (MessageService.MPNEWS_MSG_TYPE.equals(msgType)) {
-				// 调用模板
-				if (!(CommonUtil.StringisEmpty(call.getDigest()))) {
-					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jszPScGLtrIvxWBR0zYdjA";
-					call.setMediaId(mid);
-				}
 				// 未调用模板
-				else {
+				if (CommonUtil.StringisEmpty(call.getDigest())) {
+					isPermanent = false;
 					// 永久素材接口上传图片
 					jsonObject = MessageService.uploadPermanentMedia(call);
-
 					if (null != jsonObject && jsonObject.has("media_id")) {
 						mediaId = jsonObject.getString("media_id");
 						call.setMediaId(mediaId);
@@ -160,11 +163,24 @@ public class UploadService {
 						return "上传图片素材失败，请检查文件是否符合要求";
 					}
 				}
+				// 调用模板
+				else {
+					//判断模板是否存在  if( isModel()){}
+					//模板存在
+					//		替换模板中的元素：content thumb_media_id
+					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jszPScGLtrIvxWBR0zYdjA";
+					call.setMediaId(mid);
+					//else{}
+					//模板不存在
+					//	判断是否上传文件，有则生成永久图文素材，标为临时使用；无则提示出错
+				}
 			} else
 
 			// 无接收人则素材入库--去掉，入库必须选择图文，只有图文入永久库等待调用
 			if (CommonUtil.StringisEmpty(call.getToUser())) {
 				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
+				//若为临时使用，则标记为isPermanent = false;后期删除
+				
 				return "??";
 			}
 			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
@@ -190,6 +206,7 @@ public class UploadService {
 		}
 		CorpBaseJsonMessage jsonMessage = MessageService
 				.changeMessageToJson(call);
+		jsonMessage.setPermanent(isPermanent);
 		// 立即发送消息
 		if (CommonUtil.StringisEmpty(call.getSendTime())) {
 			if (0 == MessageService.sendMessage(jsonMessage)) {

@@ -60,4 +60,8 @@ public class MpArticle {
 		Show_cover_pic = 1;
 	}
 	
+	public MpArticle(){
+		super();
+	}
+	
 }
