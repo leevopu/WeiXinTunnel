@@ -198,6 +198,51 @@ public class CommonUtil {
 				Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 		return new BufferedImage(cm, (WritableRaster) raster, true, null);
 	}
+	
+	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似
+	public static int byteIndexOf(byte[] b, String s, int start) {
+		return byteIndexOf(b, s.getBytes(), start);
+	}
+
+	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似
+	public static int byteIndexOf(byte[] b, byte[] s, int start) {
+		int i;
+		if (s.length == 0) {
+			return 0;
+		}
+		int max = b.length - s.length;
+		if (max < 0)
+			return -1;
+		if (start > max)
+			return -1;
+		if (start < 0)
+			start = 0;
+		search: for (i = start; i <= max; i++) {
+			if (b[i] == s[0]) {
+				int k = 1;
+				while (k < s.length) {
+					if (b[k + i] != s[k]) {
+						continue search;
+					}
+					k++;
+				}
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	// 用于从一个字节数组中提取一个字节数组
+	public static byte[] subBytes(byte[] b, int from, int end) {
+		byte[] result = new byte[end - from];
+		System.arraycopy(b, from, result, 0, end - from);
+		return result;
+	}
+
+	// 用于从一个字节数组中提取一个字符串
+	public static String subBytesString(byte[] b, int from, int end) {
+		return new String(subBytes(b, from, end));
+	}
 
 	public static void main(String[] args) {
 		String dateStr = "2011-01-01 12:01:12";

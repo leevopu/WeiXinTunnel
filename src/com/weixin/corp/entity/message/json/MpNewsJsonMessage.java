@@ -29,7 +29,7 @@ public class MpNewsJsonMessage extends CorpBaseJsonMessage {
 	
 	@Override
 	public String getMediaId() {
-		return this.mpnews.getArticles()[0].getThumb_media_id();
+		return this.mpnews.getMediaId();
 	}
 
 }

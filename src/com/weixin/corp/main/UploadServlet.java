@@ -61,13 +61,10 @@ public class UploadServlet extends HttpServlet {
 		final int NONE = 0;
 		final int DATAHEADER = 1;
 		final int FILEDATA = 2;
-		final int FIELDDATA = 3; // 不需要表单上传
-
-		// final int MXA_SEGSIZE = 1024 * 1024 * 20;//
-		// 设置每批最大的数据量，放到外面判断，否则不方便给返回值
+		final int FIELDDATA = 3;
 
 		String contentType = request.getContentType();// 请求消息类型
-		String fileName = ""; // 文件名
+		String mediaName = ""; // 文件名
 		String boundary = ""; // 分界符
 		String lastBoundary = ""; // 结束符
 		String fieldName = "";
@@ -82,15 +79,12 @@ public class UploadServlet extends HttpServlet {
 		}
 		int state = NONE;
 
-		// 得到数据输入流
 		DataInputStream in = new DataInputStream(request.getInputStream());
-
-		// 将请求消息的实体送到b变量中
 		int totalBytes = request.getContentLength();
-		byte[] b = new byte[totalBytes];
-		in.readFully(b);
+		byte[] mediaByte = new byte[totalBytes];
+		in.readFully(mediaByte);
 		in.close();
-		String reqContent = new String(b, "UTF-8");
+		String reqContent = new String(mediaByte, "UTF-8");
 		BufferedReader br = new BufferedReader(new StringReader(reqContent));
 
 		String line = null;
@@ -104,7 +98,7 @@ public class UploadServlet extends HttpServlet {
 				break;
 			case DATAHEADER:
 				pos = line.indexOf("filename=");
-				if (pos == -1) { // 将表单域的名字解析出来， 不需要
+				if (pos == -1) {
 					pos = line.indexOf("name=");
 					pos += "name=".length() + 1;
 					line = line.substring(pos);
@@ -112,20 +106,19 @@ public class UploadServlet extends HttpServlet {
 					line = line.substring(0, l - 1);
 					fieldName = line;
 					state = FIELDDATA;
-				} else { // 将文件名解析出来
-					// if (pos != -1) {
+				} else {
 					String temp = line;
 					pos = line.indexOf("filename=");
 					pos += "filename=".length() + 1;
 					line = line.substring(pos);
 					int l = line.length();
-					line = line.substring(0, l - 1);// 去掉最后那个引号”
+					line = line.substring(0, l - 1);
 					pos = line.lastIndexOf("\\");
 					line = line.substring(pos + 1);
-					fileName = line;
+					mediaName = line;
 					// 从字节数组中取出文件数组
-					pos = byteIndexOf(b, temp, 0);
-					b = subBytes(b, pos + temp.getBytes().length + 2, b.length);// 去掉前面的部分
+					pos = CommonUtil.byteIndexOf(mediaByte, temp, 0);
+					mediaByte = CommonUtil.subBytes(mediaByte, pos + temp.getBytes().length + 2, mediaByte.length);// 去掉前面的部分
 					int n = 0;
 					/**
 					 * 过滤boundary下形如 Content-Disposition: form-data; name="bin";
@@ -138,15 +131,15 @@ public class UploadServlet extends HttpServlet {
 						if (line.equals(""))
 							n++;
 
-						b = subBytes(b, line.getBytes().length + 2, b.length);
+						mediaByte = CommonUtil.subBytes(mediaByte, line.getBytes().length + 2, mediaByte.length);
 					}
-					pos = byteIndexOf(b, boundary, 0);
+					pos = CommonUtil.byteIndexOf(mediaByte, boundary, 0);
 					if (pos != -1)
-						b = subBytes(b, 0, pos - 1);
+						mediaByte = CommonUtil.subBytes(mediaByte, 0, pos - 1);
 					state = FILEDATA;
 				}
 				break;
-			case FIELDDATA: // 表单字段
+			case FIELDDATA:
 				line = br.readLine();
 				fieldValue = line;
 				reflectFiledValue(call, fieldName, fieldValue);
@@ -156,10 +149,6 @@ public class UploadServlet extends HttpServlet {
 				while ((!line.startsWith(boundary))
 						&& (!line.startsWith(lastBoundary))) {
 					line = br.readLine();
-					// if (line.startsWith(boundary)) {
-					// state = DATAHEADER;
-					// break;
-					// }
 					if (line.startsWith(lastBoundary)) {
 						state = NONE;
 						break;
@@ -168,83 +157,37 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
-		
-		//校验：图文消息类型时
-		if(MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())){
-			if(CommonUtil.StringisEmpty(call.getTitle())||CommonUtil.StringisEmpty(call.getText())){
+
+		// 校验：图文消息类型时
+		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
+			if (CommonUtil.StringisEmpty(call.getTitle())
+					|| CommonUtil.StringisEmpty(call.getText())) {
 				call.setErrorInfo("图文消息类型，标题、文本必填!");
 				System.out.println("图文消息类型，标题、文本必填!");
 				return call;
-			}else if(CommonUtil.StringisEmpty(call.getDigest())&&CommonUtil.StringisEmpty(fileName)){
-				call.setErrorInfo("图文消息类型，模板与素材文件必选其一");
-				System.out.println("图文消息类型，模板与素材文件必选其一");
+			}
+			if (CommonUtil.StringisEmpty(call.getDigest())) {
+				if (CommonUtil.StringisEmpty(mediaName)) {
+					call.setErrorInfo("图文消息类型，模板与素材文件必选其一");
+					System.out.println("图文消息类型，模板与素材文件必选其一");
+					return call;
+				}
+			} else {
 				return call;
 			}
 		}
-		if (CommonUtil.StringisEmpty(fileName)) {
-			if (CommonUtil.StringisEmpty(call.getText())) {
+
+		if (CommonUtil.StringisEmpty(call.getText())) {
+			if (CommonUtil.StringisEmpty(mediaName)) {
 				call.setErrorInfo("文本内容和素材文件不能同时为空");
 			} else {
 				call.setMsgType(MessageService.TEXT_MSG_TYPE);
 			}
 			return call;
 		}
-		// 校验：图文消息类型时
-		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
-			if ("" == call.getTitle() || "" == call.getDigest()) {
-				call.setErrorInfo("图文类型消息，标题与模板必填");
-				System.out.println("图文类型消息，标题与模板必填");
-				return call;
-			}
-		}
-		call.setMediaByte(b);
-		call.setMediaName(fileName);
+		call.setMediaByte(mediaByte);
+		call.setMediaName(mediaName);
 		return call;
-	}
-
-	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似
-	public static int byteIndexOf(byte[] b, String s, int start) {
-		return byteIndexOf(b, s.getBytes(), start);
-	}
-
-	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似
-	public static int byteIndexOf(byte[] b, byte[] s, int start) {
-		int i;
-		if (s.length == 0) {
-			return 0;
-		}
-		int max = b.length - s.length;
-		if (max < 0)
-			return -1;
-		if (start > max)
-			return -1;
-		if (start < 0)
-			start = 0;
-		search: for (i = start; i <= max; i++) {
-			if (b[i] == s[0]) {
-				int k = 1;
-				while (k < s.length) {
-					if (b[k + i] != s[k]) {
-						continue search;
-					}
-					k++;
-				}
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	// 用于从一个字节数组中提取一个字节数组
-	public static byte[] subBytes(byte[] b, int from, int end) {
-		byte[] result = new byte[end - from];
-		System.arraycopy(b, from, result, 0, end - from);
-		return result;
-	}
-
-	// 用于从一个字节数组中提取一个字符串
-	public static String subBytesString(byte[] b, int from, int end) {
-		return new String(subBytes(b, from, end));
 	}
 
 	private RequestCall reflectFiledValue(RequestCall call, String fieldName,
