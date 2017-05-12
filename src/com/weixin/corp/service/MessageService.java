@@ -250,7 +250,7 @@ public class MessageService {
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
 				MessageService.MEDIA_PERMANENT_UPLOAD.replace("TYPE",
 						msgType), WeixinUtil.POST_REQUEST_METHOD,
-				call.getMedia());
+				call);
 		if (null != jsonObject) {
 			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
 				log.error("请求永久素材上传接口失败 errcode:"
@@ -383,7 +383,6 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
-			jsonMessage = new MpNewsJsonMessage(call.getMediaId());
 			break;
 		default:
 			break;
