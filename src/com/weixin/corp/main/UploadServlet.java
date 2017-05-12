@@ -57,7 +57,166 @@ public class UploadServlet extends HttpServlet {
 		if (null != call.getErrorInfo()) {
 			response.getWriter().write(call.getErrorInfo());
 		}
+<<<<<<< HEAD
 		response.getWriter().write(UploadService.process(call));
+=======
+		
+		// 判断文件长度
+		System.out.println("lenth: " + contentLength);
+		String size = CommonUtil.convertFileSize(contentLength);
+		System.out.println("文件大小为：" + size);
+		
+		// =================================================================
+		// 判断文件大小 超过20M返回提示
+		// =================================================================
+		if (contentLength > MXA_SEGSIZE) {
+			String msg = "文件大小超过20M，请重新操作！！！！";
+			System.out.println(msg);
+			response.getWriter().write(msg);
+			return;
+		}
+		
+		// 判断是否格式符合要求，是否有缺失的字段
+		if (/* CommonUtil.StringisEmpty(call.getFromUser()) || */CommonUtil
+				.StringisEmpty(call.getToUser())
+				|| CommonUtil.StringisEmpty(call.getMsgType())
+				|| (CommonUtil.StringisEmpty(call.getText()) && null == call
+						.getMedia())) {
+			StringBuffer missFieldValue = new StringBuffer();
+			missFieldValue.append("缺少必要的信息请检查，发送人:");
+			missFieldValue.append(call.getFromUser());
+			missFieldValue.append("，接收人:");
+			missFieldValue.append(call.getToUser());
+			missFieldValue.append("，消息类型:");
+			missFieldValue.append(call.getMsgType());
+			missFieldValue.append("，文本:");
+			missFieldValue.append(call.getText());
+			missFieldValue.append("，素材:");
+			if (null != call.getMedia()) {
+				missFieldValue.append(call.getMedia().getName());
+			}
+			response.getWriter().write(missFieldValue.toString());
+			return;
+		}
+		//针对图片文件 如果文件过大，则进行压缩
+		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
+			String[] imagType={"jpg","jepg","png","bmp","gif"};
+			List<String> imageTyepLists=Arrays.asList(imagType);
+			String str = StringUtils.substringAfterLast(call.getMedia().getName(), ".");
+			if(!imageTyepLists.contains(str)){
+				String msg ="上传文件与选择素材类型不匹配"; 
+				System.out.println(msg);
+				response.getWriter().write(msg);
+				return;
+			}
+			int width = 800;
+			int height = 650;
+			//图片压缩
+			boolean flag =CommonUtil.compressPic(call.getMedia(), height, width);
+			String info = "";
+			if(!flag){
+				info = "图片压缩失败，请检查图片大小及类型！";
+				response.getWriter().write(info);
+			}else{
+				info = "图片压缩完成！";
+			}
+			System.out.println(info);
+		}
+		
+		// 如果发送时间选的不对，在当前系统时间2分钟内，那就清空，默认立刻发送。
+		if (!CommonUtil.StringisEmpty(call.getSendTime())
+				&& CommonUtil.getStrDate(call.getSendTime(),
+						"yyyy-MM-dd HH:mm:ss").before(
+						new Date(System.currentTimeMillis() + 1000 * 60 * 2))) {
+			call.setSendTime(null);
+		}
+		String msgType = call.getMsgType();
+		// 如果不是文本，先上传素材，获取素材id
+		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
+			JSONObject jsonObject = null;
+			String mediaId = null;
+			//图文消息类型：
+			//	若调用模板[只传入了title，content，未上传图片]，则通过永久素材库去除对应的图文素材，修改其title，content
+			//	若不调用模板，则先上传图片至永久素材库，取得mediaid，再将图文素材传入微信后台
+			if(MessageService.MPNEWS_MSG_TYPE.equals(msgType)){
+				System.out.println(""==call.getDigest());
+				//调用模板
+				if(!(CommonUtil.StringisEmpty(call.getDigest()))){
+					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jjH8d-mYAIEW-Q5kzriDul";
+					call.setMediaId(mediaId);
+				}
+				//未调用模板
+				else{
+					// 永久素材接口上传图片
+					jsonObject = MessageService.uploadPermanentMedia(call);
+					if (null != jsonObject && jsonObject.has("media_id")) {
+						mediaId = jsonObject.getString("media_id");
+						call.setMediaId(mediaId);
+						System.out.println("上传图片成功.");
+						//上传图文素材
+						jsonObject = MessageService.uploadMPNews(call);
+						if(null != jsonObject && jsonObject.has("media_id")){
+							mediaId = jsonObject.getString("media_id");
+							call.setMediaId(mediaId);
+							System.out.println("上传图文素材成功.");
+						}else{
+							response.getWriter().write("上传图文素材失败，请检查文件是否符合要求");
+							return;
+						}
+					} else {
+						response.getWriter().write("上传图片素材失败，请检查文件是否符合要求");
+						return;
+					}
+				}
+			}else
+			
+			
+			// 无接收人则素材入库
+			if (CommonUtil.StringisEmpty(call.getToUser())) {
+				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
+				return;
+			}
+			// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材
+			else {
+				if (!CommonUtil.StringisEmpty(call.getSendTime())
+						&& CommonUtil.getStrDate(call.getSendTime(),
+								"yyyy-MM-dd HH:mm:ss").after(
+								new Date(System.currentTimeMillis() + 1000 * 60
+										* 60 * 24 * 3))) {
+					// 永久素材接口
+					jsonObject = MessageService.uploadPermanentMedia(call);
+				} else {
+					// 临时素材接口
+					jsonObject = MessageService.uploadTempMedia(call);
+				}
+				if (null != jsonObject && jsonObject.has("media_id")) {
+					mediaId = jsonObject.getString("media_id");
+					call.setMediaId(mediaId);
+				} else {
+					response.getWriter().write("上传素材失败，请检查文件是否符合要求");
+					return;
+				}
+
+			}
+		}
+		CorpBaseJsonMessage jsonMessage = MessageService
+				.changeMessageToJson(call);
+		// 立即发送消息
+		if (CommonUtil.StringisEmpty(call.getSendTime())) {
+			if (MessageService.sendMessage(jsonMessage)) {
+				// 回复提示发送成功
+				result = "发送成功";
+			} else {
+				// 回复发送失败
+				result = "发送失败";
+			}
+		} else {
+			// 放入消息队列，定时触发
+			WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
+			result = "放入消息队列，等待定时触发";
+		}
+		response.getWriter().write(result);
+>>>>>>> branch 'master' of https://github.com/leevopu/WeixinTest3.git
 	}
 
 	private RequestCall parseRequestCall(HttpServletRequest request)
@@ -173,6 +332,19 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
+		
+		//校验：图文消息类型时
+		if(MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())){
+			if(CommonUtil.StringisEmpty(call.getTitle())||CommonUtil.StringisEmpty(call.getText())){
+				call.setErrorInfo("图文消息类型，标题、文本必填!");
+				System.out.println("图文消息类型，标题、文本必填!");
+				return call;
+			}else if(CommonUtil.StringisEmpty(call.getDigest())&&CommonUtil.StringisEmpty(fileName)){
+				call.setErrorInfo("图文消息类型，模板与素材文件必选其一");
+				System.out.println("图文消息类型，模板与素材文件必选其一");
+				return call;
+			}
+		}
 		if (CommonUtil.StringisEmpty(fileName)) {
 			if (CommonUtil.StringisEmpty(call.getText())) {
 				call.setErrorInfo("文本内容和素材文件不能同时为空");
@@ -181,6 +353,7 @@ public class UploadServlet extends HttpServlet {
 			}
 			return call;
 		}
+<<<<<<< HEAD
 		// 校验：图文消息类型时
 		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
 			if ("" == call.getTitle() || "" == call.getDigest()) {
@@ -193,6 +366,11 @@ public class UploadServlet extends HttpServlet {
 		File uploadRootFolder = new File(UPLOAD_TEMP_URL);
 		if (!uploadRootFolder.exists()) {
 			uploadRootFolder.mkdir();
+=======
+		File uploadFolder = new File(UPLOAD_TEMP_URL+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
+		if (!uploadFolder.exists()) {
+			uploadFolder.mkdir();
+>>>>>>> branch 'master' of https://github.com/leevopu/WeixinTest3.git
 		}
 		File uploadDailyFolder = new File(UPLOAD_TEMP_URL
 				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
