@@ -42,7 +42,7 @@ public class UploadService {
 	}
 
 	public static String process(RequestCall call) {
-
+		
 		// 判断文件长度
 		long contentLength = call.getMediaByte().length;
 		System.out.println("lenth: " + contentLength);
@@ -55,7 +55,6 @@ public class UploadService {
 		if (contentLength > 20 * 1024 * 1024) {
 			return "文件大小超过20M，请重新操作！！！！";
 		}
-
 		// 判断是否格式符合要求，是否有缺失的字段
 		if (/* CommonUtil.StringisEmpty(call.getFromUser()) || */CommonUtil
 				.StringisEmpty(call.getToUser())
@@ -88,13 +87,15 @@ public class UploadService {
 		}
 		// 针对图片文件 如果文件过大，则进行压缩
 		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())
-				|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
+				|| (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())&&(!CommonUtil.StringisEmpty(call.getMediaName())))) {
 			String[] imagType = { "jpg", "jepg", "png", "bmp", "gif" };
 			List<String> imageTyepLists = Arrays.asList(imagType);
 			String str = StringUtils.substringAfterLast(call.getMediaName(),
 					".");
 			if (!imageTyepLists.contains(str)) {
-				return "上传文件与选择素材类型不匹配";
+				String msg ="上传文件与选择素材类型不匹配"; 
+				System.out.println(msg);
+				return msg;
 			}
 			int width = 800;
 			int height = 650;
@@ -106,7 +107,7 @@ public class UploadService {
 			}
 			System.out.println("图片压缩完成！");
 		}
-
+		
 		// 如果发送时间选的不对，在当前系统时间2分钟内，那就清空，默认立刻发送。
 		if (!CommonUtil.StringisEmpty(call.getSendTime())
 				&& CommonUtil.getStrDate(call.getSendTime(),
@@ -119,6 +120,39 @@ public class UploadService {
 		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
 			JSONObject jsonObject = null;
 			String mediaId = null;
+			//图文消息类型：
+			//	若调用模板[只传入了title，content，未上传图片]，则通过永久素材库去除对应的图文素材，修改其title，content
+			//	若不调用模板，则先上传图片至永久素材库，取得mediaid，再将图文素材传入微信后台
+			if(MessageService.MPNEWS_MSG_TYPE.equals(msgType)){
+				//调用模板
+				if(!(CommonUtil.StringisEmpty(call.getDigest()))){
+					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jszPScGLtrIvxWBR0zYdjA";
+					call.setMediaId(mid);
+				}
+				//未调用模板
+				else{
+					// 永久素材接口上传图片
+					jsonObject = MessageService.uploadPermanentMedia(call);
+					
+					if (null != jsonObject && jsonObject.has("media_id")) {
+						mediaId = jsonObject.getString("media_id");
+						call.setMediaId(mediaId);
+						System.out.println("上传图片成功.");
+						//上传图文素材
+						jsonObject = MessageService.uploadMPNews(call);
+						if(null != jsonObject && jsonObject.has("media_id")){
+							mediaId = jsonObject.getString("media_id");
+							call.setMediaId(mediaId);
+							System.out.println("上传图文素材成功.");
+						}else{
+							return "上传图文素材失败，请检查文件是否符合要求";
+						}
+					} else {
+						return "上传图片素材失败，请检查文件是否符合要求";
+					}
+				}
+			}else
+			
 			// 无接收人则素材入库--去掉，入库必须选择图文，只有图文入永久库等待调用
 			if (CommonUtil.StringisEmpty(call.getToUser())) {
 				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？

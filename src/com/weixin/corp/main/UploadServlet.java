@@ -200,15 +200,7 @@ public class UploadServlet extends HttpServlet {
 			}
 			return call;
 		}
-		// 校验：图文消息类型时
-		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
-			if ("" == call.getTitle() || "" == call.getDigest()) {
-				call.setErrorInfo("图文类型消息，标题与模板必填");
-				System.out.println("图文类型消息，标题与模板必填");
-				return call;
-			}
-		}
-
+	
 		File uploadRootFolder = new File(UPLOAD_TEMP_URL);
 		if (!uploadRootFolder.exists()) {
 			uploadRootFolder.mkdir();
