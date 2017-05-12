@@ -383,6 +383,7 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
+			jsonMessage = new MpNewsJsonMessage(call.getMediaId());
 			break;
 		default:
 			break;
