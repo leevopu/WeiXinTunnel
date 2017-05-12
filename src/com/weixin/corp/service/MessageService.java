@@ -426,43 +426,16 @@ public class MessageService {
 	 * @param str
 	 * @return
 	 */
-	public static String convert(String toUser) {
+	private static String convert(String toUser) {
 		String userIds = "";
-		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
-		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
-		x.run();
 		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
 		Object[] strs = maps.keySet().toArray();
 		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
-			// System.out.println("包含");
-			String users[] = toUser.split(",");
-			for (int i = 0; i < users.length; i++) {
-				String user = users[i];
-				String ph = "";
-				if (user.length() > 11) {
-					// 取最后11位 如果没填手机号则不做处理
-					ph = user.substring(user.length() - 11, user.length());
-					String dep = "";
-					// 判断是否全为数字 flag： TRUE FALSE
-					if (isNum(ph)) {
-						// 拿到部门名称
-						dep = user.substring(0, user.length() - 11);
-						// 遍历部门名称，匹配信息
-						for (int j = 0; j < strs.length; j++) {
-							// 部门匹配 拼接userId
-							if (strs[j].equals(dep)) {
-								HashMap<String, User> datas = maps.get(dep);
-								User data = datas.get(ph);
-								if (null != data) {
-									userIds += data.getUserid() + "|";
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if(toUser.length() > 11) {// 只有一个单独的字符串,进行分割
+			userIds = splitToUser(toUser, userIds, maps, strs, ",");
+		} else if (toUser.indexOf("|") != -1) {// 根据 "|" 来进行分割
+			userIds = splitToUser(toUser, userIds, maps, strs, "\\|");
+		} else if (toUser.length() > 11) {// 只有一个单独的字符串,进行分割
 			String ph = toUser.substring(toUser.length() - 11, toUser.length());
 			if (isNum(ph)) {
 				String dep = toUser.substring(0, toUser.length() - 11);
@@ -478,11 +451,44 @@ public class MessageService {
 				}
 			}
 		}
-		if(!("".equals(userIds)) ){
+		if (!("".equals(userIds))) {
 			// 处理字符串最后一位"|"
-			String s = userIds.substring(userIds.length() - 1, userIds.length());
+			String s = userIds
+					.substring(userIds.length() - 1, userIds.length());
 			if ("|".equals(s)) {// 去除最后一个"|"
 				userIds = userIds.substring(0, userIds.length() - 1);
+			}
+		}
+		return userIds;
+	}
+	
+	private static String splitToUser(String toUser, String userIds,
+			Map<String, HashMap<String, User>> maps, Object[] strs,
+			String signal) {
+		String users[] = toUser.split(signal);
+		for (int i = 0; i < users.length; i++) {
+			String user = users[i];
+			String ph = "";
+			if (user.length() > 11) {
+				// 取最后11位 如果没填手机号则不做处理
+				ph = user.substring(user.length() - 11, user.length());
+				String dep = "";
+				// 判断是否全为数字 flag： TRUE FALSE
+				if (isNum(ph)) {
+					// 拿到部门名称
+					dep = user.substring(0, user.length() - 11);
+					// 遍历部门名称，匹配信息
+					for (int j = 0; j < strs.length; j++) {
+						// 部门匹配 拼接userId
+						if (strs[j].equals(dep)) {
+							HashMap<String, User> datas = maps.get(dep);
+							User data = datas.get(ph);
+							if (null != data) {
+								userIds += data.getUserid() + "|";
+							}
+						}
+					}
+				}
 			}
 		}
 		return userIds;
