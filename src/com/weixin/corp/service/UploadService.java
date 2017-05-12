@@ -83,6 +83,7 @@ public class UploadService {
 							.substring(
 									call.getMediaName().lastIndexOf(
 											File.separator) + 1));
+			log.error(missFieldValue.toString());
 			return missFieldValue.toString();
 		}
 		// 针对图片文件 如果文件过大，则进行压缩
