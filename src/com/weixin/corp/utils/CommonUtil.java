@@ -17,7 +17,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -29,6 +33,7 @@ import org.apache.commons.lang.time.DateUtils;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.weixin.corp.entity.user.User;
 
 public class CommonUtil {
 
@@ -47,42 +52,31 @@ public class CommonUtil {
 		}
 		return strDate;
 	}
-	
-	public static boolean StringisEmpty(String value){
-		if(null == value){
+
+	public static boolean StringisEmpty(String value) {
+		if (null == value) {
 			return true;
 		}
 		return "".equals(value.trim());
 	}
 
-	public static boolean compressPic(File file, int outputHeight,int outputWidth){
-		return compressPict(file,  outputHeight, outputWidth );
-	}
 	/**
 	 * 图片处理 压缩
 	 * 
-	 * @param inputDir
-	 *            输入图路径
-	 * @param outputDir
-	 *            输出图路径
-	 * @param inputFileName
-	 *            输入图文件名
-	 * @param outputFileName
-	 *            输出图文件名
 	 * @param outputWidth
 	 *            输出图片宽
 	 * @param outputHeight
 	 *            输出图片高
-	 * @param proportion
-	 *            是否是等比缩放 标记(默认为等比缩放)
 	 * @return
 	 */
-	private static boolean compressPict(File file, int outputHeight,int outputWidth ) {
+	public static boolean compressPic(String imageName, int outputHeight,
+			int outputWidth) {
 		boolean proportion = true;
+		File file = new File(imageName);
 		try {
 			BufferedImage img;
 			String type = StringUtils.substringAfterLast(file.getName(), ".");
-			if ("jpg".equals(type)|| "JPEG".equals(type)) {
+			if ("jpg".equals(type) || "JPEG".equals(type)) {
 				System.out.println("此图片后缀为：" + type);
 				img = getImage(file);
 			} else {
@@ -93,8 +87,10 @@ public class CommonUtil {
 			// 判断是否是等比缩放
 			if (proportion == true) {
 				// 为等比缩放计算输出的图片宽度及高度
-				double rate1 = ((double) img.getWidth(null))/ (double) outputWidth + 0.1;
-				double rate2 = ((double) img.getHeight(null))/ (double) outputHeight + 0.1;
+				double rate1 = ((double) img.getWidth(null))
+						/ (double) outputWidth + 0.1;
+				double rate2 = ((double) img.getHeight(null))
+						/ (double) outputHeight + 0.1;
 				// 根据缩放比率大的进行缩放控制
 				double rate = rate1 > rate2 ? rate1 : rate2;
 				newWidth = (int) (((double) img.getWidth(null)) / rate);
@@ -103,12 +99,15 @@ public class CommonUtil {
 				newWidth = outputWidth; // 输出的图片宽度
 				newHeight = outputHeight; // 输出的图片高度
 			}
-			BufferedImage tag = new BufferedImage((int) newWidth,(int) newHeight, BufferedImage.TYPE_INT_RGB);
+			BufferedImage tag = new BufferedImage((int) newWidth,
+					(int) newHeight, BufferedImage.TYPE_INT_RGB);
 
 			/*
 			 * Image.SCALE_SMOOTH 的缩略算法 生成缩略图片的平滑度的 优先级比速度高 生成的图片质量比较好 但速度慢
 			 */
-			tag.getGraphics().drawImage(img.getScaledInstance(newWidth, newHeight,Image.SCALE_SMOOTH), 0, 0, null);
+			tag.getGraphics().drawImage(
+					img.getScaledInstance(newWidth, newHeight,
+							Image.SCALE_SMOOTH), 0, 0, null);
 			File f = new File(file.toString());
 			if (!f.exists()) {
 				f.mkdirs();
@@ -133,7 +132,7 @@ public class CommonUtil {
 	 * @throws IOException
 	 */
 	private static BufferedImage getImage(File file) throws IOException {
-		//File file = new File(filename);
+		// File file = new File(filename);
 		// 创建输入流
 		ImageInputStream input = ImageIO.createImageInputStream(file);
 		Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
@@ -209,20 +208,34 @@ public class CommonUtil {
 				Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 		return new BufferedImage(cm, (WritableRaster) raster, true, null);
 	}
+	
+	private static boolean isNum(String ph) {
+		// 正则判断
+		Pattern pattern = Pattern.compile("[0-9]*");
+		Matcher isNum = pattern.matcher(ph);
+		if (!isNum.matches()) {
+			// 不全是数字，可能没有填手机号
+			return false;
+		}
+		return true;
+	}
+
 
 	public static void main(String[] args) {
 		String dateStr = "2011-01-01 12:01:12";
-				System.out.println(getStrDate(dateStr, "yyyy-MM-dd"));
-				System.out.println(Calendar.DAY_OF_MONTH);
-				System.out.println(getDateStr(DateUtils.round(new Date(), 1), "yyyy-MM-dd"));
-				System.out.println(getDateStr(DateUtils.round(new Date(), 5), "yyyy-MM-dd"));
-//		String size = CommonUtil.convertFileSize(1705110020);
-//		System.out.println("====================" + size);
-//		// =================================================================
-//		// 判断文件大小
-//		// =================================================================
-//		String x = StringUtils.substringBefore(size, " ");
-//		System.out.println(x);
-//		System.out.println(Float.parseFloat(x) > 10);
+		System.out.println(getStrDate(dateStr, "yyyy-MM-dd"));
+		System.out.println(Calendar.DAY_OF_MONTH);
+		System.out.println(getDateStr(DateUtils.round(new Date(), 1),
+				"yyyy-MM-dd"));
+		System.out.println(getDateStr(DateUtils.round(new Date(), 5),
+				"yyyy-MM-dd"));
+		// String size = CommonUtil.convertFileSize(1705110020);
+		// System.out.println("====================" + size);
+		// // =================================================================
+		// // 判断文件大小
+		// // =================================================================
+		// String x = StringUtils.substringBefore(size, " ");
+		// System.out.println(x);
+		// System.out.println(Float.parseFloat(x) > 10);
 	}
 }

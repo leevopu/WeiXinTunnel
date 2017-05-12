@@ -1,6 +1,5 @@
 package com.weixin.corp.entity.message;
 
-import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -32,7 +31,7 @@ public class RequestCall implements Serializable {
 	 */
 	private String msgType;
 	/**
-	 * 图文消息的描述，不超过512个字节，超过会自动截断  [这里用作模板描述]
+	 * 图文消息的描述，不超过512个字节，超过会自动截断 [这里用作模板描述]
 	 */
 	private String digest;
 	/**
@@ -40,11 +39,12 @@ public class RequestCall implements Serializable {
 	 */
 	private String text;
 	/**
-	 * 若msgType不为text则需有值
+	 * 图片视频文件的二进制流
 	 */
-	private File media;
-	
-	private byte[] fileByte;
+	private byte[] mediaByte;
+
+	private String mediaName;
+
 	/**
 	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
@@ -63,51 +63,6 @@ public class RequestCall implements Serializable {
 
 	public RequestCall() {
 		super();
-	}
-
-	public RequestCall(String fromUser, String toUser, String msgType,
-			String text, File media, String sendTime) {
-		super();
-		this.fromUser = fromUser;
-		this.toUser = toUser;
-		this.msgType = msgType;
-		this.text = text;
-		this.media = media;
-		this.sendTime = sendTime;
-	}
-
-	public RequestCall(String fromUser, String toUser, String msgType,
-			String text, String mediaPath, String sendTime) {
-		super();
-		this.fromUser = fromUser;
-		this.toUser = toUser;
-		this.msgType = msgType;
-		this.text = text;
-		this.media = new File(mediaPath);
-		this.sendTime = sendTime;
-	}
-	/**
-	 * 图文消息类型时
-	 * @param fromUser
-	 * @param toUser
-	 * @param msgType
-	 * @param text
-	 * @param media
-	 * @param sendTime
-	 * @param title
-	 * @param digest
-	 */
-	public RequestCall(String fromUser, String toUser, String msgType,
-			String text, File media, String sendTime,String title,String digest) {
-		super();
-		this.fromUser = fromUser;
-		this.toUser = toUser;
-		this.msgType = msgType;
-		this.text = text;
-		this.media = media;
-		this.sendTime = sendTime;
-		this.title = title;
-		this.digest = digest;
 	}
 
 	/**
@@ -172,12 +127,20 @@ public class RequestCall implements Serializable {
 		this.text = text;
 	}
 
-	public File getMedia() {
-		return media;
+	public byte[] getMediaByte() {
+		return mediaByte;
 	}
 
-	public void setMedia(File media) {
-		this.media = media;
+	public void setMediaByte(byte[] mediaByte) {
+		this.mediaByte = mediaByte;
+	}
+
+	public String getMediaName() {
+		return mediaName;
+	}
+
+	public void setMediaName(String mediaName) {
+		this.mediaName = mediaName;
 	}
 
 	public String getSendTime() {
@@ -203,6 +166,7 @@ public class RequestCall implements Serializable {
 	public void setMediaId(String mediaId) {
 		this.mediaId = mediaId;
 	}
+
 	public String getDigest() {
 		return digest;
 	}
@@ -210,13 +174,4 @@ public class RequestCall implements Serializable {
 	public void setDigest(String digest) {
 		this.digest = digest;
 	}
-
-	public byte[] getFileByte() {
-		return fileByte;
-	}
-
-	public void setFileByte(byte[] fileByte) {
-		this.fileByte = fileByte;
-	}
-	
 }

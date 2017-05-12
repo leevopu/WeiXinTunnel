@@ -3,13 +3,13 @@
 		UploadService Service Example
 	</description>
 	<parameter name="ServiceClass">
-		test.UploadService
+		com.weixin.corp.service.UploadService
 	</parameter>
-	<operation name="uploadWeixin">
+	<operation name="process">
 		<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
 	</operation>
 	<excludeOperations>
-        <operation>uploadImageWithByte</operation>
+        <operation></operation>
         <!-- 屏蔽掉bean里的get set方法,以及不需要包装成webservice接口的方法 -->
     </excludeOperations>
 </service>

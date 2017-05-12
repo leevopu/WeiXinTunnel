@@ -50,16 +50,15 @@ public class TimerTaskServlet extends HttpServlet {
 			if (null != token) {
 				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
 			}
-
+			// 启动循环获取access_token的线程，access_token每隔2小时会失效
+			new Thread(new WeixinAccessTokenTimerTaskThread()).start();
+			// 首次初始化缓存必须放在取access_token之后
+			Runnable userPoolInit = new DailyUpdateUserTimerTask();
+			userPoolInit.run();
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
 //			dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
 //			// 启动定时更新用户信息，每天6点触发1次更新缓存
 //			dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
-//			// 首次初始化缓存
-//			Runnable userPoolInit = new DailyUpdateUserTimerTask();
-//			userPoolInit.run();
-			// 启动循环获取access_token的线程，access_token每隔2小时会失效
-			new Thread(new WeixinAccessTokenTimerTaskThread()).start();
 			// 启动循环监控用户自定义发送时间的消息
 //			new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
