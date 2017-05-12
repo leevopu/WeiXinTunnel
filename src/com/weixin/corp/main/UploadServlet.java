@@ -8,10 +8,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -19,18 +16,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
-import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UploadService;
 import com.weixin.corp.utils.CommonUtil;
-import com.weixin.corp.utils.WeixinUtil;
 
 /**
  * 上层应用主动调用 请求处理类
