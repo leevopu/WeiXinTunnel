@@ -1,25 +1,13 @@
 package com.weixin.corp.service;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
@@ -34,6 +22,7 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
+import com.weixin.corp.constant.ErrorCode;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.entity.message.json.FileJsonMessage;
@@ -45,8 +34,6 @@ import com.weixin.corp.entity.message.pojo.Article;
 import com.weixin.corp.entity.message.xml.CorpBaseXMLMessage;
 import com.weixin.corp.entity.message.xml.NewsXMLMessage;
 import com.weixin.corp.entity.message.xml.TextXMLMessage;
-import com.weixin.corp.entity.user.User;
-import com.weixin.corp.main.TimerTaskServlet.DailyUpdateUserTimerTask;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -59,6 +46,8 @@ public class MessageService {
 	public static String MEDIA_TEMP_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
 
 	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
+	
+	public static String MPNEWS_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_mpnews?access_token=ACCESS_TOKEN";
 
 	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
 
@@ -200,37 +189,57 @@ public class MessageService {
 			}
 		}
 		// test
-//		String mediaId = "2U3efl32gH-nXPgi30kLBdVjbI5IuwrizqblJift-Okdkpw3AT1FJi779H0HFOEnM0bcZv_qEadmPvyw5fkJDOg";
-//		ImageXMLMessage x = new ImageXMLMessage(mediaId);
-//		x.setAgentID(9);
-//		x.setCreateTime(new Date().getTime());
-//		x.setFromUserName("wx522a5f82e335b883");
-//		x.setToUserName("leevo_pu");
+		// String mediaId =
+		// "2U3efl32gH-nXPgi30kLBdVjbI5IuwrizqblJift-Okdkpw3AT1FJi779H0HFOEnM0bcZv_qEadmPvyw5fkJDOg";
+		// ImageXMLMessage x = new ImageXMLMessage(mediaId);
+		// x.setAgentID(9);
+		// x.setCreateTime(new Date().getTime());
+		// x.setFromUserName("wx522a5f82e335b883");
+		// x.setToUserName("leevo_pu");
 		responseMsg = textMessageToXml(defaultMessage);
 		return responseMsg;
 	}
 
-	public static boolean sendMessage(CorpBaseJsonMessage jsonMessage) {
+	public static int sendMessage(CorpBaseJsonMessage jsonMessage) {
 		JSONObject outputStr = JSONObject.fromObject(jsonMessage);
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
-		JSONObject jsonObject = WeixinUtil.httpsRequest(
-				MESSAGE_SEND,
+		JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
 				WeixinUtil.POST_REQUEST_METHOD,
 				outputStr.toString().replace("mediaId", "media_id"));
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
 						+ "，errmsg:" + jsonObject.getString("errmsg"));
-				return false;
+				return jsonObject.getInt("errcode");
 			}
 			if (jsonObject.has("invaliduser")
 					&& !"".equals(jsonObject.getString("invaliduser"))) {
 				log.error("丢失接收人:" + jsonObject.getString("invaliduser")
 						+ "，请确认用户更新情况");
-				return false;
+				return ErrorCode.MESSAGE_LOST_USER;
+			}
+			return 0;
+		}
+		return ErrorCode.MESSAGE_NO_RETURN;
+	}
+	
+	
+	public static JSONObject uploadMPNews(RequestCall call) {
+		//生成图文消息体
+		MpNewsJsonMessage jsonMessage = 
+		 new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText(),call.getDigest());
+		
+		JSONObject jsonObject = WeixinUtil.httpsRequest(
+				MessageService.MPNEWS_UPLOAD.replace("TYPE",MPNEWS_MSG_TYPE), WeixinUtil.POST_REQUEST_METHOD,
+				JSONObject.fromObject(jsonMessage).toString().replace("mediaId", "media_id"));
+		if (null != jsonObject) {
+			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
+				log.error("请求图文永久素材上传接口失败 errcode:"
+						+ jsonObject.getInt("errcode") + "，errmsg:"
+						+ jsonObject.getString("errmsg"));
 			}
 		}
-		return true;
+		return jsonObject;
 	}
 
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
@@ -255,14 +264,9 @@ public class MessageService {
 
 	public static JSONObject uploadTempMedia(RequestCall call) {
 		String msgType = call.getMsgType();
-		//如果是图文类型素材，修改以图片类型上传
-		if(MPNEWS_MSG_TYPE.equals(msgType)){
-			msgType=IMAGE_MSG_TYPE;
-		}
-		
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
-				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE",msgType), WeixinUtil.POST_REQUEST_METHOD,
-				call.getMedia());
+				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE", msgType),
+				WeixinUtil.POST_REQUEST_METHOD, call);
 		if (null != jsonObject) {
 			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
 				log.error("请求临时素材上传接口失败 errcode:"
@@ -293,7 +297,7 @@ public class MessageService {
 		return jsonObject;
 	}
 
-	public static boolean deletePermanentMedia(String media_id) {
+	public static int deletePermanentMedia(String media_id) {
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				MEDIA_PERMANENT_DELETE.replace("MEDIA_ID", media_id),
 				WeixinUtil.GET_REQUEST_METHOD, null);
@@ -301,10 +305,11 @@ public class MessageService {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
 						+ "，errmsg:" + jsonObject.getString("errmsg"));
-				return false;
+				return jsonObject.getInt("errcode");
 			}
+			return 0;
 		}
-		return true;
+		return ErrorCode.MESSAGE_NO_RETURN;
 	}
 
 	/**
@@ -318,9 +323,10 @@ public class MessageService {
 
 		for (RequestCall call : WeixinUtil.getGroupMessagePool().get(todayStr)) {
 			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
-			if (sendMessage(jsonMessage)) {
+			if (0 == sendMessage(jsonMessage)) {
 				successMessages.add(call);
 			}
+			// else 失败？？
 			try {
 				// 间隔发送，降低调用微信服务器压力
 				Thread.sleep(2 * 1000);
@@ -378,7 +384,7 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
-			jsonMessage = new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText(),call.getDigest());
+			jsonMessage = new MpNewsJsonMessage(call.getMediaId());
 			break;
 		default:
 			break;
@@ -399,91 +405,13 @@ public class MessageService {
 		// 转换
 		// 转换toUser逗号或竖线分割的列表成userid竖线分割的列表
 		// jsonMessage.setTouser(call.getToUser());
-		String userId = convert(call.getToUser());
+		String userId = CommonUtil.convert(call.getToUser());
 		jsonMessage.setTouser(userId);
 		// jsonMessage.setTouser("leevo_pu");
 		return jsonMessage;
 	}
 
-	/**
-	 * 将传入的toUser与微信端信息匹配 转化为userID
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public static String convert(String toUser) {
-		String userIds = "";
-		// 从微信端取通讯录数据 :问题：根据部门id从微信端取人员详情 不成功 url正常
-		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
-		x.run();
-		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
-		System.out.println(maps.keySet().toString());
-		Object[] strs = maps.keySet().toArray();
-		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
-			// System.out.println("包含");
-			String users[] = toUser.split(",");
-			for (int i = 0; i < users.length; i++) {
-				String user = users[i];
-				String ph = "";
-				if (user.length() > 11) {
-					// 取最后11位 如果没填手机号则不做处理
-					ph = user.substring(user.length() - 11, user.length());
-					String dep = "";
-					// 判断是否全为数字 flag： TRUE FALSE
-					if (isNum(ph)) {
-						// 拿到部门名称
-						dep = user.substring(0, user.length() - 11);
-						// 遍历部门名称，匹配信息
-						for (int j = 0; j < strs.length; j++) {
-							// 部门匹配 拼接userId
-							if (strs[j].equals(dep)) {
-								HashMap<String, User> datas = maps.get(dep);
-								User data = datas.get(ph);
-								if (null != data) {
-									userIds += data.getUserid() + "|";
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if(toUser.length() > 11) {// 只有一个单独的字符串,进行分割
-			String ph = toUser.substring(toUser.length() - 11, toUser.length());
-			if (isNum(ph)) {
-				String dep = toUser.substring(0, toUser.length() - 11);
-				for (int j = 0; j < strs.length; j++) {
-					// 部门匹配
-					if (strs[j].equals(dep)) {
-						HashMap<String, User> datas = maps.get(dep);
-						User data = datas.get(ph);
-						if (null != data) {
-							userIds = data.getUserid();
-						}
-					}
-				}
-			}
-		}
-		if(!("".equals(userIds)) ){
-			// 处理字符串最后一位"|"
-			String s = userIds.substring(userIds.length() - 1, userIds.length());
-			if ("|".equals(s)) {// 去除最后一个"|"
-				userIds = userIds.substring(0, userIds.length() - 1);
-			}
-		}
-		return userIds;
-	}
-
-	private static boolean isNum(String ph) {
-		// 正则判断
-		Pattern pattern = Pattern.compile("[0-9]*");
-		Matcher isNum = pattern.matcher(ph);
-		if (!isNum.matches()) {
-			// 不全是数字，可能没有填手机号
-			return false;
-		}
-		return true;
-	}
-
+	
 	/**
 	 * 消息类型：文本
 	 */
@@ -518,200 +446,202 @@ public class MessageService {
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
 
-	/**
-	 * 模拟上层应用调用请求
-	 */
-	public static String testUploadToServer(String requestUrl, RequestCall call) {
-		String result = null;
-		String msgType = call.getMsgType();
-		switch (msgType) {
-		case TEXT_MSG_TYPE:
-			System.out.println("123");
-		case IMAGE_MSG_TYPE:
-			System.out.println(234);
-		case VIDEO_MSG_TYPE:
-			System.out.println(345);
-		case FILE_MSG_TYPE:
-			break;
-		default:
-			return "发送的消息类型不正确，只允许text,image,video和file";
-		}
-		HttpURLConnection httpUrlConn = null;
-		try {
-//			TrustManager[] tm = { new MyX509TrustManager() };
-//			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-//			sslContext.init(null, tm, new java.security.SecureRandom());
-//			// 从上述SSLContext对象中得到SSLSocketFactory对象
-//			SSLSocketFactory ssf = sslContext.getSocketFactory();
-
-			URL url = new URL(requestUrl);
-			httpUrlConn = (HttpURLConnection) url
-					.openConnection();
-//			httpUrlConn.setSSLSocketFactory(ssf);
-			httpUrlConn = (HttpURLConnection) url.openConnection();
-			httpUrlConn.setRequestMethod("POST"); // 以Post方式提交表单，默认get方式
-			httpUrlConn.setDoInput(true);
-			httpUrlConn.setDoOutput(true);
-			httpUrlConn.setUseCaches(false); // post方式不能使用缓存
-			// 设置请求头信息
-			httpUrlConn.setRequestProperty("Connection", "Keep-Alive");
-			httpUrlConn.setRequestProperty("Charset", "UTF-8");
-			// 设置边界
-			String BOUNDARY = "---------------------------"
-					+ System.currentTimeMillis();
-			httpUrlConn.setRequestProperty("Content-Type",
-					"multipart/form-data; boundary=" + BOUNDARY);
-			final String newLine = "\r\n";
-
-			// 获得输出流
-			OutputStream out = new DataOutputStream(httpUrlConn.getOutputStream());
-
-			// 请求正文信息
-			// 第一部分：
-			StringBuilder sb = new StringBuilder();
-			sb.append("--"); // 必须多两道线
-			sb.append(BOUNDARY);
-			sb.append(newLine);
-
-			// 添加消息类型
-			sb.append("Content-Disposition: form-data;name=\"msgType\"");
-			sb.append(newLine);
-			sb.append(newLine);
-			sb.append(msgType);
-			sb.append(newLine);
-			sb.append("Content-Type:application/octet-stream");
-			sb.append(newLine);
-			sb.append(newLine);
-
-			if(null != call.getFromUser()){
-			// 添加发送人
-			sb.append("--"); // 必须多两道线
-			sb.append(BOUNDARY);
-			sb.append(newLine);
-			sb.append("Content-Disposition: form-data;name=\"fromUser\"");
-			sb.append(newLine);
-			sb.append(newLine);
-			sb.append(call.getFromUser());
-			sb.append(newLine);
-			sb.append("Content-Type:application/octet-stream");
-			sb.append(newLine);
-			sb.append(newLine);
-			}
-
-			// 添加接收人
-			sb.append("--"); // 必须多两道线
-			sb.append(BOUNDARY);
-			sb.append(newLine);
-			sb.append("Content-Disposition: form-data;name=\"toUser\"");
-			sb.append(newLine);
-			sb.append(newLine);
-			sb.append(call.getToUser());
-			sb.append(newLine);
-			sb.append("Content-Type:application/octet-stream");
-			sb.append(newLine);
-			sb.append(newLine);
-
-			if(null != call.getSendTime()){
-			// 添加时间
-			sb.append("--"); // 必须多两道线
-			sb.append(BOUNDARY);
-			sb.append(newLine);
-			sb.append("Content-Disposition: form-data;name=\"sendTime\"");
-			sb.append(newLine);
-			sb.append(newLine);
-			sb.append(call.getSendTime());
-			sb.append(newLine);
-			sb.append("Content-Type:application/octet-stream");
-			sb.append(newLine);
-			sb.append(newLine);
-			}
-
-			// 添加消息内容（文本或文件）
-			sb.append("--"); // 必须多两道线
-			sb.append(BOUNDARY);
-			sb.append(newLine);
-			if (TEXT_MSG_TYPE.equals(msgType)) {
-				sb.append("Content-Disposition: form-data;name=\"text\"");
-				sb.append(newLine);
-				sb.append(newLine);
-				sb.append(call.getText());
-				sb.append(newLine);
-				sb.append("Content-Type:application/octet-stream");
-				sb.append(newLine);
-				sb.append(newLine);
-				out.write(sb.toString().getBytes("utf-8"));
-			} else {
-				File media = call.getMedia();
-				if (!media.exists()) {
-					return "选择的消息文件不存在";
-				}
-				sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
-						+ media.getName() + "\"");
-				sb.append(newLine);
-				sb.append("Content-Type:application/octet-stream");
-				sb.append(newLine);
-				sb.append(newLine);
-				out.write(sb.toString().getBytes("utf-8"));
-				// 文件正文部分
-				// 把文件已流文件的方式 推入到url中
-				DataInputStream in = new DataInputStream(new FileInputStream(
-						media));
-				int bytes = 0;
-				byte[] bufferOut = new byte[1024];
-				while ((bytes = in.read(bufferOut)) != -1) {
-					out.write(bufferOut, 0, bytes);
-				}
-				in.close();
-				out.write(newLine.getBytes());
-				// 结尾部分
-				byte[] foot = ("--" + BOUNDARY + "--").getBytes("utf-8");
-				// 定义最后数据分隔线
-				out.write(foot);
-				out.write(newLine.getBytes());
-				out.flush();
-			}
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.error("调用消息接口请求失败");
-			return "调用消息接口请求失败";
-		}
-
-		StringBuffer buffer = new StringBuffer();
-		BufferedReader reader = null;
-		try {
-			// 定义BufferedReader输入流来读取URL的响应
-			reader = new BufferedReader(new InputStreamReader(
-					httpUrlConn.getInputStream()));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				buffer.append(line);
-			}
-			if (result == null) {
-				result = buffer.toString();
-			}
-		} catch (IOException e) {
-			log.error("获取POST请求响应出现异常！" + e);
-			e.printStackTrace();
-			return "获取POST请求响应出现异常！";
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return result;
-	}
+	// /**
+	// * 模拟上层应用Servlet调用请求
+	// */
+	// public static String testUploadToServer(String requestUrl, RequestCall
+	// call) {
+	// String result = null;
+	// String msgType = call.getMsgType();
+	// switch (msgType) {
+	// case TEXT_MSG_TYPE:
+	// System.out.println("123");
+	// case IMAGE_MSG_TYPE:
+	// System.out.println(234);
+	// case VIDEO_MSG_TYPE:
+	// System.out.println(345);
+	// case FILE_MSG_TYPE:
+	// break;
+	// default:
+	// return "发送的消息类型不正确，只允许text,image,video和file";
+	// }
+	// HttpURLConnection httpUrlConn = null;
+	// try {
+	// // TrustManager[] tm = { new MyX509TrustManager() };
+	// // SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+	// // sslContext.init(null, tm, new java.security.SecureRandom());
+	// // // 从上述SSLContext对象中得到SSLSocketFactory对象
+	// // SSLSocketFactory ssf = sslContext.getSocketFactory();
+	//
+	// URL url = new URL(requestUrl);
+	// httpUrlConn = (HttpURLConnection) url
+	// .openConnection();
+	// // httpUrlConn.setSSLSocketFactory(ssf);
+	// httpUrlConn = (HttpURLConnection) url.openConnection();
+	// httpUrlConn.setRequestMethod("POST"); // 以Post方式提交表单，默认get方式
+	// httpUrlConn.setDoInput(true);
+	// httpUrlConn.setDoOutput(true);
+	// httpUrlConn.setUseCaches(false); // post方式不能使用缓存
+	// // 设置请求头信息
+	// httpUrlConn.setRequestProperty("Connection", "Keep-Alive");
+	// httpUrlConn.setRequestProperty("Charset", "UTF-8");
+	// // 设置边界
+	// String BOUNDARY = "---------------------------"
+	// + System.currentTimeMillis();
+	// httpUrlConn.setRequestProperty("Content-Type",
+	// "multipart/form-data; boundary=" + BOUNDARY);
+	// final String newLine = "\r\n";
+	//
+	// // 获得输出流
+	// OutputStream out = new DataOutputStream(httpUrlConn.getOutputStream());
+	//
+	// // 请求正文信息
+	// // 第一部分：
+	// StringBuilder sb = new StringBuilder();
+	// sb.append("--"); // 必须多两道线
+	// sb.append(BOUNDARY);
+	// sb.append(newLine);
+	//
+	// // 添加消息类型
+	// sb.append("Content-Disposition: form-data;name=\"msgType\"");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// sb.append(msgType);
+	// sb.append(newLine);
+	// sb.append("Content-Type:application/octet-stream");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	//
+	// if(null != call.getFromUser()){
+	// // 添加发送人
+	// sb.append("--"); // 必须多两道线
+	// sb.append(BOUNDARY);
+	// sb.append(newLine);
+	// sb.append("Content-Disposition: form-data;name=\"fromUser\"");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// sb.append(call.getFromUser());
+	// sb.append(newLine);
+	// sb.append("Content-Type:application/octet-stream");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// }
+	//
+	// // 添加接收人
+	// sb.append("--"); // 必须多两道线
+	// sb.append(BOUNDARY);
+	// sb.append(newLine);
+	// sb.append("Content-Disposition: form-data;name=\"toUser\"");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// sb.append(call.getToUser());
+	// sb.append(newLine);
+	// sb.append("Content-Type:application/octet-stream");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	//
+	// if(null != call.getSendTime()){
+	// // 添加时间
+	// sb.append("--"); // 必须多两道线
+	// sb.append(BOUNDARY);
+	// sb.append(newLine);
+	// sb.append("Content-Disposition: form-data;name=\"sendTime\"");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// sb.append(call.getSendTime());
+	// sb.append(newLine);
+	// sb.append("Content-Type:application/octet-stream");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// }
+	//
+	// // 添加消息内容（文本或文件）
+	// sb.append("--"); // 必须多两道线
+	// sb.append(BOUNDARY);
+	// sb.append(newLine);
+	// if (TEXT_MSG_TYPE.equals(msgType)) {
+	// sb.append("Content-Disposition: form-data;name=\"text\"");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// sb.append(call.getText());
+	// sb.append(newLine);
+	// sb.append("Content-Type:application/octet-stream");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// out.write(sb.toString().getBytes("utf-8"));
+	// } else {
+	// File media = call.getMedia();
+	// if (!media.exists()) {
+	// return "选择的消息文件不存在";
+	// }
+	// sb.append("Content-Disposition: form-data;name=\"media\";filename=\""
+	// + media.getName() + "\"");
+	// sb.append(newLine);
+	// sb.append("Content-Type:application/octet-stream");
+	// sb.append(newLine);
+	// sb.append(newLine);
+	// out.write(sb.toString().getBytes("utf-8"));
+	// // // 文件正文部分
+	// // // 把文件已流文件的方式 推入到url中
+	// // DataInputStream in = new DataInputStream(new FileInputStream(
+	// // media));
+	// // int bytes = 0;
+	// // byte[] bufferOut = new byte[1024];
+	// // while ((bytes = in.read(bufferOut)) != -1) {
+	// // out.write(bufferOut, 0, bytes);
+	// // }
+	// // in.close();
+	// out.write(newLine.getBytes());
+	// // 结尾部分
+	// byte[] foot = ("--" + BOUNDARY + "--").getBytes("utf-8");
+	// // 定义最后数据分隔线
+	// out.write(foot);
+	// out.write(newLine.getBytes());
+	// out.flush();
+	// }
+	// out.close();
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// log.error("调用消息接口请求失败");
+	// return "调用消息接口请求失败";
+	// }
+	//
+	// StringBuffer buffer = new StringBuffer();
+	// BufferedReader reader = null;
+	// try {
+	// // 定义BufferedReader输入流来读取URL的响应
+	// reader = new BufferedReader(new InputStreamReader(
+	// httpUrlConn.getInputStream()));
+	// String line = null;
+	// while ((line = reader.readLine()) != null) {
+	// buffer.append(line);
+	// }
+	// if (result == null) {
+	// result = buffer.toString();
+	// }
+	// } catch (IOException e) {
+	// log.error("获取POST请求响应出现异常！" + e);
+	// e.printStackTrace();
+	// return "获取POST请求响应出现异常！";
+	// } finally {
+	// if (reader != null) {
+	// try {
+	// reader.close();
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// }
+	// return result;
+	// }
 
 	public static void main(String[] args) throws Exception {
 		RequestCall call = new RequestCall();
 		call.setMsgType("image");
 		call.setToUser("888");
-		call.setMedia(new File("C:/Users/Administrator/Desktop/abc.png"));
-		MessageService.testUploadToServer("http://localhost/WeixinTest3/uploadServlet", call);
+		call.setMediaName("C:/Users/Administrator/Desktop/abc.png");
+		// MessageService.testUploadToServer("http://localhost/WeixinTest3/uploadServlet",
+		// call);
 	}
 
 }
