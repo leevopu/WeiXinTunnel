@@ -56,12 +56,10 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		final int MXA_SEGSIZE = 1024 * 1024 * 20;// 设置每批最大的数据量 20M
 		long startDoPostTime = System.currentTimeMillis();
 
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
-		long contentLength = request.getContentLength();
 		RequestCall call = parseRequestCall(request);
 		if (null != call.getErrorInfo()) {
 			response.getWriter().write(call.getErrorInfo());
