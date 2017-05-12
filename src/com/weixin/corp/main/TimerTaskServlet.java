@@ -60,7 +60,7 @@ public class TimerTaskServlet extends HttpServlet {
 			// // 启动定时更新用户信息，每天6点触发1次更新缓存
 			// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
 			// 启动循环监控用户自定义发送时间的消息
-			// new Thread(new DelayJsonMessageTimerTaskThread()).start();
+			 new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
 	}
 
@@ -106,49 +106,16 @@ public class TimerTaskServlet extends HttpServlet {
 	public static class DailyUpdateUserTimerTask implements Runnable {
 		@Override
 		public void run() {
-			// 测试
-			// Department department1 = new Department();
-			// department1.setId("1");
-			// department1.setName("财务");
-			// department1.setOrder(1);
-			// department1.setParentid(2);
-			//
-			// Department department2 = new Department();
-			// department2.setId("2");
-			// department2.setName("后勤");
-			// department2.setOrder(1);
-			// department2.setParentid(2);
-			//
-			// User user1 = new User();
-			// user1.setDepartment("1");
-			// user1.setMobile("13777777777");
-			// user1.setUserid("431");
-			//
-			// User user2 = new User();
-			// user2.setDepartment("2");
-			// user2.setMobile("13888888888");
-			// user2.setUserid("567");
-			//
-			// User user3 = new User();
-			// user3.setDepartment("2");
-			// user3.setMobile("13999999999");
-			// user3.setUserid("617");
-
-			// List<Department> departmentList = new ArrayList<Department>();
-			// departmentList.add(department1);
-			// departmentList.add(department2);
-			// List<User> userList = new ArrayList<User>();
-			// userList.add(user1);
-			// userList.add(user2);
-			// userList.add(user3);
 			try {
-				System.out.println("access_token:" + WeixinUtil.getNewAccessToken());
+				while(null == WeixinUtil.getAvailableAccessToken()){
+					Thread.sleep(5 * 1000);
+				}
 				System.out.println("开始执行每日定时更新用户");
 
 				// 获取微信全部部门信息
 				List<Department> departmentList = UserService.getDepartment();
 				if (null == departmentList) {
-					System.out.println("null department");
+					log.error("未获取到部门信息");
 					return;
 				}
 				// 遍历部门获取用户信息
@@ -202,7 +169,7 @@ public class TimerTaskServlet extends HttpServlet {
 		public void run() {
 			while (true) {
 				try {
-					AccessToken accessToken = WeixinUtil.getNewAccessToken();
+					AccessToken accessToken = WeixinUtil.requestNewAccessToken();
 					if (null != accessToken) {
 						log.info(String.format(
 								"获取access_token成功，有效时长%d秒 token:%s",

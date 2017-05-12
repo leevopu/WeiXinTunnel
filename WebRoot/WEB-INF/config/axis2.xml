@@ -117,7 +117,7 @@
 
     <!-- If you have a front end host which exposes this webservice using a different public URL  -->
     <!-- use this parameter to override autodetected url -->
-    <!--<parameter name="httpFrontendHostUrl">https://someotherhost/context</parameter>-->
+    <!--<parameter name="httpFrontendHostUrl">://someotherhost/context</parameter>-->
 
     <!--By default, JAXWS services are created by reading annotations. WSDL and schema are generated-->
     <!--using a separate WSDL generator only when ?wsdl is called. Therefore, even if you engage-->
@@ -193,6 +193,10 @@
     <!-- ================================================= -->
     <!-- Transport Ins -->
     <!-- ================================================= -->
+    <transportReceiver name="https" class="org.apache.axis2.transport.http.SimpleHTTPServer">  
+        <parameter name="port">8443</parameter>  
+    </transportReceiver> 
+    
     <transportReceiver name="http"
                        class="org.apache.axis2.transport.http.SimpleHTTPServer">
         <parameter name="port">8080</parameter>

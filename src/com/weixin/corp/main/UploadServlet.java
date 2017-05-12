@@ -50,9 +50,12 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("start doPost Time = " + startDoPostTime);
 		RequestCall call = parseRequestCall(request);
 		if (null != call.getErrorInfo()) {
-			response.getWriter().write(call.getErrorInfo());
+			response.getWriter().write(
+					new String(call.getErrorInfo().getBytes("UTF-8")));
+		} else {
+			response.getWriter().write(
+					new String(UploadService.process(call).getBytes("UTF-8")));
 		}
-		response.getWriter().write(UploadService.process(call));
 	}
 
 	private RequestCall parseRequestCall(HttpServletRequest request)
@@ -118,7 +121,8 @@ public class UploadServlet extends HttpServlet {
 					mediaName = line;
 					// 从字节数组中取出文件数组
 					pos = CommonUtil.byteIndexOf(mediaByte, temp, 0);
-					mediaByte = CommonUtil.subBytes(mediaByte, pos + temp.getBytes().length + 2, mediaByte.length);// 去掉前面的部分
+					mediaByte = CommonUtil.subBytes(mediaByte,
+							pos + temp.getBytes().length + 2, mediaByte.length);// 去掉前面的部分
 					int n = 0;
 					/**
 					 * 过滤boundary下形如 Content-Disposition: form-data; name="bin";
@@ -131,7 +135,8 @@ public class UploadServlet extends HttpServlet {
 						if (line.equals(""))
 							n++;
 
-						mediaByte = CommonUtil.subBytes(mediaByte, line.getBytes().length + 2, mediaByte.length);
+						mediaByte = CommonUtil.subBytes(mediaByte,
+								line.getBytes().length + 2, mediaByte.length);
 					}
 					pos = CommonUtil.byteIndexOf(mediaByte, boundary, 0);
 					if (pos != -1)
@@ -177,16 +182,16 @@ public class UploadServlet extends HttpServlet {
 			}
 		}
 
-		if (CommonUtil.StringisEmpty(call.getText())) {
-			if (CommonUtil.StringisEmpty(mediaName)) {
+		if (CommonUtil.StringisEmpty(mediaName)) {
+			if (CommonUtil.StringisEmpty(call.getText())) {
 				call.setErrorInfo("文本内容和素材文件不能同时为空");
 			} else {
 				call.setMsgType(MessageService.TEXT_MSG_TYPE);
 			}
-			return call;
+		} else {
+			call.setMediaByte(mediaByte);
+			call.setMediaName(mediaName);
 		}
-		call.setMediaByte(mediaByte);
-		call.setMediaName(mediaName);
 		return call;
 	}
 
