@@ -194,6 +194,7 @@ public class UserService {
 		} else {
 			return null;
 		}
+		
 		// JSONArray jsonArray = jsonObject.getJSONArray("department");
 		//String testDepartStr = "{  \"errcode\": 0, \"errmsg\": \"ok\", \"department\": [       {           \"id\": 2,   \"idx\": 2,           \"name\": \"广州研发中心\",               \"order\": 10       },       {           \"id\": 3,      \"ifx\": \"abc\",           \"name\": \"邮箱产品部\",           \"parentid\": 2,           \"order\": 40       }   ]}";
 		JSONArray jsonArray = JSONObject.fromObject(jsonObject).getJSONArray("department");

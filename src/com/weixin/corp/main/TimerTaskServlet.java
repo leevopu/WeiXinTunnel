@@ -56,11 +56,11 @@ public class TimerTaskServlet extends HttpServlet {
 			Runnable userPoolInit = new DailyUpdateUserTimerTask();
 			userPoolInit.run();
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
-//			dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
-//			// 启动定时更新用户信息，每天6点触发1次更新缓存
-//			dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
+			// dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
+			// // 启动定时更新用户信息，每天6点触发1次更新缓存
+			// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
 			// 启动循环监控用户自定义发送时间的消息
-//			new Thread(new DelayJsonMessageTimerTaskThread()).start();
+			// new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
 	}
 
@@ -142,11 +142,13 @@ public class TimerTaskServlet extends HttpServlet {
 			// userList.add(user2);
 			// userList.add(user3);
 			try {
+				System.out.println("access_token:" + WeixinUtil.getNewAccessToken());
 				System.out.println("开始执行每日定时更新用户");
 
 				// 获取微信全部部门信息
 				List<Department> departmentList = UserService.getDepartment();
 				if (null == departmentList) {
+					System.out.println("null department");
 					return;
 				}
 				// 遍历部门获取用户信息

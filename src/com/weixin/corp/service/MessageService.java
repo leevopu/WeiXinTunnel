@@ -488,7 +488,7 @@ public class MessageService {
 
 	private static boolean isAllNum(String ph) {
 		try {
-			Integer.parseInt(ph);
+			Long.parseLong(ph);
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -528,5 +528,9 @@ public class MessageService {
 	 * 事件类型：CLICK(自定义菜单点击事件)
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
+	
+	public static void main(String[] args) {
+		System.out.println(Integer.parseInt("12300000000"));
+	}
 
 }
