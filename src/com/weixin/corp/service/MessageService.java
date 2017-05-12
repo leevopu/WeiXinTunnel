@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
@@ -49,7 +47,7 @@ public class MessageService {
 	public static String MEDIA_TEMP_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
 
 	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
-	
+
 	public static String MPNEWS_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_mpnews?access_token=ACCESS_TOKEN";
 
 	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
@@ -192,12 +190,13 @@ public class MessageService {
 			}
 		}
 		// test
-//		String mediaId = "2U3efl32gH-nXPgi30kLBdVjbI5IuwrizqblJift-Okdkpw3AT1FJi779H0HFOEnM0bcZv_qEadmPvyw5fkJDOg";
-//		ImageXMLMessage x = new ImageXMLMessage(mediaId);
-//		x.setAgentID(9);
-//		x.setCreateTime(new Date().getTime());
-//		x.setFromUserName("wx522a5f82e335b883");
-//		x.setToUserName("leevo_pu");
+		// String mediaId =
+		// "2U3efl32gH-nXPgi30kLBdVjbI5IuwrizqblJift-Okdkpw3AT1FJi779H0HFOEnM0bcZv_qEadmPvyw5fkJDOg";
+		// ImageXMLMessage x = new ImageXMLMessage(mediaId);
+		// x.setAgentID(9);
+		// x.setCreateTime(new Date().getTime());
+		// x.setFromUserName("wx522a5f82e335b883");
+		// x.setToUserName("leevo_pu");
 		responseMsg = textMessageToXml(defaultMessage);
 		return responseMsg;
 	}
@@ -224,15 +223,17 @@ public class MessageService {
 		}
 		return ErrorCode.MESSAGE_NO_RETURN;
 	}
-	
+
 	public static JSONObject uploadMPNews(RequestCall call) {
-		//生成图文消息体
-		MpNewsJsonMessage jsonMessage = 
-		 new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText(),call.getDigest());
-		
+		// 生成图文消息体
+		MpNewsJsonMessage jsonMessage = new MpNewsJsonMessage(call.getTitle(),
+				call.getMediaId(), call.getText(), call.getDigest());
+
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
-				MessageService.MPNEWS_UPLOAD.replace("TYPE",MPNEWS_MSG_TYPE), WeixinUtil.POST_REQUEST_METHOD,
-				JSONObject.fromObject(jsonMessage).toString().replace("mediaId", "media_id"));
+				MessageService.MPNEWS_UPLOAD.replace("TYPE", MPNEWS_MSG_TYPE),
+				WeixinUtil.POST_REQUEST_METHOD,
+				JSONObject.fromObject(jsonMessage).toString()
+						.replace("mediaId", "media_id"));
 		if (null != jsonObject) {
 			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
 				log.error("请求图文永久素材上传接口失败 errcode:"
@@ -242,12 +243,12 @@ public class MessageService {
 		}
 		return jsonObject;
 	}
-	
+
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
 		String msgType = call.getMsgType();
-		//如果是图文类型素材，修改以图片类型上传
-		if(MPNEWS_MSG_TYPE.equals(msgType)){
-			msgType=IMAGE_MSG_TYPE;
+		// 如果是图文类型素材，修改以图片类型上传
+		if (MPNEWS_MSG_TYPE.equals(msgType)) {
+			msgType = IMAGE_MSG_TYPE;
 		}
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
 				MessageService.MEDIA_PERMANENT_UPLOAD.replace("TYPE", msgType),
@@ -428,7 +429,7 @@ public class MessageService {
 			userIds = splitToUser(toUser, userIds, maps, strs, "\\|");
 		} else if (toUser.length() > 11) {// 只有一个单独的字符串,进行分割
 			String ph = toUser.substring(toUser.length() - 11, toUser.length());
-			if (isNum(ph)) {
+			if (isAllNum(ph)) {
 				String dep = toUser.substring(0, toUser.length() - 11);
 				for (int j = 0; j < strs.length; j++) {
 					// 部门匹配
@@ -452,7 +453,7 @@ public class MessageService {
 		}
 		return userIds;
 	}
-	
+
 	private static String splitToUser(String toUser, String userIds,
 			Map<String, HashMap<String, User>> maps, Object[] strs,
 			String signal) {
@@ -465,7 +466,7 @@ public class MessageService {
 				ph = user.substring(user.length() - 11, user.length());
 				String dep = "";
 				// 判断是否全为数字 flag： TRUE FALSE
-				if (isNum(ph)) {
+				if (isAllNum(ph)) {
 					// 拿到部门名称
 					dep = user.substring(0, user.length() - 11);
 					// 遍历部门名称，匹配信息
@@ -485,12 +486,10 @@ public class MessageService {
 		return userIds;
 	}
 
-	private static boolean isNum(String ph) {
-		// 正则判断
-		Pattern pattern = Pattern.compile("[0-9]*");
-		Matcher isNum = pattern.matcher(ph);
-		if (!isNum.matches()) {
-			// 不全是数字，可能没有填手机号
+	private static boolean isAllNum(String ph) {
+		try {
+			Integer.parseInt(ph);
+		} catch (NumberFormatException e) {
 			return false;
 		}
 		return true;

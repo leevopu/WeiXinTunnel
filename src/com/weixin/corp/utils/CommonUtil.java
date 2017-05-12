@@ -17,11 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -33,7 +29,6 @@ import org.apache.commons.lang.time.DateUtils;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
-import com.weixin.corp.entity.user.User;
 
 public class CommonUtil {
 
@@ -69,18 +64,17 @@ public class CommonUtil {
 	 *            输出图片高
 	 * @return
 	 */
-	public static boolean compressPic(String imageName, int outputHeight,
+	public static boolean compressPic(File image, int outputHeight,
 			int outputWidth) {
 		boolean proportion = true;
-		File file = new File(imageName);
 		try {
 			BufferedImage img;
-			String type = StringUtils.substringAfterLast(file.getName(), ".");
+			String type = StringUtils.substringAfterLast(image.getName(), ".");
 			if ("jpg".equals(type) || "JPEG".equals(type)) {
 				System.out.println("此图片后缀为：" + type);
-				img = getImage(file);
+				img = getImage(image);
 			} else {
-				img = ImageIO.read(file);
+				img = ImageIO.read(image);
 			}
 			int newWidth;
 			int newHeight;
@@ -108,11 +102,7 @@ public class CommonUtil {
 			tag.getGraphics().drawImage(
 					img.getScaledInstance(newWidth, newHeight,
 							Image.SCALE_SMOOTH), 0, 0, null);
-			File f = new File(file.toString());
-			if (!f.exists()) {
-				f.mkdirs();
-			}
-			FileOutputStream out = new FileOutputStream(file);
+			FileOutputStream out = new FileOutputStream(image);
 			// JPEGImageEncoder可适用于其他图片类型的转换
 			JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
 			encoder.encode(tag);
@@ -208,18 +198,6 @@ public class CommonUtil {
 				Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 		return new BufferedImage(cm, (WritableRaster) raster, true, null);
 	}
-	
-	private static boolean isNum(String ph) {
-		// 正则判断
-		Pattern pattern = Pattern.compile("[0-9]*");
-		Matcher isNum = pattern.matcher(ph);
-		if (!isNum.matches()) {
-			// 不全是数字，可能没有填手机号
-			return false;
-		}
-		return true;
-	}
-
 
 	public static void main(String[] args) {
 		String dateStr = "2011-01-01 12:01:12";

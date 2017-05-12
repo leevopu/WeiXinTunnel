@@ -1,9 +1,8 @@
 package com.weixin.corp.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -22,26 +21,10 @@ import com.weixin.corp.utils.WeixinUtil;
 public class UploadService {
 	private static Log log = LogFactory.getLog(UploadService.class);
 
-	public boolean uploadWeixinByWebservice(RequestCall call) {
-
-		byte[] imageByte = call.getMediaByte();
-		DataInputStream in = new DataInputStream(new ByteArrayInputStream(
-				imageByte));
-		try {
-			in.readFully(imageByte);
-			in.close();
-			FileOutputStream fos = null;
-			File mediaFile = new File("D:/temp/" + call.getMediaName());
-			fos = new FileOutputStream(mediaFile);
-			fos.write(imageByte, 0, imageByte.length);
-			fos.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return true;
-	}
-
+	public static final String UPLOAD_TEMP_URL = "D:/temp/";
+	
 	public static String process(RequestCall call) {
+		System.out.println(WeixinUtil.getAvailableAccessToken());
 
 		// 判断文件长度
 		long contentLength = call.getMediaByte().length;
@@ -86,6 +69,30 @@ public class UploadService {
 			log.error(missFieldValue.toString());
 			return missFieldValue.toString();
 		}
+		
+		File uploadRootFolder = new File(UPLOAD_TEMP_URL);
+		if (!uploadRootFolder.exists()) {
+			uploadRootFolder.mkdir();
+		}
+		File uploadDailyFolder = new File(UPLOAD_TEMP_URL
+				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
+		if (!uploadDailyFolder.exists()) {
+			uploadDailyFolder.mkdir();
+		}
+		File media = new File(uploadDailyFolder.getAbsolutePath()
+				+ File.separator + call.getMediaName());
+		try{
+		// 创建输出流
+		FileOutputStream outStream = new FileOutputStream(media);
+		// 写入数据
+		outStream.write(call.getMediaByte());
+		// 关闭输出流
+		outStream.close();
+		}catch(IOException e){
+			e.printStackTrace();
+			return "二进制流转成素材失败";
+		}
+		
 		// 针对图片文件 如果文件过大，则进行压缩
 		if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())
 				|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
@@ -99,7 +106,7 @@ public class UploadService {
 			int width = 800;
 			int height = 650;
 			// 图片压缩
-			boolean flag = CommonUtil.compressPic(call.getMediaName(), height,
+			boolean flag = CommonUtil.compressPic(media, height,
 					width);
 			if (!flag) {
 				return "图片压缩失败，请检查图片大小及类型！";

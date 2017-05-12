@@ -2,13 +2,10 @@ package com.weixin.corp.main;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Date;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -34,8 +31,6 @@ public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 5941583433272362854L;
 
 	private static Log log = LogFactory.getLog(UploadServlet.class);
-
-	public static final String UPLOAD_TEMP_URL = "D:/temp/";
 
 	@Override
 	protected void doGet(HttpServletRequest request,
@@ -202,26 +197,8 @@ public class UploadServlet extends HttpServlet {
 				return call;
 			}
 		}
-
-		File uploadRootFolder = new File(UPLOAD_TEMP_URL);
-		if (!uploadRootFolder.exists()) {
-			uploadRootFolder.mkdir();
-		}
-		File uploadDailyFolder = new File(UPLOAD_TEMP_URL
-				+ CommonUtil.getDateStr(new Date(), "yyyy-MM-dd"));
-		if (!uploadDailyFolder.exists()) {
-			uploadDailyFolder.mkdir();
-		}
-		File media = new File(uploadDailyFolder.getAbsolutePath()
-				+ File.separator + fileName);
-		// 创建输出流
-		FileOutputStream outStream = new FileOutputStream(media);
-		// 写入数据
-		outStream.write(b, 0, b.length - 1);
-		// 关闭输出流
-		outStream.close();
 		call.setMediaByte(b);
-		call.setMediaName(media.getCanonicalPath());
+		call.setMediaName(fileName);
 		return call;
 	}
 
