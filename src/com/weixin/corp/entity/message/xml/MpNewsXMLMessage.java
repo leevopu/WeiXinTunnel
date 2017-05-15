@@ -20,7 +20,7 @@ public class MpNewsXMLMessage extends CorpBaseXMLMessage {
 
 	public MpNewsXMLMessage(String mediaId, String title,String thumb_media_id,String content,String digest) {
 		super();
-		MpArticle[] articles = {new MpArticle(title,thumb_media_id,content,digest)};
+		MpArticle[] articles = {new MpArticle(title,thumb_media_id,content)};
 		this.mpnews = new MpNews("", articles);
 		this.setMsgType("mpnews");
 	}
