@@ -6,6 +6,17 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
   
+<security-constraint>
+  <web-resource-collection>
+     <web-resource-name>SSL</web-resource-name>
+	 <url-pattern>/*</url-pattern>
+  </web-resource-collection>
+  <user-data-constraint>
+     <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+  </user-data-constraint>
+</security-constraint>
+
+   
   <servlet>
     <servlet-name>CorpWeixinServlet</servlet-name>
     <servlet-class>com.weixin.corp.main.CorpWeixinServlet</servlet-class>
@@ -69,8 +80,28 @@
         </init-param>
         <init-param>
             <param-name>token</param-name>
-            <param-value>weixin</param-value>  
+            <param-value>weixin</param-value>
         </init-param>
+        
+        
+<!-- 数据库jdbc连接配置 -->
+		<init-param>
+			<param-name>driverClassName</param-name>
+            <param-value>oracle.jdbc.driver.OracleDriver</param-value>
+        </init-param>
+        <init-param>
+			<param-name>url</param-name>
+            <param-value>jdbc:oracle:thin:@192.168.159.182:1521:xxxx</param-value>
+        </init-param>
+        <init-param>
+			<param-name>username</param-name>
+            <param-value>username</param-value>
+        </init-param>
+        <init-param>
+			<param-name>password</param-name>
+            <param-value>password</param-value>
+        </init-param>
+        
 <!-- 企业号下某个应用，目前只用1个，如果用多个可能就不能配死了 -->
         <init-param>
         	<param-name>agentid</param-name>

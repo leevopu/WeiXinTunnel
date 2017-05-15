@@ -63,11 +63,7 @@ public class WeixinUtil {
 	/**
 	 * 用户信息缓存池，外层key为部门名称，内层key为手机号
 	 */
-	private static Map<String, HashMap<String, User>> useridPool = new HashMap<String, HashMap<String, User>>();
-	/**
-	 * 图文素材缓冲池，key为模板标题 digest value为mparticle
-	 */
-	private static Map<String, MpNews> mpnewsPool = new HashMap<String, MpNews>();
+	private static HashMap<String, User> useridPool = new HashMap<String, User>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -137,14 +133,10 @@ public class WeixinUtil {
 		return groupMessagePool;
 	}
 
-	public static Map<String, HashMap<String, User>> getUseridPool() {
+	public static HashMap<String, User> getUseridPool() {
 		return useridPool;
 	}
 	
-	public static Map<String, MpNews> getMpnewsPool() {
-		return mpnewsPool;
-	}
-
 	public static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr) {
 		return httpsRequest(requestUrl, requestMethod, outputStr, null);
