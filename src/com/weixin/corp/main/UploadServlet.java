@@ -45,16 +45,14 @@ public class UploadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		long startDoPostTime = System.currentTimeMillis();
-
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
 		RequestCall call = parseRequestCall(request);
+		response.setContentType("text/html;charset=UTF-8");
 		if (null != call.getErrorInfo()) {
-			response.getWriter().write(
-					new String(call.getErrorInfo().getBytes("UTF-8")));
+			response.getWriter().write(call.getErrorInfo());
 		} else {
-			response.getWriter().write(
-					new String(UploadService.process(call).getBytes("UTF-8")));
+			response.getWriter().write(UploadService.process(call));
 		}
 	}
 
@@ -92,7 +90,6 @@ public class UploadServlet extends HttpServlet {
 
 		String line = null;
 		while (null != (line = br.readLine())) {
-			System.out.println(line);
 			switch (state) {
 			case NONE:
 				if (line.startsWith(boundary)) {
