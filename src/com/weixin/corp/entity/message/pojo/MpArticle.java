@@ -28,7 +28,7 @@ public class MpArticle {
 	/**
 	 * 是否显示封面，1为显示，0为不显示 非必填
 	 */
-	private int Show_cover_pic;
+	private int Show_cover_pic=1;
 	
 	public String getTitle() {
 		return Title;
@@ -48,6 +48,7 @@ public class MpArticle {
 	public String getDigest() {
 		return Digest;
 	}
+	
 	public int getShow_cover_pic() {
 		return Show_cover_pic;
 	}
@@ -57,7 +58,6 @@ public class MpArticle {
 		Thumb_media_id = thumb_media_id;
 		Content = content;
 		Digest = digest;
-		Show_cover_pic = 1;
 	}
 	
 	public MpArticle(){

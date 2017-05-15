@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONObject;
 
@@ -15,6 +16,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.message.pojo.MpArticle;
+import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -106,8 +109,8 @@ public class UploadService {
 					System.out.println(msg);
 					return msg;
 				}
-				//当图片大于1M的时候，对批片进行压缩
-				if(contentLength > 1 * 1024 * 1024){
+				//当图片大于2M的时候，对批片进行压缩
+				if(contentLength > 2 * 1024 * 1024){
 					int width = 800;
 					int height = 650;
 					// 图片压缩
@@ -143,6 +146,7 @@ public class UploadService {
 			if (MessageService.MPNEWS_MSG_TYPE.equals(msgType)) {
 				// 未调用模板
 				if (CommonUtil.StringisEmpty(call.getDigest())) {
+					//不放缓冲池
 					isPermanent = false;
 					// 永久素材接口上传图片
 					jsonObject = MessageService.uploadPermanentMedia(call);
@@ -165,11 +169,26 @@ public class UploadService {
 				}
 				// 调用模板
 				else {
-					//判断模板是否存在  if( isModel()){}
+					//判断模板是否存在
+					String digest = call.getDigest();
+					Map<String, MpNews> map = WeixinUtil.getMpnewsPool();
+					MpNews mpnews = map.get(digest);
+					MpArticle[] articles = mpnews.getArticles();
 					//模板存在
 					//		替换模板中的元素：content thumb_media_id
-					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jszPScGLtrIvxWBR0zYdjA";
-					call.setMediaId(mid);
+					for (int i = 0; i < articles.length; i++) {
+						MpArticle article = articles[i];
+						if(digest.equals(article.getDigest())){
+							
+						}
+					}
+					//if(flag){
+						//MpArticle article = map.get(digest);
+						//String mid = article.;
+						//call.setMediaId(mid);
+					//}
+					
+					
 					//else{}
 					//模板不存在
 					//	判断是否上传文件，有则生成永久图文素材，标为临时使用；无则提示出错
@@ -226,5 +245,4 @@ public class UploadService {
 			return "解析请求失败";
 		}
 	}
-
 }

@@ -3,6 +3,7 @@ package com.weixin.corp.main;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -17,8 +18,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.message.pojo.MpArticle;
+import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.entity.user.User;
+import com.weixin.corp.service.MediaService;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UserService;
 import com.weixin.corp.utils.CommonUtil;
@@ -145,8 +149,6 @@ public class TimerTaskServlet extends HttpServlet {
 						for (User user : userList) {
 							// user.getDepartment()是一个object数组
 							if (!CommonUtil.StringisEmpty(user.getMobile())) {
-								// WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(),
-								// user);
 								datas.put(user.getMobile(), user);
 							}
 						}
@@ -159,7 +161,7 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 		}
 	}
-	public static class GetMpNews implements Runnable {
+	public static class DailyGetMpNewsTimerTask implements Runnable {
 		@Override
 		public void run() {
 			try {
@@ -169,47 +171,26 @@ public class TimerTaskServlet extends HttpServlet {
 				System.out.println("开始连接微信后台...");
 				
 				// 获取微信全部图文永久素材列表MpNews
-				List<Department> departmentList = UserService.getDepartment();
-				if (null == departmentList) {
-					log.error("未获取到部门信息");
+				List<MpNews> mpnewsList = MediaService.getMpNews();
+				if (null == mpnewsList) {
+					log.error("未获取到图文信息");
 					return;
 				}
-				// 遍历部门获取用户信息
-				List<User> userList = null;
-				for (Department department : departmentList) {
-					System.out.println(department.getId() + ":"
-							+ department.getName());
-					Map<String, HashMap<String, User>> maps = WeixinUtil
-							.getUseridPool();
-					// 有新增部门，放入缓存
-					if (null == maps.get(department.getName())) {
-						maps.put(department.getName(),
-								new HashMap<String, User>());
-					}
-					// 是否递归获取子部门下面的成员 1/0
-					String feachChild = "1";
-					// 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
-					String status = "0";
-					userList = UserService.getUserByDepartment(
-							department.getId(), feachChild, status);
-					if (null != userList) {
-						// 清空用户缓存
-						maps.get(department.getName()).clear();
-						HashMap<String, User> datas = maps.get(department
-								.getName());
-						// 放入用户缓存
-						for (User user : userList) {
-							// user.getDepartment()是一个object数组
-							if (!CommonUtil.StringisEmpty(user.getMobile())) {
-								// WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(),
-								// user);
-								datas.put(user.getMobile(), user);
-							}
+				for (MpNews mpNews : mpnewsList) {
+					System.out.println(mpNews.getMediaId()+":"+mpNews.getArticles().toString());
+					Map<String, MpNews>  mpnewsPool = WeixinUtil.getMpnewsPool();
+					
+					for (int i = 0; i < mpNews.getArticles().length; i++) {
+						MpArticle arr[] = mpNews.getArticles();
+						String digest = arr[i].getDigest();
+						// 有新的图文素材，放入缓存
+						if (null == mpnewsPool.get(digest)) {
+							mpnewsPool.put(digest,mpNews);
 						}
 					}
 				}
-				System.out.println("用户信息缓存更新完成");
-				log.info("用户信息缓存更新完成");
+				System.out.println("图文素材缓存更新完成");
+				log.info("图文素材缓存更新完成");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -33,6 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.message.pojo.MpArticle;
+import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.entity.user.User;
 
 public class WeixinUtil {
@@ -62,6 +64,10 @@ public class WeixinUtil {
 	 * 用户信息缓存池，外层key为部门名称，内层key为手机号
 	 */
 	private static Map<String, HashMap<String, User>> useridPool = new HashMap<String, HashMap<String, User>>();
+	/**
+	 * 图文素材缓冲池，key为模板标题 digest value为mparticle
+	 */
+	private static Map<String, MpNews> mpnewsPool = new HashMap<String, MpNews>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -133,6 +139,10 @@ public class WeixinUtil {
 
 	public static Map<String, HashMap<String, User>> getUseridPool() {
 		return useridPool;
+	}
+	
+	public static Map<String, MpNews> getMpnewsPool() {
+		return mpnewsPool;
 	}
 
 	public static JSONObject httpsRequest(String requestUrl,
