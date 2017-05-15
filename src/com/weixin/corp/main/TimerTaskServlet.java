@@ -22,6 +22,7 @@ import com.weixin.corp.entity.user.User;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UserService;
 import com.weixin.corp.utils.CommonUtil;
+import com.weixin.corp.utils.DatabaseUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -60,7 +61,7 @@ public class TimerTaskServlet extends HttpServlet {
 			// // 启动定时更新用户信息，每天6点触发1次更新缓存
 			// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
 			// 启动循环监控用户自定义发送时间的消息
-			 new Thread(new DelayJsonMessageTimerTaskThread()).start();
+			new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
 	}
 
@@ -107,7 +108,8 @@ public class TimerTaskServlet extends HttpServlet {
 		@Override
 		public void run() {
 			try {
-				while(null == WeixinUtil.getAvailableAccessToken()){
+				Map<String, String> oaUserIdMap = DatabaseUtil.getOaUserId();
+				while (null == WeixinUtil.getAvailableAccessToken()) {
 					Thread.sleep(5 * 1000);
 				}
 				System.out.println("开始执行每日定时更新用户");
@@ -121,15 +123,7 @@ public class TimerTaskServlet extends HttpServlet {
 				// 遍历部门获取用户信息
 				List<User> userList = null;
 				for (Department department : departmentList) {
-					System.out.println(department.getId() + ":"
-							+ department.getName());
-					Map<String, HashMap<String, User>> maps = WeixinUtil
-							.getUseridPool();
-					// 有新增部门，放入缓存
-					if (null == maps.get(department.getName())) {
-						maps.put(department.getName(),
-								new HashMap<String, User>());
-					}
+					HashMap<String, User> maps = WeixinUtil.getUseridPool();
 					// 是否递归获取子部门下面的成员 1/0
 					String feachChild = "1";
 					// 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
@@ -137,18 +131,10 @@ public class TimerTaskServlet extends HttpServlet {
 					userList = UserService.getUserByDepartment(
 							department.getId(), feachChild, status);
 					if (null != userList) {
-						// 清空用户缓存
-						maps.get(department.getName()).clear();
-						HashMap<String, User> datas = maps.get(department
-								.getName());
 						// 放入用户缓存
 						for (User user : userList) {
-							// user.getDepartment()是一个object数组
-							if (!CommonUtil.StringisEmpty(user.getMobile())) {
-								// WeixinUtil.getUseridPool().get(department.getName()).put(user.getMobile(),
-								// user);
-								datas.put(user.getMobile(), user);
-							}
+							user.setOaid(userOaidMap.get("userid"));
+							maps.put(user.getOaid(), user);
 						}
 					}
 				}
@@ -159,15 +145,16 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 		}
 	}
+
 	public static class GetMpNews implements Runnable {
 		@Override
 		public void run() {
 			try {
-				while(null == WeixinUtil.getAvailableAccessToken()){
+				while (null == WeixinUtil.getAvailableAccessToken()) {
 					Thread.sleep(5 * 1000);
 				}
 				System.out.println("开始连接微信后台...");
-				
+
 				// 获取微信全部图文永久素材列表MpNews
 				List<Department> departmentList = UserService.getDepartment();
 				if (null == departmentList) {
@@ -225,7 +212,8 @@ public class TimerTaskServlet extends HttpServlet {
 		public void run() {
 			while (true) {
 				try {
-					AccessToken accessToken = WeixinUtil.requestNewAccessToken();
+					AccessToken accessToken = WeixinUtil
+							.requestNewAccessToken();
 					if (null != accessToken) {
 						log.info(String.format(
 								"获取access_token成功，有效时长%d秒 token:%s",
