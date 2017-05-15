@@ -45,16 +45,14 @@ public class UploadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		long startDoPostTime = System.currentTimeMillis();
-
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
 		RequestCall call = parseRequestCall(request);
+		response.setContentType("text/html;charset=UTF-8");
 		if (null != call.getErrorInfo()) {
-			response.getWriter().write(
-					new String(call.getErrorInfo().getBytes("UTF-8")));
+			response.getWriter().write(call.getErrorInfo());
 		} else {
-			response.getWriter().write(
-					new String(UploadService.process(call).getBytes("UTF-8")));
+			response.getWriter().write(UploadService.process(call));
 		}
 	}
 
@@ -92,7 +90,6 @@ public class UploadServlet extends HttpServlet {
 
 		String line = null;
 		while (null != (line = br.readLine())) {
-			System.out.println(line);
 			switch (state) {
 			case NONE:
 				if (line.startsWith(boundary)) {
@@ -166,19 +163,11 @@ public class UploadServlet extends HttpServlet {
 		// 校验：图文消息类型时
 		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
 			if (CommonUtil.StringisEmpty(call.getTitle())
-					|| CommonUtil.StringisEmpty(call.getText())) {
-				call.setErrorInfo("图文消息类型，标题、文本必填!");
-				System.out.println("图文消息类型，标题、文本必填!");
+					|| CommonUtil.StringisEmpty(call.getText())
+					|| CommonUtil.StringisEmpty(mediaName)) {
+				call.setErrorInfo("图文消息类型，标题、文本、文件素材必填!");
+				System.out.println("图文消息类型，标题、文本、文件素材必填!");
 				return call;
-			}
-			if (CommonUtil.StringisEmpty(mediaName)) {
-				if(CommonUtil.StringisEmpty(call.getDigest())){
-					call.setErrorInfo("图文消息类型，若文件素材为空，则模板必填！");
-					System.out.println("图文消息类型，若文件素材为空，则模板必填！");
-					return call;
-				}else{
-					return call;
-				}
 			}
 		}
 

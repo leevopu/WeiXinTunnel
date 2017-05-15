@@ -3,7 +3,6 @@ package com.weixin.corp.main;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -18,11 +17,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
-import com.weixin.corp.entity.message.pojo.MpArticle;
-import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.entity.user.User;
-import com.weixin.corp.service.MediaService;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UserService;
 import com.weixin.corp.utils.CommonUtil;
@@ -156,41 +152,6 @@ public class TimerTaskServlet extends HttpServlet {
 				}
 				System.out.println("用户信息缓存更新完成");
 				log.info("用户信息缓存更新完成");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	public static class DailyGetMpNewsTimerTask implements Runnable {
-		@Override
-		public void run() {
-			try {
-				while(null == WeixinUtil.getAvailableAccessToken()){
-					Thread.sleep(5 * 1000);
-				}
-				System.out.println("开始连接微信后台...");
-				
-				// 获取微信全部图文永久素材列表MpNews
-				List<MpNews> mpnewsList = MediaService.getMpNews();
-				if (null == mpnewsList) {
-					log.error("未获取到图文信息");
-					return;
-				}
-				for (MpNews mpNews : mpnewsList) {
-					System.out.println(mpNews.getMediaId()+":"+mpNews.getArticles().toString());
-					Map<String, MpNews>  mpnewsPool = WeixinUtil.getMpnewsPool();
-					
-					for (int i = 0; i < mpNews.getArticles().length; i++) {
-						MpArticle arr[] = mpNews.getArticles();
-						String digest = arr[i].getDigest();
-						// 有新的图文素材，放入缓存
-						if (null == mpnewsPool.get(digest)) {
-							mpnewsPool.put(digest,mpNews);
-						}
-					}
-				}
-				System.out.println("图文素材缓存更新完成");
-				log.info("图文素材缓存更新完成");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

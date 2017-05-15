@@ -27,7 +27,7 @@ public class MediaService {
 	
 	/**
 	 * 查询图文素材列表
-	 * 
+	 * 弃用!!!
 	 */
 	public static List<MpNews> getMpNews() {
 		//调用接口获取永久素材总数

@@ -48,10 +48,6 @@ public class MpArticle {
 	public String getDigest() {
 		return Digest;
 	}
-	
-	public int getShow_cover_pic() {
-		return Show_cover_pic;
-	}
 	public MpArticle(String title, String thumb_media_id, String content, String digest) {
 		super();
 		Title = title;

@@ -11,7 +11,7 @@ public class RequestCall implements Serializable {
 	private static final long serialVersionUID = 5570817032197190881L;
 
 	/**
-	 * 消息标题（非必填)
+	 * 消息标题（非必填，主要图文使用)
 	 */
 	private String title;
 	/**
@@ -27,7 +27,7 @@ public class RequestCall implements Serializable {
 	 */
 	private String toUser;
 	/**
-	 * 消息类型（文本text，图片image，视频video，文件file，图文mpnnews）
+	 * 消息类型（文本text，图片image，视频video，文件file，图文mpnews）
 	 */
 	private String msgType;
 	/**

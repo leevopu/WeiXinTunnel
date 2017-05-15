@@ -137,10 +137,6 @@
 				<input id="title"type="text" name="title" placeholder="若为图文素材则必填" style="display: none;"/>
 			</label>  
 			<label> 
-				<span>模板 :</span> 
-				<input id="digest"type="text" name="digest" placeholder="若为图文素材则必选" style="display: none;" />
-			</label>  
-			<label> 
 				<span>文本 :</span> 
 				<textarea id="text"name="text" placeholder="若素材类型为文本|图文类型则填，否则不必填..."></textarea>
 			</label>
@@ -161,11 +157,9 @@
  	function typeChange(v){
  		if ("mpnews"==v){
  			document.getElementById("title").style.display="block";
- 			document.getElementById("digest").style.display="block";
  		}else
  		{
  			document.getElementById("title").style.display="none";
-			document.getElementById("digest").style.display="none";
 		}
  	}
  </script>
