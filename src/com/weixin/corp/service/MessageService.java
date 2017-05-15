@@ -228,6 +228,7 @@ public class MessageService {
 		// 生成图文消息体
 		MpNewsJsonMessage jsonMessage = new MpNewsJsonMessage(call.getTitle(),
 				call.getMediaId(), call.getText(), call.getDigest());
+		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				MessageService.MPNEWS_UPLOAD.replace("TYPE", MPNEWS_MSG_TYPE),
