@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONObject;
 
@@ -15,6 +16,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
+import com.weixin.corp.entity.message.pojo.MpArticle;
+import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -106,8 +109,8 @@ public class UploadService {
 					System.out.println(msg);
 					return msg;
 				}
-				//当图片大于1M的时候，对批片进行压缩
-				if(contentLength > 1 * 1024 * 1024){
+				//当图片大于2M的时候，对批片进行压缩
+				if(contentLength > 2 * 1024 * 1024){
 					int width = 800;
 					int height = 650;
 					// 图片压缩
@@ -134,52 +137,13 @@ public class UploadService {
 		if (!MessageService.TEXT_MSG_TYPE.equals(msgType)) {
 			JSONObject jsonObject = null;
 			String mediaId = null;
-			// ========================图文消息类型：===============================
-			// 1.模板已填写：
-			//    1.)模板存在：调用模板，修改其中的：title，content以及图片url[若图片已上传]等字段信息
-			//	  2.)模板不存在：生成永久图文素材[图片已上传]
-			// 2.模板未填写：生成永久图文素材[标为临时使用]
-			// =================================================================
-			if (MessageService.MPNEWS_MSG_TYPE.equals(msgType)) {
-				// 未调用模板
-				if (CommonUtil.StringisEmpty(call.getDigest())) {
-					isPermanent = false;
-					// 永久素材接口上传图片
-					jsonObject = MessageService.uploadPermanentMedia(call);
-					if (null != jsonObject && jsonObject.has("media_id")) {
-						mediaId = jsonObject.getString("media_id");
-						call.setMediaId(mediaId);
-						System.out.println("上传图片成功.");
-						// 上传图文素材
-						jsonObject = MessageService.uploadMPNews(call);
-						if (null != jsonObject && jsonObject.has("media_id")) {
-							mediaId = jsonObject.getString("media_id");
-							call.setMediaId(mediaId);
-							System.out.println("上传图文素材成功.");
-						} else {
-							return "上传图文素材失败，请检查文件是否符合要求";
-						}
-					} else {
-						return "上传图片素材失败，请检查文件是否符合要求";
-					}
-				}
-				// 调用模板
-				else {
-					//判断模板是否存在  if( isModel()){}
-					//模板存在
-					//		替换模板中的元素：content thumb_media_id
-					String mid = "2nNeleiqYNyDV0ls48vMtkdwabrvvXna4gSo0GZAuq4jszPScGLtrIvxWBR0zYdjA";
-					call.setMediaId(mid);
-					//else{}
-					//模板不存在
-					//	判断是否上传文件，有则生成永久图文素材，标为临时使用；无则提示出错
-				}
-			} else
-
+			if(MessageService.MPNEWS_MSG_TYPE.equals(msgType)){//图文消息
+				// 永久素材接口
+				jsonObject = MessageService.uploadPermanentMedia(call);
+			}else
 			// 无接收人则素材入库--去掉，入库必须选择图文，只有图文入永久库等待调用
 			if (CommonUtil.StringisEmpty(call.getToUser())) {
 				// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
-				//若为临时使用，则标记为isPermanent = false;后期删除
 				
 				return "??";
 			}
@@ -192,7 +156,7 @@ public class UploadService {
 										* 60 * 24 * 3))) {
 					// 永久素材接口
 					jsonObject = MessageService.uploadPermanentMedia(call);
-				} else {
+				}else {
 					// 临时素材接口
 					jsonObject = MessageService.uploadTempMedia(call);
 				}
@@ -226,5 +190,4 @@ public class UploadService {
 			return "解析请求失败";
 		}
 	}
-
 }

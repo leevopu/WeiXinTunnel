@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.pojo.MpNews;
-import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class MediaService {
@@ -28,9 +27,9 @@ public class MediaService {
 	
 	/**
 	 * 查询图文素材列表
-	 * 
+	 * 弃用!!!
 	 */
-	public static List<Department> getMpNews() {
+	public static List<MpNews> getMpNews() {
 		//调用接口获取永久素材总数
 		JSONObject countObject = WeixinUtil.httpsRequest(MATERIAL_COUNT_GET,WeixinUtil.GET_REQUEST_METHOD, null);
 		JSONObject jsonObject = null;
@@ -74,20 +73,17 @@ public class MediaService {
 			    	obj.remove("media_id");
 			    	obj.remove("content");
 			    	obj.remove("update_time");
-			    	JSONObject.toBean(obj, MpNews.class);
+			    	array.add(obj);
 				}
 			}
 			
 		}else{
+			log.error("微信端没有永久图文素材！");
 			return null;
 		}
-		System.out.println(array.toString());
-		Collection collection = JSONArray.toCollection(array,MpNews.class);
+//		Collection collection = JSONArray.toCollection(array,MpNews.class);
+		Collection collection = array.toCollection(array,MpNews.class);
 		mpnewsList = (List<MpNews>) collection;
 		return mpnewsList;
-	}
-	
-	public static void main(String[] args) {
-		getMpNews();
 	}
 }

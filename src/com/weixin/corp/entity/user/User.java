@@ -17,7 +17,7 @@ public class User implements Serializable {
 	private String email;
 	private String weixinid;
 	private Integer enable = 1; //默认启用， 0为禁用
-
+	private String oaid; //内部系统相互调用的用户id
 
 	public String getUserid() {
 		return userid;
@@ -94,6 +94,14 @@ public class User implements Serializable {
 
 	public void setEnable(Integer enable) {
 		this.enable = enable;
+	}
+
+	public String getOaid() {
+		return oaid;
+	}
+
+	public void setOaid(String oaid) {
+		this.oaid = oaid;
 	}
 
 }

@@ -224,26 +224,6 @@ public class MessageService {
 		return ErrorCode.MESSAGE_NO_RETURN;
 	}
 
-	public static JSONObject uploadMPNews(RequestCall call) {
-		// 生成图文消息体
-		MpNewsJsonMessage jsonMessage = new MpNewsJsonMessage(call.getTitle(),
-				call.getMediaId(), call.getText(), call.getDigest());
-		jsonMessage.setAgentid(WeixinUtil.getAgentid());
-
-		JSONObject jsonObject = WeixinUtil.httpsRequest(
-				MessageService.MPNEWS_UPLOAD.replace("TYPE", MPNEWS_MSG_TYPE),
-				WeixinUtil.POST_REQUEST_METHOD,
-				JSONObject.fromObject(jsonMessage).toString()
-						.replace("mediaId", "media_id"));
-		if (null != jsonObject) {
-			if (jsonObject.has("errcode") && 0 != jsonObject.getInt("errcode")) {
-				log.error("请求图文永久素材上传接口失败 errcode:"
-						+ jsonObject.getInt("errcode") + "，errmsg:"
-						+ jsonObject.getString("errmsg"));
-			}
-		}
-		return jsonObject;
-	}
 
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
 		String msgType = call.getMsgType();

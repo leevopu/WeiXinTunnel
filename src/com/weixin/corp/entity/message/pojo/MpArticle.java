@@ -28,7 +28,7 @@ public class MpArticle {
 	/**
 	 * 是否显示封面，1为显示，0为不显示 非必填
 	 */
-	private int Show_cover_pic = 1;
+	private int Show_cover_pic=1;
 	
 	public String getTitle() {
 		return Title;
