@@ -421,29 +421,30 @@ public class MessageService {
 	 */
 	private static String convert(String toUser) {
 		String userIds = "";
-		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
+		HashMap<String, User> maps = WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
-		Object[] strs = maps.keySet().toArray();
-		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
-			userIds = splitToUser(toUser, userIds, maps, strs, ",");
-		} else if (toUser.indexOf("|") != -1) {// 根据 "|" 来进行分割
-			userIds = splitToUser(toUser, userIds, maps, strs, "\\|");
-		} else if (toUser.length() > 11) {// 只有一个单独的字符串,进行分割
-			String ph = toUser.substring(toUser.length() - 11, toUser.length());
-			if (isAllNum(ph)) {
-				String dep = toUser.substring(0, toUser.length() - 11);
-				for (int j = 0; j < strs.length; j++) {
-					// 部门匹配
-					if (strs[j].equals(dep)) {
-						HashMap<String, User> datas = maps.get(dep);
-						User data = datas.get(ph);
-						if (null != data) {
-							userIds = data.getUserid();
-						}
-					}
-				}
-			}
-		}
+//		Object[] strs = maps.keySet().toArray();
+//		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
+//			userIds = splitToUser(toUser, userIds, maps, strs, ",");
+//		} else if (toUser.indexOf("|") != -1) {// 根据 "|" 来进行分割
+//			userIds = splitToUser(toUser, userIds, maps, strs, "\\|");
+//		} else if (toUser.length() > 11) {// 只有一个单独的字符串,进行分割
+//			String ph = toUser.substring(toUser.length() - 11, toUser.length());
+//			if (isAllNum(ph)) {
+//				String dep = toUser.substring(0, toUser.length() - 11);
+//				for (int j = 0; j < strs.length; j++) {
+//					// 部门匹配
+//					if (strs[j].equals(dep)) {
+//						HashMap<String, User> datas = maps.get(dep);
+//						User data = datas.get(ph);
+//						if (null != data) {
+//							userIds = data.getUserid();
+//						}
+//					}
+//				}
+//			}
+//		}
+		
 		if (!("".equals(userIds))) {
 			// 处理字符串最后一位"|"
 			String s = userIds
