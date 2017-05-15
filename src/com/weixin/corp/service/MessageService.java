@@ -421,7 +421,7 @@ public class MessageService {
 	 */
 	private static String convert(String toUser) {
 		String userIds = "";
-		HashMap<String, User> maps = WeixinUtil.getUseridPool();
+		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
 //		Object[] strs = maps.keySet().toArray();
 //		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
@@ -444,7 +444,6 @@ public class MessageService {
 //				}
 //			}
 //		}
-		
 		if (!("".equals(userIds))) {
 			// 处理字符串最后一位"|"
 			String s = userIds
