@@ -61,7 +61,7 @@ public class WeixinUtil {
 	/**
 	 * 用户信息缓存池，外层key为部门名称，内层key为手机号
 	 */
-	private static Map<String, HashMap<String, User>> useridPool = new HashMap<String, HashMap<String, User>>();
+	private static HashMap<String, User> useridPool = new HashMap<String, User>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -131,7 +131,7 @@ public class WeixinUtil {
 		return groupMessagePool;
 	}
 
-	public static Map<String, HashMap<String, User>> getUseridPool() {
+	public static HashMap<String, User> getUseridPool() {
 		return useridPool;
 	}
 
