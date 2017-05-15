@@ -6,18 +6,16 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
-import com.weixin.corp.entity.message.pojo.MpArticle;
-import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.utils.CommonUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -97,9 +95,7 @@ public class UploadService {
 
 			// 针对图片文件 如果文件过大，则进行压缩
 			if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())
-					|| (MessageService.MPNEWS_MSG_TYPE
-							.equals(call.getMsgType()) && (!CommonUtil
-							.StringisEmpty(call.getMediaName())))) {
+					|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
 				String[] imagType = { "jpg", "jepg", "png", "bmp", "gif" };
 				List<String> imageTyepLists = Arrays.asList(imagType);
 				String str = StringUtils.substringAfterLast(
@@ -118,6 +114,8 @@ public class UploadService {
 					if (!flag) {
 						return "图片压缩失败，请检查图片大小及类型！";
 					}
+					// 压缩后的流传回call
+					call.setMediaByte(FileUtils.readFileToByteArray(media));
 					System.out.println("图片压缩完成！");
 				}
 			}
@@ -130,7 +128,6 @@ public class UploadService {
 						new Date(System.currentTimeMillis() + 1000 * 60 * 2))) {
 			call.setSendTime(null);
 		}
-		Boolean isPermanent = false;
 		
 		String msgType = call.getMsgType();
 		// 如果不是文本，先上传素材，获取素材id
@@ -140,6 +137,12 @@ public class UploadService {
 			if(MessageService.MPNEWS_MSG_TYPE.equals(msgType)){//图文消息
 				// 永久素材接口
 				jsonObject = MessageService.uploadPermanentMedia(call);
+				if (null != jsonObject && jsonObject.has("media_id")) {
+					mediaId = jsonObject.getString("media_id");
+					call.setMediaId(mediaId);
+				} else {
+					return "上传素材失败，请检查文件是否符合要求";
+				}
 			}else
 			// 无接收人则素材入库--去掉，入库必须选择图文，只有图文入永久库等待调用
 			if (CommonUtil.StringisEmpty(call.getToUser())) {
@@ -170,7 +173,6 @@ public class UploadService {
 		}
 		CorpBaseJsonMessage jsonMessage = MessageService
 				.changeMessageToJson(call);
-		jsonMessage.setPermanent(isPermanent);
 		// 立即发送消息
 		if (CommonUtil.StringisEmpty(call.getSendTime())) {
 			if (0 == MessageService.sendMessage(jsonMessage)) {

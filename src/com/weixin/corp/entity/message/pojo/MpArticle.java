@@ -48,12 +48,15 @@ public class MpArticle {
 	public String getDigest() {
 		return Digest;
 	}
-	public MpArticle(String title, String thumb_media_id, String content, String digest) {
+	
+	public int getShow_cover_pic() {
+		return Show_cover_pic;
+	}
+	public MpArticle(String title, String thumb_media_id, String content) {
 		super();
 		Title = title;
 		Thumb_media_id = thumb_media_id;
 		Content = content;
-		Digest = digest;
 	}
 	
 	public MpArticle(){
