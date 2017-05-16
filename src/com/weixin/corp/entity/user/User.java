@@ -18,7 +18,9 @@ public class User implements Serializable {
 	private String gender;
 	private String email;
 	private String weixinid;
-	private Integer enable = 1; //默认启用， 0为禁用
+	private String avatar;
+	private int status;
+	private int enable = 1; //默认启用， 0为禁用
 	private String oaid; //内部系统相互调用的用户id
 
 	public String getUserid() {
@@ -43,6 +45,10 @@ public class User implements Serializable {
 
 	public void setDepartment(Set<Integer> department) {
 		this.department = department;
+	}
+	
+	public void addDepartment(Integer departmentId){
+		this.department.add(departmentId);
 	}
 
 	public String getGender() {
@@ -85,11 +91,27 @@ public class User implements Serializable {
 		this.weixinid = weixinid;
 	}
 
-	public Integer getEnable() {
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public int getEnable() {
 		return enable;
 	}
 
-	public void setEnable(Integer enable) {
+	public void setEnable(int enable) {
 		this.enable = enable;
 	}
 

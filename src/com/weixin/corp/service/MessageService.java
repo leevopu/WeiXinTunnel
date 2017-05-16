@@ -203,8 +203,8 @@ public class MessageService {
 		JSONObject outputStr = JSONObject.fromObject(jsonMessage);
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
-				WeixinUtil.POST_REQUEST_METHOD,
-				outputStr.toString().replaceFirst("mediaId", "media_id"));
+				WeixinUtil.POST_REQUEST_METHOD, outputStr.toString()
+						.replaceFirst("mediaId", "media_id"));
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
@@ -221,7 +221,6 @@ public class MessageService {
 		}
 		return ErrorCode.MESSAGE_NO_RETURN;
 	}
-
 
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
 		String msgType = call.getMsgType();
@@ -300,8 +299,9 @@ public class MessageService {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = 0;
 		Set<RequestCall> successMessages = new HashSet<RequestCall>();
-
-		for (RequestCall call : WeixinUtil.getGroupMessagePool().get(todayStr)) {
+		Map<String, HashSet<RequestCall>> requestCallMap = WeixinUtil.getGroupMessagePool();
+		if(null != requestCallMap.get(todayStr)){
+		for (RequestCall call : requestCallMap.get(todayStr)) {
 			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
 			if (0 == sendMessage(jsonMessage)) {
 				successMessages.add(call);
@@ -317,6 +317,7 @@ public class MessageService {
 		WeixinUtil.getGroupMessagePool().get(todayStr)
 				.removeAll(successMessages);
 		log.info("日期：" + todayStr + "，群发消息完成");
+		}
 		return result;
 	}
 
@@ -350,6 +351,8 @@ public class MessageService {
 
 	public static CorpBaseJsonMessage changeMessageToJson(RequestCall call) {
 		CorpBaseJsonMessage jsonMessage = null;
+		Date sendTimeDate = CommonUtil.getStrDate(call.getSendTime(),
+				"yyyy-MM-dd HH:mm:ss");
 		switch (call.getMsgType()) {
 		case TEXT_MSG_TYPE:
 			jsonMessage = new TextJsonMessage(call.getText());
@@ -364,17 +367,16 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
-			jsonMessage = new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText());
+			jsonMessage = new MpNewsJsonMessage(call.getTitle(),
+					call.getMediaId(), call.getText());
 			break;
 		default:
 			break;
 		}
 		if (!CommonUtil.StringisEmpty(call.getSendTime())) {
-			jsonMessage.setSendTime(CommonUtil.getStrDate(call.getSendTime(),
-					"yyyy-MM-dd HH:mm:ss").getTime());
+			jsonMessage.setSendTime(sendTimeDate.getTime());
 			if (!TEXT_MSG_TYPE.equals(jsonMessage.getMsgtype())
-					&& CommonUtil.getStrDate(call.getSendTime(),
-							"yyyy-MM-dd HH:mm:ss").after(
+					&& sendTimeDate.after(
 							new Date(System.currentTimeMillis() + 1000 * 60
 									* 60 * 24 * 3))) {
 				// 说明是上传到永久库的素材消息
@@ -398,80 +400,30 @@ public class MessageService {
 	 * @return
 	 */
 	private static String convert(String toUser) {
-		String userIds = "";
-		Map<String, User> maps = WeixinUtil.getUseridPool();
-		System.out.println(maps.keySet().toString());
-//		Object[] strs = maps.keySet().toArray();
-//		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
-//			userIds = splitToUser(toUser, userIds, maps, strs, ",");
-//		} else if (toUser.indexOf("|") != -1) {// 根据 "|" 来进行分割
-//			userIds = splitToUser(toUser, userIds, maps, strs, "\\|");
-//		} else if (toUser.length() > 11) {// 只有一个单独的字符串,进行分割
-//			String ph = toUser.substring(toUser.length() - 11, toUser.length());
-//			if (isAllNum(ph)) {
-//				String dep = toUser.substring(0, toUser.length() - 11);
-//				for (int j = 0; j < strs.length; j++) {
-//					// 部门匹配
-//					if (strs[j].equals(dep)) {
-//						HashMap<String, User> datas = maps.get(dep);
-//						User data = datas.get(ph);
-//						if (null != data) {
-//							userIds = data.getUserid();
-//						}
-//					}
-//				}
-//			}
-//		}
-		if (!("".equals(userIds))) {
-			// 处理字符串最后一位"|"
-			String s = userIds
-					.substring(userIds.length() - 1, userIds.length());
-			if ("|".equals(s)) {// 去除最后一个"|"
-				userIds = userIds.substring(0, userIds.length() - 1);
-			}
+		String[] oaIds = null;
+		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割
+			oaIds = toUser.split(",");
+		} else if (toUser.indexOf("|") != -1) {// 根据 "|" 来进行分割
+			oaIds = toUser.split("\\|");
 		}
-		return userIds;
-	}
-
-	private static String splitToUser(String toUser, String userIds,
-			Map<String, HashMap<String, User>> maps, Object[] strs,
-			String signal) {
-		String users[] = toUser.split(signal);
-		for (int i = 0; i < users.length; i++) {
-			String user = users[i];
-			String ph = "";
-			if (user.length() > 11) {
-				// 取最后11位 如果没填手机号则不做处理
-				ph = user.substring(user.length() - 11, user.length());
-				String dep = "";
-				// 判断是否全为数字 flag： TRUE FALSE
-				if (isAllNum(ph)) {
-					// 拿到部门名称
-					dep = user.substring(0, user.length() - 11);
-					// 遍历部门名称，匹配信息
-					for (int j = 0; j < strs.length; j++) {
-						// 部门匹配 拼接userId
-						if (strs[j].equals(dep)) {
-							HashMap<String, User> datas = maps.get(dep);
-							User data = datas.get(ph);
-							if (null != data) {
-								userIds += data.getUserid() + "|";
-							}
-						}
-					}
+		Map<String, User> oaUserIdPool = WeixinUtil.getOaUserIdPool();
+		if (null != oaIds) {
+			StringBuffer userIds = new StringBuffer();
+			for (String oaId : oaIds) {
+				if (null != oaUserIdPool.get(oaId)) {
+					userIds.append(oaUserIdPool.get(oaId).getUserid());
+					userIds.append("|");
 				}
 			}
+			return userIds.toString();
+		} else {
+			try {
+				return oaUserIdPool.get(toUser).getUserid();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "";
+			}
 		}
-		return userIds;
-	}
-
-	private static boolean isAllNum(String ph) {
-		try {
-			Long.parseLong(ph);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -507,7 +459,7 @@ public class MessageService {
 	 * 事件类型：CLICK(自定义菜单点击事件)
 	 */
 	public static final String EVENT_TYPE_CLICK = "CLICK";
-	
+
 	public static void main(String[] args) {
 		System.out.println(Integer.parseInt("12300000000"));
 	}

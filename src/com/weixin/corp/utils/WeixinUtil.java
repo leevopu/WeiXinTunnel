@@ -82,10 +82,10 @@ public class WeixinUtil {
 
 	// 目前环境无数据库，模拟取数据
 	public static void testFetchData() {
-		RequestCall data1 = new RequestCall("monthlyStockReport", "wangli",
-				"2017-04-26", "300");
-		RequestCall data2 = new RequestCall("monthlyBondReport", "dawei",
-				"2017-04-26", null);
+		RequestCall data1 = new RequestCall("monthlyStockReport", "3",
+				"2017-05-16", "300");
+		RequestCall data2 = new RequestCall("monthlyBondReport", "1",
+				"2017-05-16", null);
 		// test1
 		// List<Data> dataList = new ArrayList<Data>();
 		// dataList.add(data1);
@@ -159,15 +159,13 @@ public class WeixinUtil {
 		try {
 			Date today = sdf.parse(sdf.format(new Date()));
 			String sendTime = call.getSendTime();
-			if (null == sendTime || sendTime.length() != 8) {
-				return false;
-			}
 			Date sendTimeDate = sdf.parse(sendTime);
 			if ("database".equals(call.getFromUser())
 					&& !sendTimeDate.before(today)) {
 				if (null == groupMessagePool.get(sendTime)) {
 					groupMessagePool.put(sendTime, new HashSet<RequestCall>());
 				}
+				call.setSendTime(sendTime + " 00:00:00");
 				groupMessagePool.get(sendTime).add(call);
 				return true;
 			}

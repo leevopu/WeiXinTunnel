@@ -32,7 +32,7 @@ public class UserServlet extends HttpServlet {
 			newUser.setUserid("wangwu");
 			newUser.setName("wangwu");
 			// department之后改成部门名称，目前断网测试用departmentId
-			newUser.setDepartment(new Object[]{"1"});
+			newUser.addDepartment(3);
 			newUser.setPosition("高级经理");
 			newUser.setMobile("13666666666");
 			newUser.setGender("1");
@@ -51,8 +51,7 @@ public class UserServlet extends HttpServlet {
 			updateUser.setUserid("lisi");
 			updateUser.setName("lisi");
 			// department之后改成部门名称，目前断网测试用departmentId
-			updateUser.setDepartment(new Object[]{"28"
-					+ ""});
+			updateUser.addDepartment(1);
 			updateUser.setPosition("工程师");
 			updateUser.setMobile("15888888888");
 			updateUser.setGender("1");

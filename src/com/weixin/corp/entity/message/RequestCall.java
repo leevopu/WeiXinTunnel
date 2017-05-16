@@ -15,25 +15,19 @@ public class RequestCall implements Serializable {
 	 */
 	private String title;
 	/**
-	 * 发送人（"database"|user=部门名称+手机号） <br>
-	 * <br>
-	 * 主动调用user赋值时校验身份
+	 * 暂不使用，考虑传调用者IP做校验
 	 */
 	private String fromUser;
 	/**
-	 * 接收人（用部门名称+手机号来唯一确定用户） <br>
+	 * 接收人（用OA系统的用户id） <br>
 	 * <br>
-	 * 用逗号或竖线分割多个接收人，确保及时更新用户信息，否则只有能匹配上的用户能接收到消息
+	 * 用逗号或竖线分割多个接收人，否则只有能匹配上的用户能接收到消息
 	 */
 	private String toUser;
 	/**
 	 * 消息类型（文本text，图片image，视频video，文件file，图文mpnews）
 	 */
 	private String msgType;
-	/**
-	 * 图文消息的描述，不超过512个字节，超过会自动截断 [这里用作模板描述]
-	 */
-	private String digest;
 	/**
 	 * 文本内容（若msgType为text则需有值)
 	 */
@@ -167,11 +161,4 @@ public class RequestCall implements Serializable {
 		this.mediaId = mediaId;
 	}
 
-	public String getDigest() {
-		return digest;
-	}
-
-	public void setDigest(String digest) {
-		this.digest = digest;
-	}
 }

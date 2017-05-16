@@ -245,20 +245,8 @@ public class CommonUtil {
 	}
 
 	public static void main(String[] args) {
-		String dateStr = "2011-01-01 12:01:12";
-		System.out.println(getStrDate(dateStr, "yyyy-MM-dd"));
-		System.out.println(Calendar.DAY_OF_MONTH);
-		System.out.println(getDateStr(DateUtils.round(new Date(), 1),
-				"yyyy-MM-dd"));
-		System.out.println(getDateStr(DateUtils.round(new Date(), 5),
-				"yyyy-MM-dd"));
-		// String size = CommonUtil.convertFileSize(1705110020);
-		// System.out.println("====================" + size);
-		// // =================================================================
-		// // 判断文件大小
-		// // =================================================================
-		// String x = StringUtils.substringBefore(size, " ");
-		// System.out.println(x);
-		// System.out.println(Float.parseFloat(x) > 10);
+		CommonUtil.getStrDate("2017-05-16",
+				"yyyy-MM-dd");
+		
 	}
 }

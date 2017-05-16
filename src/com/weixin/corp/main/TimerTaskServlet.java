@@ -65,6 +65,9 @@ public class TimerTaskServlet extends HttpServlet {
 			// 首次初始化缓存必须放在取access_token和jdbc之后
 			Runnable userPoolInit = new DailyUpdateUserTimerTask();
 			userPoolInit.run();
+			
+			Runnable groupMessagePoolInit = new DailyGroupMessageTimerTask();
+			groupMessagePoolInit.run();
 			// JDBCFactory.execRead("select 123");
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
 			// dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
@@ -146,10 +149,6 @@ public class TimerTaskServlet extends HttpServlet {
 					if (null != userList) {
 						// 放入用户缓存
 						for (User user : userList) {
-							if (user.getUserid().equals("guanzhao")
-									|| user.getUserid().equals("leevo_pu")) {
-								System.out.println(333);
-							}
 							oaIdSet = userOaIdMap.get(user.getUserid());
 							if (null != oaIdSet) {
 								for (String oaId : oaIdSet) {
@@ -236,7 +235,7 @@ public class TimerTaskServlet extends HttpServlet {
 	}
 
 	public static void main(String[] args) {
-		DailyUpdateUserTimerTask x = new DailyUpdateUserTimerTask();
+		DailyGroupMessageTimerTask x = new DailyGroupMessageTimerTask();
 		x.run();
 	}
 }
