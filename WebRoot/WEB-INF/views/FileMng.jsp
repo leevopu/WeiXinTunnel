@@ -105,15 +105,15 @@
 		<form name="myform" action="uploadServlet" method="post" enctype="multipart/form-data">
 			<h1>
 				素材管理 
+				<br/>
 				<span>企业公众号素材管理.</span>
-				<span>人员以OA给定PK为准，发送时请保证与OA用户信息一致</span>
 			</h1>
 			<!-- <label> 
 				<span>发 送 人 :</span> 
 				<input id="fromUser" type="text"name="fromUser"/>
 			</label>  -->
 			<label> 
-				<span>接 收 人 :</span> 
+				<span>接 收 人 [OA的PK(,|分割)]:</span> 
 				<input id="toUser"type="text" name="toUser" />
 			</label> 
 			<label> 
