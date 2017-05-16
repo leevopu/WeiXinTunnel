@@ -13,9 +13,9 @@ public class MpNewsJsonMessage extends CorpBaseJsonMessage {
 		return mpnews;
 	}
 
-	public MpNewsJsonMessage(String title,String thumb_media_id,String content,String digest){
+	public MpNewsJsonMessage(String title,String thumb_media_id,String content){
 		super();
-		MpArticle[] articles = {new MpArticle(title,thumb_media_id,content,digest)};
+		MpArticle[] articles = {new MpArticle(title,thumb_media_id,content)};
 		this.mpnews = new MpNews("", articles);
 		this.setMsgtype("mpnews");
 		

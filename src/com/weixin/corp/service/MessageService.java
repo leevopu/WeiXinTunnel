@@ -48,8 +48,6 @@ public class MessageService {
 
 	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
 
-	public static String MPNEWS_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_mpnews?access_token=ACCESS_TOKEN";
-
 	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
 
 	public static String MEDIA_PERMANENT_LIST_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
@@ -206,7 +204,7 @@ public class MessageService {
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
 				WeixinUtil.POST_REQUEST_METHOD,
-				outputStr.toString().replace("mediaId", "media_id"));
+				outputStr.toString().replaceFirst("mediaId", "media_id"));
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
@@ -366,7 +364,7 @@ public class MessageService {
 			jsonMessage = new FileJsonMessage(call.getMediaId());
 			break;
 		case MPNEWS_MSG_TYPE:
-			jsonMessage = new MpNewsJsonMessage(call.getMediaId());
+			jsonMessage = new MpNewsJsonMessage(call.getTitle(),call.getMediaId(),call.getText());
 			break;
 		default:
 			break;
@@ -401,7 +399,7 @@ public class MessageService {
 	 */
 	private static String convert(String toUser) {
 		String userIds = "";
-		Map<String, HashMap<String, User>> maps = WeixinUtil.getUseridPool();
+		Map<String, User> maps = WeixinUtil.getUseridPool();
 		System.out.println(maps.keySet().toString());
 //		Object[] strs = maps.keySet().toArray();
 //		if (toUser.indexOf(",") != -1) {// 根据 "," 来进行分割

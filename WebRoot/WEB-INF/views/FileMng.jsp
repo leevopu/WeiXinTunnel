@@ -125,7 +125,7 @@
 				<span>消息类型 :</span> 
 				<select name="msgType" id="msgType" onchange="typeChange(this.options[this.options.selectedIndex].value)">
 					<option value="">请选择...</option> 
-					<option value="image">图片[支持：jpg、png、bmp]</option> 
+					<option value="image">图片[支持：jpg、png]</option> 
 					<option value="mpnews">图文</option>
 					<option value="text">文本</option> 
 					<option value="video">视频</option> 
