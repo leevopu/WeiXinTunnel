@@ -104,7 +104,7 @@ public class TimerTaskServlet extends HttpServlet {
 		public void run() {
 			try {
 				System.out.println("开始执行每日定时群发消息");
-				// 模拟定时取数据，真实环境需连接数据库 groupMessagePool
+				// 模拟定时取数据，真实的需用户定时调用接口
 				WeixinUtil.testFetchData();
 				// 群发消息
 				MessageService.groupMessage();

@@ -351,8 +351,6 @@ public class MessageService {
 
 	public static CorpBaseJsonMessage changeMessageToJson(RequestCall call) {
 		CorpBaseJsonMessage jsonMessage = null;
-		Date sendTimeDate = CommonUtil.getStrDate(call.getSendTime(),
-				"yyyy-MM-dd HH:mm:ss");
 		switch (call.getMsgType()) {
 		case TEXT_MSG_TYPE:
 			jsonMessage = new TextJsonMessage(call.getText());
@@ -374,6 +372,8 @@ public class MessageService {
 			break;
 		}
 		if (!CommonUtil.StringisEmpty(call.getSendTime())) {
+			Date sendTimeDate = CommonUtil.getStrDate(call.getSendTime(),
+					"yyyy-MM-dd HH:mm:ss");
 			jsonMessage.setSendTime(sendTimeDate.getTime());
 			if (!TEXT_MSG_TYPE.equals(jsonMessage.getMsgtype())
 					&& sendTimeDate.after(
