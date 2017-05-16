@@ -113,7 +113,7 @@
 				<input id="fromUser" type="text"name="fromUser"/>
 			</label>  -->
 			<label> 
-				<span>接 收 人 [OA的PK(,|分割)]:</span> 
+				<span>接 收 人 [英文逗号或竖线分隔多个]:</span> 
 				<input id="toUser"type="text" name="toUser" />
 			</label> 
 			<label> 
