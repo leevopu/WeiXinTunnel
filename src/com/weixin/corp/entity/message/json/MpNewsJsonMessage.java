@@ -18,7 +18,6 @@ public class MpNewsJsonMessage extends CorpBaseJsonMessage {
 		MpArticle[] articles = {new MpArticle(title,thumb_media_id,content)};
 		this.mpnews = new MpNews("", articles);
 		this.setMsgtype("mpnews");
-		
 	}
 
 	public MpNewsJsonMessage(String mediaId) {
