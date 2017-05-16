@@ -27,7 +27,7 @@ public class MpArticle {
 	private String Digest;
 	/**
 	 * 是否显示封面，1为显示，0为不显示 非必填
-	 */
+	 */ 
 	private int Show_cover_pic=1;
 	
 	public String getTitle() {
