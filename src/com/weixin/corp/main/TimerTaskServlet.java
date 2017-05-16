@@ -126,13 +126,13 @@ public class TimerTaskServlet extends HttpServlet {
 					// 是否递归获取子部门下面的成员 1/0
 					String feachChild = "1";
 					// 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
-					String status = "0";
+					String status = "0";    
 					userList = UserService.getUserByDepartment(
 							department.getId(), feachChild, status);
 					if (null != userList) {
 						// 放入用户缓存
 						for (User user : userList) {
-							user.setOaid(userOaidMap.get("userid"));
+							user.setOaid(oaUserIdMap.get(user.getUserid()));
 							maps.put(user.getOaid(), user);
 						}
 					}
