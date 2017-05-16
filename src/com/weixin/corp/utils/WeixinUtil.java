@@ -61,9 +61,9 @@ public class WeixinUtil {
 	private static DelayQueue<CorpBaseJsonMessage> delayJsonMessageQueue = new DelayQueue<CorpBaseJsonMessage>();
 
 	/**
-	 * 用户信息缓存池，外层key为部门名称，内层key为手机号
+	 * 用户账号缓存池
 	 */
-	private static HashMap<String, User> useridPool = new HashMap<String, User>();
+	private static HashMap<String, User> oaUserIdPool = new HashMap<String, User>();
 
 	private static String token = "weixin";
 	private static String appid;
@@ -133,10 +133,10 @@ public class WeixinUtil {
 		return groupMessagePool;
 	}
 
-	public static HashMap<String, User> getUseridPool() {
-		return useridPool;
+	public static HashMap<String, User> getOaUserIdPool() {
+		return oaUserIdPool;
 	}
-	
+
 	public static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr) {
 		return httpsRequest(requestUrl, requestMethod, outputStr, null);

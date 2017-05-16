@@ -170,8 +170,8 @@ public class DESUtil {
 		try {
 
 			DESUtil des = new DESUtil("WEIXIN");
-			System.out.println("加密："+des.encrypt("!234Hjkl"));
-            System.out.println("解密："+des.decrypt("e1bc3c6666f377356d9da2fec3b76f98"));
+			System.out.println("加密："+des.encrypt("X234Hjkl"));
+            System.out.println("解密："+des.decrypt("50db2eab56e7777572f34a424f2c3563"));
         } catch (Exception e) {
 			e.printStackTrace();
 		}

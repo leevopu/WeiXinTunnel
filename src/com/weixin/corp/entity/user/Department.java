@@ -8,16 +8,16 @@ import java.io.Serializable;
 public class Department implements Serializable {
 
 	private static final long serialVersionUID = -3886293804629153404L;
-	private String id;
+	private Integer id;
 	private String name;
 	private int parentid;
 	private int order;
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

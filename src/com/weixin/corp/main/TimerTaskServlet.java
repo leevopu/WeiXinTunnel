@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -52,9 +53,19 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 			// 启动循环获取access_token的线程，access_token每隔2小时会失效
 			new Thread(new WeixinAccessTokenTimerTaskThread()).start();
-			// 首次初始化缓存必须放在取access_token之后
+
+			String driverClassName = getInitParameter("driverClassName");
+			String url = getInitParameter("url");
+			String username = getInitParameter("username");
+			String password = getInitParameter("password");
+			if (!JDBCFactory.initJDBC(driverClassName, url, username, password)) {
+				log.error("connect database failed");
+				System.exit(-1);
+			}
+			// 首次初始化缓存必须放在取access_token和jdbc之后
 			Runnable userPoolInit = new DailyUpdateUserTimerTask();
 			userPoolInit.run();
+			// JDBCFactory.execRead("select 123");
 			// 启动定时获取跑批数据，每天10点触发1次进行群发
 			// dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
 			// // 启动定时更新用户信息，每天6点触发1次更新缓存
@@ -107,7 +118,8 @@ public class TimerTaskServlet extends HttpServlet {
 		@Override
 		public void run() {
 			try {
-				Map<String, String> oaUserIdMap = JDBCFactory.getOaUserId();
+				Map<String, Set<String>> userOaIdMap = JDBCFactory
+						.getUserOaId();
 				while (null == WeixinUtil.getAvailableAccessToken()) {
 					Thread.sleep(5 * 1000);
 				}
@@ -121,19 +133,35 @@ public class TimerTaskServlet extends HttpServlet {
 				}
 				// 遍历部门获取用户信息
 				List<User> userList = null;
+				Set<String> oaIdSet = null;
 				for (Department department : departmentList) {
-					HashMap<String, User> maps = WeixinUtil.getUseridPool();
+					HashMap<String, User> oaUserIdPool = WeixinUtil
+							.getOaUserIdPool();
 					// 是否递归获取子部门下面的成员 1/0
 					String feachChild = "1";
 					// 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
-					String status = "0";    
+					String status = "0";
 					userList = UserService.getUserByDepartment(
 							department.getId(), feachChild, status);
 					if (null != userList) {
 						// 放入用户缓存
 						for (User user : userList) {
-							user.setOaid(oaUserIdMap.get(user.getUserid()));
-							maps.put(user.getOaid(), user);
+							if (user.getUserid().equals("guanzhao")
+									|| user.getUserid().equals("leevo_pu")) {
+								System.out.println(333);
+							}
+							oaIdSet = userOaIdMap.get(user.getUserid());
+							if (null != oaIdSet) {
+								for (String oaId : oaIdSet) {
+									// 没有此oaid的key
+									if (null == oaUserIdPool.get(oaId)) {
+										oaUserIdPool.put(oaId, user);
+									}
+									// 同一userid有多部门时，设置user的部门号集合
+									oaUserIdPool.get(oaId).getDepartment()
+											.add(department.getId());
+								}
+							}
 						}
 					}
 				}

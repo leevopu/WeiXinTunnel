@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,62 +17,50 @@ public class JDBCFactory {
 
 	private static Log log = LogFactory.getLog(JDBCFactory.class);
 
-	private String driver = null;
-	private String url = null;
-	private String user = null;
-	private String password = null;
+	private static String driver = null;
+	private static String url = null;
+	private static String user = null;
+	private static String password = null;
 	private static Connection CONNECTION = null;
 	private static Statement ST = null;
-	public static JDBCFactory JDBCFACTORY = null;
 
-	/**
-	 * 单例模式的得到对数据库操作的类
-	 * 
-	 * @return 返回数据访问对象的实例
-	 * @throws Exception
-	 */
-	public static JDBCFactory getinstance() throws Exception {
-		if (null == JDBCFACTORY || CONNECTION.isClosed()) {
-			JDBCFACTORY = new JDBCFactory();
-		}
-		return JDBCFACTORY;
-	}
-
-	public synchronized static ResultSet execRead(String sql)
-			throws SQLException {
+	public synchronized static ResultSet execRead(String sql) {
 		ResultSet rs = null;
-		if (CONNECTION != null && !CONNECTION.isClosed() && ST != null) {
-			try {
+		try {
+			if (CONNECTION != null && !CONNECTION.isClosed() && ST != null) {
 				rs = ST.executeQuery(sql);
-			} catch (SQLException e) {
-				e.printStackTrace();
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return rs;
 	}
 
-	public JDBCFactory() throws Exception {
-		getConn();
+	public static boolean initJDBC(String driverClassName, String url,
+			String username, String password) {
+		try {
+			JDBCFactory.driver = driverClassName;
+			JDBCFactory.url = url;
+			JDBCFactory.user = username;
+			JDBCFactory.password = getDes().decrypt(password);
+//			getConn();
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("初始化jdbc失败");
+			return false;
+		}
+		return true;
 	}
 
-	public JDBCFactory(String driverClassName, String url, String username,
-			String password) throws Exception {
-		this.driver = driverClassName;
-		this.url = url;
-		this.user = username;
-		this.password = getDes().decrypt(password);
-		super();
-	}
-
-	private void getConn() throws Exception {
+	private static void getConn() throws Exception {
 		Class.forName(driver);
 		CONNECTION = DriverManager.getConnection(url, user, password);
 		ST = CONNECTION.createStatement();
 	}
 
-	private DESUtil des = null;
+	private static DESUtil des = null;
 
-	public DESUtil getDes() {
+	public static DESUtil getDes() {
 		if (des == null) {
 			try {
 				des = new DESUtil("WEIXIN");
@@ -81,11 +71,27 @@ public class JDBCFactory {
 		return des;
 	}
 
-	public static Map<String, String> getOaUserId() {
-		Map<String, String> oaUserId = new HashMap<String, String>();
-		oaUserId.put("1", "guanzhao");
-		oaUserId.put("2", "leevo_pu");
-		return oaUserId;
+	public static Map<String, Set<String>> getUserOaId() {
+		Map<String, Set<String>> userOaIdMap = new HashMap<String, Set<String>>();
+		// ResultSet result = execRead("select oaid, userid from xxxx");
+		// try {
+		// while (result.next()) {
+		// if (null == userOaIdMap.get(result.getString(2))) {
+		// Set<String> oaIdSet = new HashSet<String>();
+		// userOaIdMap.put(result.getString(2), oaIdSet);
+		// }
+		// userOaIdMap.get(result.getString(2)).add(result.getString(1));
+		// }
+		// } catch (SQLException e) {
+		// e.printStackTrace();
+		// }
+		Set<String> oaIdSet = new HashSet<String>();
+		oaIdSet.add("1");
+		oaIdSet.add("2");
+		Set<String> oaIdSet2 = new HashSet<String>();
+		oaIdSet2.add("3");
+		userOaIdMap.put("guanzhao", oaIdSet);
+		userOaIdMap.put("leevo_pu", oaIdSet2);
+		return userOaIdMap;
 	}
-
 }

@@ -153,11 +153,11 @@ public class UserService {
 	 * @param departmentId
 	 * 
 	 */
-	public static List<User> getUserByDepartment(String departmentId,String fetchChild,String status) {
+	public static List<User> getUserByDepartment(Integer departmentId,String fetchChild,String status) {
 		List<User> userList = new ArrayList<User>();
 		// 调用接口获取用户列表
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
-				USER_GET_BY_DEPARTMENT.replace("DEPARTMENTID", departmentId).replace("FETCHCHILD", fetchChild).replace("STATUS", status),
+				USER_GET_BY_DEPARTMENT.replace("DEPARTMENTID", String.valueOf(departmentId)).replace("FETCHCHILD", fetchChild).replace("STATUS", status),
 				WeixinUtil.GET_REQUEST_METHOD, null);
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {

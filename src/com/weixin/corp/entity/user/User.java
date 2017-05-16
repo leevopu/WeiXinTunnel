@@ -1,6 +1,8 @@
 package com.weixin.corp.entity.user;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 微信用户信息
@@ -10,7 +12,7 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 3349073660021645866L;
 	private String userid;
 	private String name;
-	private Object department[];
+	private Set<Integer> department = new HashSet<Integer>();
 	private String position;
 	private String mobile;
 	private String gender;
@@ -35,19 +37,14 @@ public class User implements Serializable {
 		this.name = name;
 	}
 	
-	public Object[] getDepartment() {
+	public Set<Integer> getDepartment() {
 		return department;
 	}
 
-	public void setDepartment(Object[] department) {
+	public void setDepartment(Set<Integer> department) {
 		this.department = department;
 	}
-	
-	/*public void setDepartment(int departmentId) {
-	this.department = departmentId + "";
-	} */
 
-	
 	public String getGender() {
 		return this.gender;
 	}
