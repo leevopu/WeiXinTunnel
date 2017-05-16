@@ -10,7 +10,6 @@ import java.util.List;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -92,15 +91,14 @@ public class UploadService {
 				e.printStackTrace();
 				return "二进制流转成素材文件失败";
 			}
-
+			System.out.println("abvc.txt".substring("abvc.txt".lastIndexOf(".")));
 			// 针对图片文件 如果文件过大，则进行压缩
 			if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())
 					|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
-				String[] imagType = { "jpg", "jepg", "png", "bmp", "gif" };
+				String[] imagType = { ".jpg", ".jepg", ".png", ".bmp", ".gif" };
 				List<String> imageTyepLists = Arrays.asList(imagType);
-				String str = StringUtils.substringAfterLast(
-						call.getMediaName(), ".");
-				if (!imageTyepLists.contains(str)) {
+					String suffix = call.getMediaName().substring(call.getMediaName().lastIndexOf("."));
+				if (!imageTyepLists.contains(suffix)) {
 					String msg = "上传文件与选择素材类型不匹配";
 					System.out.println(msg);
 					return msg;
@@ -113,6 +111,9 @@ public class UploadService {
 					boolean flag = CommonUtil.compressPic(media, height, width);
 					if (!flag) {
 						return "图片压缩失败，请检查图片大小及类型！";
+					}
+					while(contentLength == media.length()){
+						Thread.sleep(5 * 1000);
 					}
 					// 压缩后的流传回call
 					call.setMediaByte(FileUtils.readFileToByteArray(media));

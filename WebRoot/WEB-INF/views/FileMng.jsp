@@ -97,6 +97,7 @@
 	.smart-green .button:hover {
 		background-color: #80A24A;
 	}
+	
 </style>
 </head>
 <body>
@@ -105,45 +106,45 @@
 			<h1>
 				素材管理 
 				<span>企业公众号素材管理.</span>
+				<span>人员以OA给定PK为准，发送时请保证与OA用户信息一致</span>
 			</h1>
-			<label>
-				<span>人员以部门名称+手机号唯一确认，请及时更新保证用户信息一致</span>
-			</label>
-			<label> 
+			<!-- <label> 
 				<span>发 送 人 :</span> 
-				<input id="fromUser" type="text"name="fromUser" placeholder="素材入库时校验身份用" />
-			</label> 
+				<input id="fromUser" type="text"name="fromUser"/>
+			</label>  -->
 			<label> 
 				<span>接 收 人 :</span> 
-				<input id="toUser"type="text" name="toUser" placeholder="接收人为空则素材入库" />
+				<input id="toUser"type="text" name="toUser" />
 			</label> 
 			<label> 
-				<span>触发时间 :</span> 
+				<span>触发时间 [若不填则默认立即发送]:</span> 
 				<input type="text" class="sang_Calender"id="sendTime"name="sendTime"/>
 			</label> 
 			<label> 
 				<span>消息类型 :</span> 
 				<select name="msgType" id="msgType" onchange="typeChange(this.options[this.options.selectedIndex].value)">
 					<option value="">请选择...</option> 
-					<option value="image">图片[支持：jpg、png]</option> 
+					<option value="image">图片[微信仅支持：jpg、png]</option> 
 					<option value="mpnews">图文</option>
 					<option value="text">文本</option> 
 					<option value="video">视频</option> 
 					<option value="file">文件</option> 
 				</select>
 			</label> 
-			<label> 
-				<span>标题 :</span> 
-				<input id="title"type="text" name="title" placeholder="若为图文素材则必填" style="display: none;"/>
-			</label>  
+			<div id = "hiddenFlag" style="display: none">
+				<label> 
+					<span>标题 :</span> 
+					<input id="title" type="text" name="title"/>
+				</label>
+			</div>  
 			<label> 
 				<span>文本 :</span> 
-				<textarea id="text"name="text" placeholder="若素材类型为文本|图文类型则填，否则不必填..."></textarea>
+				<textarea id="text"name="text"></textarea>
 			</label>
 			<label> 
 				<span>请选择文件 :</span>
 				<br/><br/>
-				<input type="file" name="myfile" id="upload-file">
+				<input type="file" name="myfile" id="upload-file"  style="border: 3px;">
 			</label>
 			<label> 
 				<span>&nbsp;</span> <br/>
@@ -156,10 +157,10 @@
  <script type="text/javascript">
  	function typeChange(v){
  		if ("mpnews"==v){
- 			document.getElementById("title").style.display="block";
+ 			document.getElementById("hiddenFlag").style.display="block";
  		}else
  		{
- 			document.getElementById("title").style.display="none";
+ 			document.getElementById("hiddenFlag").style.display="none";
 		}
  	}
  </script>
