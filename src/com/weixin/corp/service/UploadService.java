@@ -33,8 +33,7 @@ public class UploadService {
 				|| (CommonUtil.StringisEmpty(call.getText()) && null == call
 						.getMediaName())) {
 			StringBuffer missFieldValue = new StringBuffer();
-			missFieldValue.append("缺少必要的信息请检查，发送人:");
-			missFieldValue.append(call.getFromUser());
+			missFieldValue.append("缺少必要的信息请检查");
 			missFieldValue.append("，接收人:");
 			missFieldValue
 					.append(CommonUtil.StringisEmpty(call.getToUser()) ? "缺失"
