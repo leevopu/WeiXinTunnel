@@ -23,5 +23,5 @@ public class Test {
 	    	user.getDepartment().add(1);
 	    	user.getDepartment().add(2);
 	    	System.out.println(JSONObject.fromObject(user).toString());
-	    }
+	    } 
 }
