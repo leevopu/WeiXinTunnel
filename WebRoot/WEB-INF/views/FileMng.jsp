@@ -146,12 +146,12 @@
 					<option value="file">文件</option>
 			</select>
 			</label>
-			<div id="hiddenFlag" style="display: none">
-				<label> <span>标题 :</span> <input id="title" type="text"
+			<div id="hiddenFlag">
+				<label> <span>标题 [图文消息时有效]:</span> <input id="title" type="text"
 					name="title" />
 				</label>
 			</div>
-			<label> <br/><br/>  <span>文本 :</span> <textarea id="text" name="text" ></textarea>
+			<label> <br/><br/>  <span>文本 :</span> <textarea id="text" name="text" style="height: 180px"></textarea>
 			</label>
 
 			<div class="media">
@@ -161,7 +161,7 @@
 				</label>
 			</div>
 			<div class="submit">
-				<label> <input type="submit" class="button"
+				<label> <input type="submit" name="submit" class="button"
 					value="提交" />
 				</label>
 			</div>
@@ -171,11 +171,11 @@
 <script src="<%=path%>/js/datetime.js" type="text/javascript"></script>
 <script type="text/javascript">
  	function typeChange(v){
- 		if ("mpnews"==v){
- 			document.getElementById("hiddenFlag").style.display="block";
+ 		if ("mpnews"!=v){
+ 			document.getElementById("hiddenFlag").style.display="none";
  		}else
  		{
- 			document.getElementById("hiddenFlag").style.display="none";
+ 			document.getElementById("hiddenFlag").style.display="block";
 		}
  	}
  </script>
