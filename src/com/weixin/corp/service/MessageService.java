@@ -200,11 +200,14 @@ public class MessageService {
 	}
 
 	public static int sendMessage(CorpBaseJsonMessage jsonMessage) {
-		JSONObject outputStr = JSONObject.fromObject(jsonMessage);
+		JSONObject jsonMessageObject = JSONObject.fromObject(jsonMessage);
+		String outputStr = jsonMessageObject.toString();
+		if(!MessageService.MPNEWS_MSG_TYPE.equals(jsonMessage.getMsgtype())){
+			outputStr = outputStr.replace("mediaId", "media_id");
+		}
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
-				WeixinUtil.POST_REQUEST_METHOD, outputStr.toString()
-						.replaceFirst("mediaId", "media_id"));
+				WeixinUtil.POST_REQUEST_METHOD, outputStr);
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
 				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")

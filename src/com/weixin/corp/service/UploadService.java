@@ -90,7 +90,6 @@ public class UploadService {
 				e.printStackTrace();
 				return "二进制流转成素材文件失败";
 			}
-			System.out.println("abvc.txt".substring("abvc.txt".lastIndexOf(".")));
 			// 针对图片文件 如果文件过大，则进行压缩
 			if (MessageService.IMAGE_MSG_TYPE.equals(call.getMsgType())
 					|| MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {

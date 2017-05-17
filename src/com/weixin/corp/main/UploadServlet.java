@@ -146,7 +146,7 @@ public class UploadServlet extends HttpServlet {
 					StringBuffer textValue = new StringBuffer("");
 					while (!line.startsWith(boundary)) {
 						if (!"".equals(line)) {
-							textValue.append(line);
+							textValue.append(line.trim());
 							// if("text".equals(call.getMsgType())){
 							textValue.append("\n");
 						}
