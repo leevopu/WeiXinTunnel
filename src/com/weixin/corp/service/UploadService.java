@@ -104,8 +104,8 @@ public class UploadService {
 				}
 				//当图片大于2M的时候，对批片进行压缩
 				if(contentLength > 2 * 1024 * 1024){
-					int width = 800;
-					int height = 650;
+					int width = 640;
+					int height = 380;
 					// 图片压缩
 					boolean flag = CommonUtil.compressPic(media, height, width);
 					if (!flag) {
