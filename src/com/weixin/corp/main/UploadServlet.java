@@ -142,9 +142,24 @@ public class UploadServlet extends HttpServlet {
 				break;
 			case FIELDDATA:
 				line = br.readLine();
-				fieldValue = line;
-				reflectFiledValue(call, fieldName, fieldValue);
-				state = NONE;
+				if ("text".equals(fieldName)) {
+					StringBuffer textValue = new StringBuffer("");
+					while (!line.startsWith(boundary)) {
+						if (!"".equals(line)) {
+							textValue.append(line);
+							// if("text".equals(call.getMsgType())){
+							textValue.append("\n");
+						}
+						// }
+						line = br.readLine();
+					}
+					reflectFiledValue(call, fieldName, textValue.toString());
+					state = DATAHEADER;
+				} else {
+					fieldValue = line;
+					reflectFiledValue(call, fieldName, fieldValue);
+					state = NONE;
+				}
 				break;
 			case FILEDATA:
 				while ((!line.startsWith(boundary))
@@ -158,14 +173,14 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
-		//去除文本中html标签之间的空格
-		if(!CommonUtil.StringisEmpty(call.getText())){
-			 String text = call.getText();
-			 String reg = ">\\s+([^\\s<]*)\\s+<";
-			 text = text.replaceAll(reg, ">$1<");
-			 call.setText(text);
+		// 去除文本中html标签之间的空格
+		if (!CommonUtil.StringisEmpty(call.getText())) {
+			String text = call.getText();
+			String reg = ">\\s+([^\\s<]*)\\s+<";
+			text = text.replaceAll(reg, ">$1<");
+			call.setText(text);
 		}
-		
+
 		// 校验：图文消息类型时
 		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
 			if (CommonUtil.StringisEmpty(call.getTitle())
@@ -193,14 +208,16 @@ public class UploadServlet extends HttpServlet {
 	private RequestCall reflectFiledValue(RequestCall call, String fieldName,
 			String fieldValue) {
 		try {
+			if ("submit".equals(fieldName)) {
+				return call;
+			}
 			Field declaredField = RequestCall.class.getDeclaredField(fieldName);
 			Method method = call.getClass().getMethod(
 					"set" + StringUtils.capitalize(declaredField.getName()),
 					declaredField.getType());
 			method.invoke(call, fieldValue);
 		} catch (Exception e) {
-			call.setErrorInfo(e.getClass().getName() + ":" + e.getMessage());
-			log.error("解析用户消息请求失败: " + e.getMessage());
+			log.error("RequestCall赋值失败: " + e.getMessage());
 		}
 		return call;
 	}

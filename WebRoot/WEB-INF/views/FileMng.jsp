@@ -10,7 +10,7 @@
 	%>
 <style type="text/css">
 .smart-green {
-	margin-left: auto;
+	margin-left: 0;
 	margin-right: auto;
 	max-width: 600px;
 	background: #E6F6F0;
@@ -151,7 +151,7 @@
 					name="title" />
 				</label>
 			</div>
-			<label> <span>文本 :</span> <textarea id="text" name="text"></textarea>
+			<label> <br/><br/>  <span>文本 :</span> <textarea id="text" name="text" ></textarea>
 			</label>
 
 			<div class="media">
@@ -161,7 +161,7 @@
 				</label>
 			</div>
 			<div class="submit">
-				<label> <input type="submit" name="submit" class="button"
+				<label> <input type="submit" class="button"
 					value="提交" />
 				</label>
 			</div>
