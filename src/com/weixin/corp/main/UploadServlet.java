@@ -159,7 +159,14 @@ public class UploadServlet extends HttpServlet {
 				break;
 			}
 		}
-
+		//去除文本中html标签之间的空格
+		if(!CommonUtil.StringisEmpty(call.getText())){
+			 String text = call.getText();
+			 String reg = ">\\s+([^\\s<]*)\\s+<";
+			 text = text.replaceAll(reg, ">$1<");
+			 call.setText(text);
+		}
+		
 		// 校验：图文消息类型时
 		if (MessageService.MPNEWS_MSG_TYPE.equals(call.getMsgType())) {
 			if (CommonUtil.StringisEmpty(call.getTitle())
