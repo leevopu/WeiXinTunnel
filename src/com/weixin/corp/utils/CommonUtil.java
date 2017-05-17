@@ -66,7 +66,7 @@ public class CommonUtil {
 	 */
 	public static boolean compressPic(File image, int outputHeight,
 			int outputWidth) {
-		boolean proportion = true;
+		boolean proportion = false;
 		try {
 			BufferedImage img;
 			String type = StringUtils.substringAfterLast(image.getName(), ".");
