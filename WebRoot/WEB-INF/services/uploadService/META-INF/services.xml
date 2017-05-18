@@ -1,15 +1,32 @@
-<service name="uploadService">
-	<description>
-		UploadService Service Example
-	</description>
-	<parameter name="ServiceClass">
-		com.weixin.corp.service.UploadService
-	</parameter>
-	<operation name="process">
-		<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
-	</operation>
-	<excludeOperations>
-        <operation></operation>
-        <!-- 屏蔽掉bean里的get set方法,以及不需要包装成webservice接口的方法 -->
-    </excludeOperations>
-</service>
+<serviceGroup>
+	<service name="uploadService">
+		<description>
+			UploadService Service Example
+		</description>
+		<parameter name="ServiceClass">
+			com.weixin.corp.service.UploadService
+		</parameter>
+		<operation name="process">
+			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
+		</operation>
+		<excludeOperations>
+			<operation></operation>
+			<!-- 屏蔽掉bean里的get set方法,以及不需要包装成webservice接口的方法 -->
+		</excludeOperations>
+	</service>
+	<service name="messageService">
+		<description>
+			MessageService Service Example
+		</description>
+		<parameter name="ServiceClass">
+			com.weixin.corp.service.MessageService
+		</parameter>
+		<operation name="getDailyGroupMessage">
+			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
+		</operation>
+		<excludeOperations>
+			<operation></operation>
+			<!-- 屏蔽掉bean里的get set方法,以及不需要包装成webservice接口的方法 -->
+		</excludeOperations>
+	</service>
+</serviceGroup>

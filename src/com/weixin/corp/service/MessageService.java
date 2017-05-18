@@ -304,7 +304,8 @@ public class MessageService {
 	 * 处理传来的数据并放入groupMessagePool中
 	 * @param callList
 	 */
-	public static void getDailyGroupMessage (ArrayList<RequestCall> callList){
+	public static void getDailyGroupMessage (RequestCall[] callList){
+		System.out.println("log.....");
 		for (RequestCall call : callList) {
 			try {
 				Date today = sdf.parse(sdf.format(new Date()));
