@@ -294,10 +294,6 @@ public class MessageService {
 		return ErrorCode.MESSAGE_ERROR_RETURN;
 	}
 
-	/**
-	 * 
-	 * @return 成功为0，失败则为errcode
-	 */
 	public static int groupMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = ErrorCode.SUCCESS_RETURN;

@@ -99,11 +99,14 @@ public class TimerTaskServlet extends HttpServlet {
 				TimeUnit.MILLISECONDS);
 	}
 
+	/**
+	 * 定时获取跑批数据，每天触发1次进行群发
+	 */
 	public static class DailyGroupMessageTimerTask implements Runnable {
 		@Override
 		public void run() {
 			try {
-				System.out.println("开始执行每日定时群发消息");
+				log.info("开始执行每日定时群发消息");
 				// 群发消息
 				MessageService.groupMessage();
 				// 未成功发送的记录会保留，可以进一步处理
@@ -116,7 +119,7 @@ public class TimerTaskServlet extends HttpServlet {
 	}
 	
 	/**
-	 * 启动定时更新用户信息，每天6点触发1次更新缓存
+	 * 定时更新用户信息，每天触发1次更新缓存
 	 */
 	public static class DailyUpdateUserTimerTask implements Runnable {
 		@Override
@@ -127,7 +130,7 @@ public class TimerTaskServlet extends HttpServlet {
 				while (null == WeixinUtil.getAvailableAccessToken()) {
 					Thread.sleep(5 * 1000);
 				}
-				System.out.println("开始执行每日定时更新用户");
+				log.info("开始执行每日定时更新用户");
 
 				// 获取微信全部部门信息
 				List<Department> departmentList = UserService.getDepartment();
@@ -162,7 +165,6 @@ public class TimerTaskServlet extends HttpServlet {
 						}
 					}
 				}
-				System.out.println("用户信息缓存更新完成");
 				log.info("用户信息缓存更新完成");
 			} catch (Exception e) {
 				e.printStackTrace();
