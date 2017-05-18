@@ -5,6 +5,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.weixin.corp.constant.ErrorCode;
 import com.weixin.corp.entity.menu.Button;
 import com.weixin.corp.entity.menu.Menu;
 import com.weixin.corp.utils.WeixinUtil;
@@ -36,7 +37,7 @@ public class MenuService {
 	 */
 	private static int createMenu(String jsonMenu) {
 		System.out.println("jsonMenu: " + jsonMenu);
-		int result = 0;
+		int result = ErrorCode.SUCCESS_RETURN;
 		// 调用接口创建菜单
 		JSONObject jsonObject = WeixinUtil.httpsRequest(MENU_CREATE, WeixinUtil.POST_REQUEST_METHOD,
 				jsonMenu);
