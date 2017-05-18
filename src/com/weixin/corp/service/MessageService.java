@@ -222,7 +222,7 @@ public class MessageService {
 			}
 			return 0;
 		}
-		return ErrorCode.MESSAGE_NO_RETURN;
+		return ErrorCode.MESSAGE_ERROR_RETURN;
 	}
 
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
@@ -291,7 +291,7 @@ public class MessageService {
 			}
 			return 0;
 		}
-		return ErrorCode.MESSAGE_NO_RETURN;
+		return ErrorCode.MESSAGE_ERROR_RETURN;
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class MessageService {
 	 */
 	public static int groupMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
-		int result = 0;
+		int result = ErrorCode.SUCCESS_RETURN;
 		Set<RequestCall> successMessages = new HashSet<RequestCall>();
 		Map<String, HashSet<RequestCall>> requestCallMap = WeixinUtil.getGroupMessagePool();
 		if(null != requestCallMap.get(todayStr)){
@@ -309,7 +309,10 @@ public class MessageService {
 			if (0 == sendMessage(jsonMessage)) {
 				successMessages.add(call);
 			}
-			// else 失败？？
+			else {
+				// 群发消息有错误仅记录日志不单独处理。
+				result = ErrorCode.MESSAGE_ERROR_RETURN;
+			}
 			try {
 				// 间隔发送，降低调用微信服务器压力
 				Thread.sleep(2 * 1000);
@@ -326,7 +329,7 @@ public class MessageService {
 
 	public static int warnFailureMessage() {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
-		int result = 0;
+		int result = ErrorCode.SUCCESS_RETURN;
 		for (RequestCall call : WeixinUtil.getGroupMessagePool().get(todayStr)) {
 			call.setToUser("管理员");
 			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);

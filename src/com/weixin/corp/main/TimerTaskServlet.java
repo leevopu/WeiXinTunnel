@@ -104,8 +104,6 @@ public class TimerTaskServlet extends HttpServlet {
 		public void run() {
 			try {
 				System.out.println("开始执行每日定时群发消息");
-				// 模拟定时取数据，真实的需用户定时调用接口
-				WeixinUtil.testFetchData();
 				// 群发消息
 				MessageService.groupMessage();
 				// 未成功发送的记录会保留，可以进一步处理
@@ -116,7 +114,10 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 		}
 	}
-
+	
+	/**
+	 * 启动定时更新用户信息，每天6点触发1次更新缓存
+	 */
 	public static class DailyUpdateUserTimerTask implements Runnable {
 		@Override
 		public void run() {
@@ -137,22 +138,19 @@ public class TimerTaskServlet extends HttpServlet {
 				// 遍历部门获取用户信息
 				List<User> userList = null;
 				Set<String> oaIdSet = null;
+				// 获得oa系统id和userid的映射关系
+				HashMap<String, User> oaUserIdPool = WeixinUtil
+						.getOaUserIdPool();
 				for (Department department : departmentList) {
-					HashMap<String, User> oaUserIdPool = WeixinUtil
-							.getOaUserIdPool();
-					// 是否递归获取子部门下面的成员 1/0
-					String feachChild = "1";
-					// 0获取全部员工，1获取已关注成员列表，2获取禁用成员列表，4获取未关注成员列表。status可叠加
-					String status = "0";
 					userList = UserService.getUserByDepartment(
-							department.getId(), feachChild, status);
+							department.getId());
 					if (null != userList) {
 						// 放入用户缓存
 						for (User user : userList) {
 							oaIdSet = userOaIdMap.get(user.getUserid());
 							if (null != oaIdSet) {
 								for (String oaId : oaIdSet) {
-									// 没有此oaid的key
+									// 没有此oaid的key时初始化
 									if (null == oaUserIdPool.get(oaId)) {
 										oaUserIdPool.put(oaId, user);
 									}
@@ -207,7 +205,7 @@ public class TimerTaskServlet extends HttpServlet {
 	}
 
 	/**
-	 * 定时发送json消息的线程
+	 * 倒计时发送json消息的线程
 	 * 
 	 */
 	public static class DelayJsonMessageTimerTaskThread implements Runnable {
@@ -231,11 +229,5 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 
 		}
-
-	}
-
-	public static void main(String[] args) {
-		DailyGroupMessageTimerTask x = new DailyGroupMessageTimerTask();
-		x.run();
 	}
 }

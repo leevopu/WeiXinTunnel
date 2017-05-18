@@ -46,7 +46,7 @@ public class MenuServlet extends HttpServlet{
 	    	
 	    	//调用微信接口返回数据项
 	    	JSONObject menu = MenuService.getMenu();
-	    	req.setAttribute("str",menu.toString()); 
+	    	req.setAttribute("str",menu.toString());
 	    	RequestDispatcher dispatcher=req.getRequestDispatcher("/WEB-INF/views/menuMng.jsp");
 			dispatcher.forward(req, resp);
 	    }
