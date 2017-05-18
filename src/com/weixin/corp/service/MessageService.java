@@ -207,8 +207,11 @@ public class MessageService {
 	public static int sendMessage(CorpBaseJsonMessage jsonMessage) {
 		JSONObject jsonMessageObject = JSONObject.fromObject(jsonMessage);
 		String outputStr = jsonMessageObject.toString();
+		// 特殊处理
 		if(!MessageService.MPNEWS_MSG_TYPE.equals(jsonMessage.getMsgtype())){
 			outputStr = outputStr.replace("mediaId", "media_id");
+		}else{
+			outputStr = outputStr.replace("\\n", "<br />");
 		}
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
 		JSONObject jsonObject = WeixinUtil.httpsRequest(MESSAGE_SEND,
@@ -300,12 +303,12 @@ public class MessageService {
 	}
 
 	/**
-	 * 后续发布为webservice接口，提供上端系统调用
-	 * 处理传来的数据并放入groupMessagePool中
+	 * 提供上端系统调用
+	 * 处理传来的数据放入
+	 * groupMessagePool中
 	 * @param callList
 	 */
 	public static void getDailyGroupMessage (RequestCall[] callList){
-		System.out.println("log.....");
 		for (RequestCall call : callList) {
 			try {
 				Date today = sdf.parse(sdf.format(new Date()));

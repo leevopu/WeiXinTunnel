@@ -110,9 +110,6 @@ public class UploadService {
 					if (!flag) {
 						return "图片压缩失败，请检查图片大小及类型！";
 					}
-					while(contentLength == media.length()){
-						Thread.sleep(5 * 1000);
-					}
 					// 压缩后的流传回call
 					call.setMediaByte(FileUtils.readFileToByteArray(media));
 					System.out.println("图片压缩完成！");

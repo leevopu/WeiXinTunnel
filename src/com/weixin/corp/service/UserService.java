@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.constant.ErrorCode;
-import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.entity.user.User;
 import com.weixin.corp.utils.WeixinUtil;
@@ -159,7 +158,6 @@ public class UserService {
 		List<User> userList = new ArrayList<User>();
 		// feachChild是否递归获取子部门下面的成员 1/0
 		// status获取全部员工0，获取已关注成员列表1，获取禁用成员列表2，获取未关注成员列表4
-		// 调用接口获取用户列表
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				USER_GET_BY_DEPARTMENT
 						.replace("DEPARTMENTID", String.valueOf(departmentId))
@@ -176,9 +174,6 @@ public class UserService {
 		} else {
 			return null;
 		}
-		// JSONArray jsonArray = jsonObject.getJSONArray("userlist");
-		// String testUserStr =
-		// "{				 \"errcode\": 0,				 \"errmsg\": \"ok\",				 \"userlist\": [				 {				 \"userid\": \"zhangsan\",				 \"name\": \"李四\",	\"department\":[1]			 }				 ]				 }			";
 		JSONArray jsonArray = JSONObject.fromObject(jsonObject).getJSONArray(
 				"userlist");
 		Collection collection = jsonArray.toCollection(jsonArray, User.class);
