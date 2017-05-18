@@ -2,9 +2,13 @@ package com.weixin.corp.service;
 
 import java.io.InputStream;
 import java.io.Writer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +63,8 @@ public class MessageService {
 	public static final String VIDEO_MSG_TYPE = "video";
 	public static final String FILE_MSG_TYPE = "file";
 	public static final String MPNEWS_MSG_TYPE = "mpnews";
+	
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	/**
 	 * 解析微信发来的请求（XML）
@@ -294,6 +300,33 @@ public class MessageService {
 		return ErrorCode.MESSAGE_NO_RETURN;
 	}
 
+	/**
+	 * 后续发布为webservice接口，提供上端系统调用
+	 * 处理传来的数据并放入groupMessagePool中
+	 * @param callList
+	 */
+	public static void getDailyGroupMessage (ArrayList<RequestCall> callList){
+		for (RequestCall call : callList) {
+			try {
+				Date today = sdf.parse(sdf.format(new Date()));
+				String sendTime = call.getSendTime();
+				Date sendTimeDate = sdf.parse(sendTime);
+				
+				if(!sendTimeDate.before(today)){
+					if (null == WeixinUtil.getGroupMessagePool().get(sendTime)) {
+						WeixinUtil.getGroupMessagePool().put(sendTime, new HashSet<RequestCall>());
+					}
+					WeixinUtil.getGroupMessagePool().get(sendTime).add(call);
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+				log.error("数据: " + call.getTitle() + call.getToUser() + ", 日期: "
+						+ call.getSendTime() + ", 不正确");
+			}catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
 	/**
 	 * 
 	 * @return 成功为0，失败则为errcode

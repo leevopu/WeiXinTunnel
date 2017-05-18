@@ -95,11 +95,11 @@
         </init-param>
         <init-param>
 			<param-name>username</param-name>
-            <param-value>username</param-value>
+            <param-value>xx</param-value>
         </init-param>
         <init-param>
 			<param-name>password</param-name>
-            <param-value>password</param-value>
+            <param-value>50db2eab56e7777572f34a424f2c3563</param-value>
         </init-param>
         
 <!-- 企业号下某个应用，目前只用1个，如果用多个可能就不能配死了 -->

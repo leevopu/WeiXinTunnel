@@ -33,8 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
-import com.weixin.corp.entity.message.pojo.MpArticle;
-import com.weixin.corp.entity.message.pojo.MpNews;
 import com.weixin.corp.entity.user.User;
 
 public class WeixinUtil {
