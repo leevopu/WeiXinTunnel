@@ -22,7 +22,7 @@ import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.entity.user.User;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UserService;
-import com.weixin.corp.utils.JDBCFactory;
+import com.weixin.corp.utils.JdbcUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
 public class TimerTaskServlet extends HttpServlet {
@@ -58,7 +58,7 @@ public class TimerTaskServlet extends HttpServlet {
 			String url = getInitParameter("url");
 			String username = getInitParameter("username");
 			String password = getInitParameter("password");
-			if (!JDBCFactory.initJDBC(driverClassName, url, username, password)) {
+			if (!JdbcUtil.initJDBC(driverClassName, url, username, password)) {
 				log.error("connect database failed");
 				System.exit(-1);
 			}
@@ -125,7 +125,7 @@ public class TimerTaskServlet extends HttpServlet {
 		@Override
 		public void run() {
 			try {
-				Map<String, Set<String>> userOaIdMap = JDBCFactory
+				Map<String, Set<String>> userOaIdMap = JdbcUtil
 						.getUserOaId();
 				while (null == WeixinUtil.getAvailableAccessToken()) {
 					Thread.sleep(5 * 1000);

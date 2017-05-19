@@ -145,10 +145,13 @@ public class UploadServlet extends HttpServlet {
 				if ("text".equals(fieldName)) {
 					StringBuffer textValue = new StringBuffer("");
 					while (!line.startsWith(boundary)) {
-							textValue.append(line.trim());
-							if ("text".equals(call.getMsgType())) {
-								textValue.append("\r\n");
-							}
+						textValue.append(line.trim());
+						if ("mpnews".equals(call.getMsgType())
+								&& !line.trim().endsWith(">")) {
+							textValue.append("<br />");
+						} else if ("text".equals(call.getMsgType())) {
+							textValue.append("\n");
+						}
 						line = br.readLine();
 					}
 					reflectFiledValue(call, fieldName, textValue.toString());

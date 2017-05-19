@@ -62,8 +62,6 @@ public class MessageService {
 	public static final String VIDEO_MSG_TYPE = "video";
 	public static final String FILE_MSG_TYPE = "file";
 	public static final String MPNEWS_MSG_TYPE = "mpnews";
-	
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	/**
 	 * 解析微信发来的请求（XML）
@@ -208,9 +206,9 @@ public class MessageService {
 		JSONObject jsonMessageObject = JSONObject.fromObject(jsonMessage);
 		String outputStr = jsonMessageObject.toString();
 		// 特殊处理
-		if(!MessageService.MPNEWS_MSG_TYPE.equals(jsonMessage.getMsgtype())){
+		if (!MessageService.MPNEWS_MSG_TYPE.equals(jsonMessage.getMsgtype())) {
 			outputStr = outputStr.replace("mediaId", "media_id");
-		}else{
+		} else {
 			outputStr = outputStr.replace("\\n", "<br />");
 		}
 		jsonMessage.setAgentid(WeixinUtil.getAgentid());
@@ -303,34 +301,43 @@ public class MessageService {
 	}
 
 	/**
-	 * 提供上端系统调用
-	 * 处理传来的数据放入
-	 * groupMessagePool中
+	 * 提供上端系统调用 处理传来的数据放入 groupMessagePool中
+	 * 
 	 * @param callList
 	 */
-	public static void getDailyGroupMessage (RequestCall[] callList){
+	public static String getDailyGroupMessage(RequestCall[] callList) {
+		Map<String, HashSet<RequestCall>> groupMessagePool = WeixinUtil
+				.getGroupMessagePool();
 		for (RequestCall call : callList) {
 			try {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				Date today = sdf.parse(sdf.format(new Date()));
 				String sendTime = call.getSendTime();
 				Date sendTimeDate = sdf.parse(sendTime);
-				
-				if(!sendTimeDate.before(today)){
-					if (null == WeixinUtil.getGroupMessagePool().get(sendTime)) {
-						WeixinUtil.getGroupMessagePool().put(sendTime, new HashSet<RequestCall>());
+
+				if (!sendTimeDate.before(today)) {
+					if (null == groupMessagePool.get(sendTime)) {
+						groupMessagePool.put(sendTime,
+								new HashSet<RequestCall>());
 					}
-					WeixinUtil.getGroupMessagePool().get(sendTime).add(call);
+					groupMessagePool.get(sendTime).add(call);
 				}
 			} catch (ParseException e) {
 				e.printStackTrace();
-				log.error("数据: " + call.getTitle() + call.getToUser() + ", 日期: "
-						+ call.getSendTime() + ", 不正确");
-			}catch (Exception e2) {
+				StringBuffer sb = new StringBuffer("");
+				sb.append("发给:").append(call.getToUser()).append("的数据:")
+						.append(call.getText()).append(", 日期:")
+						.append(call.getSendTime()).append(", 格式不正确");
+				log.error(sb.toString());
+				return sb.toString();
+			} catch (Exception e2) {
 				e2.printStackTrace();
+				return e2.getMessage();
 			}
 		}
+		return "群发消息传输完成";
 	}
-	
+
 	/**
 	 * 
 	 * @return 成功为0，失败则为errcode
@@ -339,27 +346,27 @@ public class MessageService {
 		String todayStr = CommonUtil.getDateStr(new Date(), "yyyy-MM-dd");
 		int result = ErrorCode.SUCCESS_RETURN;
 		Set<RequestCall> successMessages = new HashSet<RequestCall>();
-		Map<String, HashSet<RequestCall>> requestCallMap = WeixinUtil.getGroupMessagePool();
-		if(null != requestCallMap.get(todayStr)){
-		for (RequestCall call : requestCallMap.get(todayStr)) {
-			CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
-			if (0 == sendMessage(jsonMessage)) {
-				successMessages.add(call);
+		Map<String, HashSet<RequestCall>> groupMessagePool = WeixinUtil
+				.getGroupMessagePool();
+		if (null != groupMessagePool.get(todayStr)) {
+			for (RequestCall call : groupMessagePool.get(todayStr)) {
+				CorpBaseJsonMessage jsonMessage = changeMessageToJson(call);
+				if (0 == sendMessage(jsonMessage)) {
+					successMessages.add(call);
+				} else {
+					// 群发消息有错误仅记录日志不单独处理。
+					result = ErrorCode.MESSAGE_ERROR_RETURN;
+				}
+				try {
+					// 间隔发送，降低调用微信服务器压力
+					Thread.sleep(2 * 1000);
+				} catch (InterruptedException e) {
+				}
 			}
-			else {
-				// 群发消息有错误仅记录日志不单独处理。
-				result = ErrorCode.MESSAGE_ERROR_RETURN;
-			}
-			try {
-				// 间隔发送，降低调用微信服务器压力
-				Thread.sleep(2 * 1000);
-			} catch (InterruptedException e) {
-			}
-		}
-		// 移除成功发送的消息
-		WeixinUtil.getGroupMessagePool().get(todayStr)
-				.removeAll(successMessages);
-		log.info("日期：" + todayStr + "，群发消息完成");
+			// 移除成功发送的消息
+			WeixinUtil.getGroupMessagePool().get(todayStr)
+					.removeAll(successMessages);
+			log.info("日期：" + todayStr + "，群发消息完成");
 		}
 		return result;
 	}
@@ -419,9 +426,8 @@ public class MessageService {
 					"yyyy-MM-dd HH:mm:ss");
 			jsonMessage.setSendTime(sendTimeDate.getTime());
 			if (!TEXT_MSG_TYPE.equals(jsonMessage.getMsgtype())
-					&& sendTimeDate.after(
-							new Date(System.currentTimeMillis() + 1000 * 60
-									* 60 * 24 * 3))) {
+					&& sendTimeDate.after(new Date(System.currentTimeMillis()
+							+ 1000 * 60 * 60 * 24 * 3))) {
 				// 说明是上传到永久库的素材消息
 				jsonMessage.setPermanent(true);
 			}

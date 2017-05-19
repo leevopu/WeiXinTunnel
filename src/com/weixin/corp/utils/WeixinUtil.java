@@ -10,6 +10,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import net.sf.json.JSONObject;
 
@@ -38,8 +41,6 @@ import com.weixin.corp.entity.user.User;
 public class WeixinUtil {
 
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
-
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	public static final String POST_REQUEST_METHOD = "POST";
 	public static final String GET_REQUEST_METHOD = "GET";
@@ -79,28 +80,28 @@ public class WeixinUtil {
 	}
 
 	// 目前环境无数据库，模拟取数据
-	public static void testFetchData() {
-		RequestCall data1 = new RequestCall("monthlyStockReport", "3",
-				"2017-05-16", "300");
-		RequestCall data2 = new RequestCall("monthlyBondReport", "1",
-				"2017-05-16", null);
-		// test1
-		// List<Data> dataList = new ArrayList<Data>();
-		// dataList.add(data1);
-		// dataList.add(data2);
-		// for (Data data : dataList) {
-		// dataCachePool.put(data.getTitle() + data.getTouser(), data1);
-		// }
-
-		// test2
-		List<RequestCall> testCalls = new ArrayList<RequestCall>();
-		testCalls.add(data1);
-		testCalls.add(data2);
-		for (RequestCall call : testCalls) {
-			addTimerGroupMessage(call);
-		}
-		System.out.println("完成数据获取");
-	}
+//	public static void testFetchData() {
+//		RequestCall data1 = new RequestCall("monthlyStockReport", "3",
+//				"2017-05-16", "300");
+//		RequestCall data2 = new RequestCall("monthlyBondReport", "1",
+//				"2017-05-16", null);
+//		// test1
+//		// List<Data> dataList = new ArrayList<Data>();
+//		// dataList.add(data1);
+//		// dataList.add(data2);
+//		// for (Data data : dataList) {
+//		// dataCachePool.put(data.getTitle() + data.getTouser(), data1);
+//		// }
+//
+//		// test2
+//		List<RequestCall> testCalls = new ArrayList<RequestCall>();
+//		testCalls.add(data1);
+//		testCalls.add(data2);
+//		for (RequestCall call : testCalls) {
+//			addTimerGroupMessage(call);
+//		}
+//		System.out.println("完成数据获取");
+//	}
 
 	/**
 	 * 与微信服务器的验证口令 <br>
@@ -153,29 +154,29 @@ public class WeixinUtil {
 	 * 添加定时群发消息，目前只群发数据库每日跑批 且日期大于等于系统日期，格式为yyyy-MM-dd8位
 	 * 
 	 */
-	public static boolean addTimerGroupMessage(RequestCall call) {
-		try {
-			Date today = sdf.parse(sdf.format(new Date()));
-			String sendTime = call.getSendTime();
-			Date sendTimeDate = sdf.parse(sendTime);
-			if ("database".equals(call.getFromUser())
-					&& !sendTimeDate.before(today)) {
-				if (null == groupMessagePool.get(sendTime)) {
-					groupMessagePool.put(sendTime, new HashSet<RequestCall>());
-				}
-				call.setSendTime(sendTime + " 00:00:00");
-				groupMessagePool.get(sendTime).add(call);
-				return true;
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-			log.error("获取的数据: " + call.getTitle() + call.getToUser() + ", 日期: "
-					+ call.getSendTime() + ", 不正确");
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		return false;
-	}
+//	public static boolean addTimerGroupMessage(RequestCall call) {
+//		try {
+//			Date today = sdf.parse(sdf.format(new Date()));
+//			String sendTime = call.getSendTime();
+//			Date sendTimeDate = sdf.parse(sendTime);
+//			if ("database".equals(call.getFromUser())
+//					&& !sendTimeDate.before(today)) {
+//				if (null == groupMessagePool.get(sendTime)) {
+//					groupMessagePool.put(sendTime, new HashSet<RequestCall>());
+//				}
+//				call.setSendTime(sendTime + " 00:00:00");
+//				groupMessagePool.get(sendTime).add(call);
+//				return true;
+//			}
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//			log.error("获取的数据: " + call.getTitle() + call.getToUser() + ", 日期: "
+//					+ call.getSendTime() + ", 不正确");
+//		} catch (Exception e2) {
+//			e2.printStackTrace();
+//		}
+//		return false;
+//	}
 
 	/**
 	 * @param requestUrl
@@ -200,17 +201,11 @@ public class WeixinUtil {
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
 		JSONObject jsonObject = null;
 		StringBuffer buffer = new StringBuffer();
-		try { // 创建SSLContext对象，并使用我们指定的信任管理器初始化
-			TrustManager[] tm = { new MyX509TrustManager() };
-			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom());
-			// 从上述SSLContext对象中得到SSLSocketFactory对象
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
-
+		try {
 			URL url = new URL(requestUrl);
 			HttpsURLConnection httpUrlConn = (HttpsURLConnection) url
 					.openConnection();
-			httpUrlConn.setSSLSocketFactory(ssf);
+			setSSL(httpUrlConn);
 
 			httpUrlConn.setDoOutput(true);
 			httpUrlConn.setDoInput(true);
@@ -304,6 +299,34 @@ public class WeixinUtil {
 			log.error("https request error:{}", e);
 		}
 		return jsonObject;
+	}
+
+	private static void setSSL(HttpsURLConnection httpUrlConn) throws Exception {
+		// 创建SSLContext对象，并使用我们指定的信任管理器初始化
+		TrustManager[] tm = { new X509TrustManager() {
+
+			@Override
+			public void checkClientTrusted(X509Certificate[] chain,
+					String authType) throws CertificateException {
+			}
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] chain,
+					String authType) throws CertificateException {
+			}
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+		} };
+		SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
+		sslContext.init(null, tm, new java.security.SecureRandom());
+		// 从上述SSLContext对象中得到SSLSocketFactory对象
+		SSLSocketFactory ssf = sslContext.getSocketFactory();
+
+		httpUrlConn.setSSLSocketFactory(ssf);
 	}
 
 	/**

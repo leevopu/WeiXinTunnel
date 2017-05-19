@@ -7,7 +7,7 @@ import javax.crypto.Cipher;
 
 
 
-public class DESUtil {
+public class DesUtil {
 	
 	private static String strDefaultKey = "national";
 
@@ -73,7 +73,7 @@ public class DESUtil {
 	 * 
 	 * @throws Exception
 	 */
-	public DESUtil() throws Exception {
+	public DesUtil() throws Exception {
 		this(strDefaultKey);
 	}
 
@@ -84,7 +84,7 @@ public class DESUtil {
 	 *            指定的密钥
 	 * @throws Exception
 	 */
-	public DESUtil(String strKey) throws Exception {
+	public DesUtil(String strKey) throws Exception {
 		Security.addProvider(new com.sun.crypto.provider.SunJCE());
 		Key key = getKey(strKey.getBytes());
 
@@ -169,7 +169,7 @@ public class DESUtil {
 	public static void main(String[] args) {
 		try {
 
-			DESUtil des = new DESUtil("WEIXIN");
+			DesUtil des = new DesUtil("WEIXIN");
 			System.out.println("加密："+des.encrypt("X234Hjkl"));
             System.out.println("解密："+des.decrypt("50db2eab56e7777572f34a424f2c3563"));
         } catch (Exception e) {

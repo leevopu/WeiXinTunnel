@@ -13,9 +13,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class JDBCFactory {
+public class JdbcUtil {
 
-	private static Log log = LogFactory.getLog(JDBCFactory.class);
+	private static Log log = LogFactory.getLog(JdbcUtil.class);
 
 	private static String driver = null;
 	private static String url = null;
@@ -39,10 +39,10 @@ public class JDBCFactory {
 	public static boolean initJDBC(String driverClassName, String url,
 			String username, String password) {
 		try {
-			JDBCFactory.driver = driverClassName;
-			JDBCFactory.url = url;
-			JDBCFactory.user = username;
-			JDBCFactory.password = getDes().decrypt(password);
+			JdbcUtil.driver = driverClassName;
+			JdbcUtil.url = url;
+			JdbcUtil.user = username;
+			JdbcUtil.password = getDes().decrypt(password);
 //			getConn();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -58,12 +58,12 @@ public class JDBCFactory {
 		ST = CONNECTION.createStatement();
 	}
 
-	private static DESUtil des = null;
+	private static DesUtil des = null;
 
-	public static DESUtil getDes() {
+	public static DesUtil getDes() {
 		if (des == null) {
 			try {
-				des = new DESUtil("WEIXIN");
+				des = new DesUtil("WEIXIN");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
