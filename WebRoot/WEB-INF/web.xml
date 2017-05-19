@@ -6,17 +6,6 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
   
-<security-constraint>
-  <web-resource-collection>
-     <web-resource-name>SSL</web-resource-name>
-	 <url-pattern>/*</url-pattern>
-  </web-resource-collection>
-  <user-data-constraint>
-     <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-  </user-data-constraint>
-</security-constraint>
-
-   
   <servlet>
     <servlet-name>CorpWeixinServlet</servlet-name>
     <servlet-class>com.weixin.corp.main.CorpWeixinServlet</servlet-class>
@@ -107,8 +96,7 @@
         	<param-name>agentid</param-name>
         	<param-value>9</param-value>
         </init-param>
-
- 
+        
         <load-on-startup>0</load-on-startup>  
     </servlet>
     
@@ -135,14 +123,18 @@
 	<!-- 请求url日志记录拦截 -->  
     <filter>  
         <filter-name>requestFilter</filter-name>  
-        <filter-class>com.weixin.corp.main.RequestFilter</filter-class>  
-    </filter>  
-    <filter-mapping>  
+        <filter-class>com.weixin.corp.main.RequestFilter</filter-class>
+            <init-param>
+	        	<param-name>httpsPort</param-name>
+	        	<param-value>8443</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
         <filter-name>requestFilter</filter-name>  
-        <url-pattern>/*</url-pattern>  
-    </filter-mapping>  
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 	
-	
+
 		<!--Axis2 config start -->
 	<servlet>
 		<servlet-name>AxisServlet</servlet-name>

@@ -332,7 +332,7 @@ public class MessageService {
 				return sb.toString();
 			} catch (Exception e2) {
 				e2.printStackTrace();
-				return e2.getMessage();
+				return "群发消息传输出错, " + e2.getMessage();
 			}
 		}
 		return "群发消息传输完成";
@@ -401,6 +401,9 @@ public class MessageService {
 
 	public static CorpBaseJsonMessage changeMessageToJson(RequestCall call) {
 		CorpBaseJsonMessage jsonMessage = null;
+		if(null != call.getText()){
+			call.setText(call.getText().replace("\r\n", "\n\n"));
+		}
 		switch (call.getMsgType()) {
 		case TEXT_MSG_TYPE:
 			jsonMessage = new TextJsonMessage(call.getText());

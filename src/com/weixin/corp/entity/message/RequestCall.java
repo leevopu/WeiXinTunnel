@@ -30,6 +30,7 @@ public class RequestCall implements Serializable {
 	private String msgType;
 	/**
 	 * 文本内容（若msgType为text则需有值)
+	 * 不识别\r，只识别\n
 	 */
 	private String text;
 	/**
@@ -45,6 +46,12 @@ public class RequestCall implements Serializable {
 	 * 格式 yyyy-MM-dd HH:mm:ss 样例 2020-10-10 10:00:00
 	 */
 	private String sendTime;
+	
+	/**
+	 * 调用的应用名
+	 */
+	private String caller;
+	
 	/**
 	 * 响应后的错误消息用于提醒
 	 */
@@ -143,6 +150,14 @@ public class RequestCall implements Serializable {
 
 	public void setSendTime(String sendTime) {
 		this.sendTime = sendTime;
+	}
+
+	public String getCaller() {
+		return caller;
+	}
+
+	public void setCaller(String caller) {
+		this.caller = caller;
 	}
 
 	public String getErrorInfo() {
