@@ -255,16 +255,6 @@ public class WeixinUtil {
 				out = new DataOutputStream(httpUrlConn.getOutputStream());
 				// 输出表头
 				out.write(head);
-				// // 文件正文部分
-				// // 把文件已流文件的方式 推入到url中
-				// DataInputStream in = new DataInputStream(new FileInputStream(
-				// uploadMedia));
-				// int bytes = 0;
-				// byte[] bufferOut = new byte[1024];
-				// while ((bytes = in.read(bufferOut)) != -1) {
-				// out.write(bufferOut, 0, bytes);
-				// }
-				// in.close();
 				out.write(call.getMediaByte());
 				// 结尾部分
 				byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n")

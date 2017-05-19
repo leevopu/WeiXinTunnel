@@ -120,10 +120,10 @@
 		<url-pattern>/userServlet</url-pattern>
 	</servlet-mapping>
 
-	<!-- 请求url日志记录拦截 -->  
+	<!-- 请求url拦截转发 -->  
     <filter>  
         <filter-name>requestFilter</filter-name>  
-        <filter-class>com.weixin.corp.main.RequestFilter</filter-class>
+        <filter-class>com.weixin.corp.filter.RequestFilter</filter-class>
             <init-param>
 	        	<param-name>httpsPort</param-name>
 	        	<param-value>8443</param-value>
