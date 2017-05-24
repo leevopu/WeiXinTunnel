@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -21,9 +19,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.xml.namespace.QName;
 
 import net.sf.json.JSONObject;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.rpc.client.RPCServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,7 +39,6 @@ public class WeixinUtil {
 
 	public static final String ACCESS_TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=APPID&corpsecret=APPSECRET";
 
-	public static String httpsRequestHost = null;
 	public static final String POST_REQUEST_METHOD = "POST";
 	public static final String GET_REQUEST_METHOD = "GET";
 
@@ -56,6 +58,10 @@ public class WeixinUtil {
 	 */
 	private static HashMap<String, User> oaUserIdPool = new HashMap<String, User>();
 
+	private static String httpsRequestHostUrl;
+	private static String httpsRequestMethod;
+	private static String httpsRequestQName;
+
 	private static String token = "weixin";
 	private static String appid;
 	private static String appsecret;
@@ -63,12 +69,16 @@ public class WeixinUtil {
 	private static String agentid;
 
 	public static void init(String token, String appid, String appsecret,
-			String aeskey, String agentid) {
+			String aeskey, String agentid, String httpsRequestHostUrl,
+			String httpsRequestMethod, String httpsRequestQName) {
 		WeixinUtil.token = token;
 		WeixinUtil.appid = appid;
 		WeixinUtil.appsecret = appsecret;
 		WeixinUtil.aeskey = aeskey;
 		WeixinUtil.agentid = agentid;
+		WeixinUtil.httpsRequestHostUrl = httpsRequestHostUrl;
+		WeixinUtil.httpsRequestMethod = httpsRequestMethod;
+		WeixinUtil.httpsRequestQName = httpsRequestQName;
 	}
 
 	// 目前环境无数据库，模拟取数据
@@ -167,17 +177,79 @@ public class WeixinUtil {
 					WeixinUtil.accessToken.getToken());
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
-		return httpsRequest(requestUrl, requestMethod, outputStr, null);
+		try {
+			RPCServiceClient serviceClient = new RPCServiceClient();
+			Options options = serviceClient.getOptions();
+			EndpointReference targetEPR = new EndpointReference(
+					httpsRequestHostUrl);
+			options.setTo(targetEPR);
+
+			// 在创建QName对象时，QName类的构造方法的第一个参数表示WSDL文件的命名空间名，也就是<wsdl:definitions>元素的targetNamespace属性值
+			QName qName = new QName(httpsRequestQName, httpsRequestMethod);
+			Object[] parameters = new Object[] { requestUrl, requestMethod,
+					outputStr, null };
+			// Object[] opAddEntryArgs = new Object[] { content, atta };
+			// 返回参数类型，这个和axis1有点区别
+			// invokeBlocking方法有三个参数，其中第一个参数的类型是QName对象，表示要调用的方法名；
+			// 第二个参数表示要调用的WebService方法的参数值，参数类型为Object[]；
+			// 第三个参数表示WebService方法的返回值类型的Class对象，参数类型为Class[]。
+			// 当方法没有参数时，invokeBlocking方法的第二个参数值不能是null，而要使用new Object[]{}
+			// 如果被调用的WebService方法没有返回值，应使用RPCServiceClient类的invokeRobust方法，
+			// 该方法只有两个参数，它们的含义与invokeBlocking方法的前两个参数的含义相同
+			Class[] returnClass = new Class[] { JSONObject.class };
+			JSONObject response = (JSONObject) serviceClient.invokeBlocking(
+					qName, parameters, returnClass)[0];
+			System.out.println(response);
+
+			// return httpsRequest(requestUrl, requestMethod, outputStr, null);
+			return response;
+		} catch (AxisFault x) {
+			x.printStackTrace();
+			log.error(x.getMessage());
+		}
+		return null;
 	}
 
 	public static JSONObject httpsRequestMedia(String requestUrl,
 			String requestMethod, RequestCall call) {
+
 		if (null != WeixinUtil.accessToken) {
 			requestUrl = requestUrl.replace("ACCESS_TOKEN",
 					WeixinUtil.accessToken.getToken());
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
-		return httpsRequest(requestUrl, requestMethod, null, call);
+		try {
+			RPCServiceClient serviceClient = new RPCServiceClient();
+			Options options = serviceClient.getOptions();
+			EndpointReference targetEPR = new EndpointReference(
+					httpsRequestHostUrl);
+			options.setTo(targetEPR);
+
+			// 在创建QName对象时，QName类的构造方法的第一个参数表示WSDL文件的命名空间名，也就是<wsdl:definitions>元素的targetNamespace属性值
+			QName qName = new QName(httpsRequestQName, httpsRequestMethod);
+			Object[] parameters = new Object[] { requestUrl, requestMethod, null, call };
+			// Object[] opAddEntryArgs = new Object[] { content, atta };
+			// 返回参数类型，这个和axis1有点区别
+			// invokeBlocking方法有三个参数，其中第一个参数的类型是QName对象，表示要调用的方法名；
+			// 第二个参数表示要调用的WebService方法的参数值，参数类型为Object[]；
+			// 第三个参数表示WebService方法的返回值类型的Class对象，参数类型为Class[]。
+			// 当方法没有参数时，invokeBlocking方法的第二个参数值不能是null，而要使用new Object[]{}
+			// 如果被调用的WebService方法没有返回值，应使用RPCServiceClient类的invokeRobust方法，
+			// 该方法只有两个参数，它们的含义与invokeBlocking方法的前两个参数的含义相同
+			Class[] returnClass = new Class[] { JSONObject.class };
+			JSONObject response = (JSONObject) serviceClient.invokeBlocking(
+					qName, parameters, returnClass)[0];
+			System.out.println(response);
+
+			// return httpsRequest(requestUrl, requestMethod, outputStr, null);
+			return response;
+		} catch (AxisFault x) {
+			x.printStackTrace();
+			log.error(x.getMessage());
+		}
+		return null;
+	
+//		return httpsRequest(requestUrl, requestMethod, null, call);
 	}
 
 	/**
@@ -356,84 +428,4 @@ public class WeixinUtil {
 		return accessToken;
 	}
 
-	/**
-	 * 验证签名
-	 * 
-	 * @param signature
-	 * @param timestamp
-	 * @param nonce
-	 * @return
-	 */
-	public static boolean checkSignature(String signature, String timestamp,
-			String nonce) {
-		String[] arr = new String[] { token, timestamp, nonce };
-		// 将token、timestamp、nonce三个参数进行字典序排序
-		// Arrays.sort(arr);
-		sort(arr);
-		StringBuilder content = new StringBuilder();
-		for (int i = 0; i < arr.length; i++) {
-			content.append(arr[i]);
-		}
-
-		System.out.println("content.toString : " + content.toString());
-
-		MessageDigest md = null;
-		String tmpStr = null;
-
-		try {
-			md = MessageDigest.getInstance("SHA-1");
-			// 将三个参数字符串拼接成一个字符串进行sha1加密
-			byte[] digest = md.digest(content.toString().getBytes());
-			tmpStr = byteToStr(digest);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-
-		content = null;
-		// 将sha1加密后的字符串可与signature对比，标识该请求来源于微信
-		return tmpStr != null ? tmpStr.equals(signature.toUpperCase()) : false;
-	}
-
-	/**
-	 * 将字节数组转换为十六进制字符串
-	 * 
-	 * @param byteArray
-	 * @return
-	 */
-	private static String byteToStr(byte[] byteArray) {
-		String strDigest = "";
-		for (int i = 0; i < byteArray.length; i++) {
-			strDigest += byteToHexStr(byteArray[i]);
-		}
-		return strDigest;
-	}
-
-	/**
-	 * 将字节转换为十六进制字符串
-	 * 
-	 * @param mByte
-	 * @return
-	 */
-	private static String byteToHexStr(byte mByte) {
-		char[] Digit = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-				'B', 'C', 'D', 'E', 'F' };
-		char[] tempArr = new char[2];
-		tempArr[0] = Digit[(mByte >>> 4) & 0X0F];
-		tempArr[1] = Digit[mByte & 0X0F];
-
-		String s = new String(tempArr);
-		return s;
-	}
-
-	private static void sort(String a[]) {
-		for (int i = 0; i < a.length - 1; i++) {
-			for (int j = i + 1; j < a.length; j++) {
-				if (a[j].compareTo(a[i]) < 0) {
-					String temp = a[i];
-					a[i] = a[j];
-					a[j] = temp;
-				}
-			}
-		}
-	}
 }

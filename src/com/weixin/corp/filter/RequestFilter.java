@@ -12,12 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.weixin.corp.utils.WeixinUtil;
+
 public class RequestFilter extends HttpServlet implements Filter {
 
 	private static final long serialVersionUID = 1L;
 
 	private static String httpsPort;
-
+	
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		httpsPort = filterConfig.getInitParameter("httpsPort");

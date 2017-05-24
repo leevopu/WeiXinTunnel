@@ -30,52 +30,30 @@ public class TimerTaskServlet extends HttpServlet {
 	private static Log log = LogFactory.getLog(WeixinUtil.class);
 
 	public void init() throws ServletException {
-		// 获取web.xml中配置的参数
-		// appid第三方用户唯一凭证
-		String appid = getInitParameter("appid");
-		// appsecret第三方用户唯一凭证密钥
-		String appsecret = getInitParameter("appsecret");
-		// aeskey第三方用户加密密钥
-		String aeskey = getInitParameter("aeskey");
-		// agentid第三方用户应用ID
-		String agentid = getInitParameter("agentid");
+		// 启动循环获取access_token的线程，access_token每隔2小时会失效
+		new Thread(new WeixinAccessTokenTimerTaskThread()).start();
 
-		// 未配置appid、appsecret、aeskey时给出提示
-		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey)
-				|| aeskey.length() != 43 || "".equals(agentid)) {
-			log.error("appid, appsecret, aeskey or agentid configuration error in web.xml, please check carefully.");
+		String driverClassName = getInitParameter("driverClassName");
+		String url = getInitParameter("url");
+		String username = getInitParameter("username");
+		String password = getInitParameter("password");
+		if (!JdbcUtil.initJDBC(driverClassName, url, username, password)) {
+			log.error("connect database failed");
 			System.exit(-1);
-		} else {
-			// token第三方用户验证口令
-			String token = getInitParameter("token");
-			if (null != token) {
-				WeixinUtil.init(token, appid, appsecret, aeskey, agentid);
-			}
-			// 启动循环获取access_token的线程，access_token每隔2小时会失效
-			new Thread(new WeixinAccessTokenTimerTaskThread()).start();
-
-			String driverClassName = getInitParameter("driverClassName");
-			String url = getInitParameter("url");
-			String username = getInitParameter("username");
-			String password = getInitParameter("password");
-			if (!JdbcUtil.initJDBC(driverClassName, url, username, password)) {
-				log.error("connect database failed");
-				System.exit(-1);
-			}
-			// 首次初始化缓存必须放在取access_token和jdbc之后
-			Runnable userPoolInit = new DailyUpdateUserTimerTask();
-			userPoolInit.run();
-			
-			Runnable groupMessagePoolInit = new DailyGroupMessageTimerTask();
-			groupMessagePoolInit.run();
-			// JDBCFactory.execRead("select 123");
-			// 启动定时获取跑批数据，每天10点触发1次进行群发
-			// dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
-			// // 启动定时更新用户信息，每天6点触发1次更新缓存
-			// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
-			// 启动循环监控用户自定义发送时间的消息
-			new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		}
+		// 首次初始化缓存必须放在取access_token和jdbc之后
+		Runnable userPoolInit = new DailyUpdateUserTimerTask();
+		userPoolInit.run();
+
+		Runnable groupMessagePoolInit = new DailyGroupMessageTimerTask();
+		groupMessagePoolInit.run();
+		// JDBCFactory.execRead("select 123");
+		// 启动定时获取跑批数据，每天10点触发1次进行群发
+		// dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
+		// // 启动定时更新用户信息，每天6点触发1次更新缓存
+		// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
+		// 启动循环监控用户自定义发送时间的消息
+		new Thread(new DelayJsonMessageTimerTaskThread()).start();
 	}
 
 	/**
@@ -117,7 +95,7 @@ public class TimerTaskServlet extends HttpServlet {
 			}
 		}
 	}
-	
+
 	/**
 	 * 定时更新用户信息，每天触发1次更新缓存
 	 */
@@ -125,8 +103,7 @@ public class TimerTaskServlet extends HttpServlet {
 		@Override
 		public void run() {
 			try {
-				Map<String, Set<String>> userOaIdMap = JdbcUtil
-						.getUserOaId();
+				Map<String, Set<String>> userOaIdMap = JdbcUtil.getUserOaId();
 				while (null == WeixinUtil.getAvailableAccessToken()) {
 					Thread.sleep(5 * 1000);
 				}
@@ -145,8 +122,8 @@ public class TimerTaskServlet extends HttpServlet {
 				HashMap<String, User> oaUserIdPool = WeixinUtil
 						.getOaUserIdPool();
 				for (Department department : departmentList) {
-					userList = UserService.getUserByDepartment(
-							department.getId());
+					userList = UserService.getUserByDepartment(department
+							.getId());
 					if (null != userList) {
 						// 放入用户缓存
 						for (User user : userList) {

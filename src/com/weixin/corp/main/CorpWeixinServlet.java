@@ -27,11 +27,40 @@ import com.weixin.corp.utils.WeixinUtil;
  * 
  */
 public class CorpWeixinServlet extends HttpServlet {
-	
+
+	public void init() throws ServletException {
+		// 获取web.xml中配置的参数
+		// appid第三方用户唯一凭证
+		String appid = getInitParameter("appid");
+		// appsecret第三方用户唯一凭证密钥
+		String appsecret = getInitParameter("appsecret");
+		// aeskey第三方用户加密密钥
+		String aeskey = getInitParameter("aeskey");
+		// agentid第三方用户应用ID
+		String agentid = getInitParameter("agentid");
+		
+		String httpsRequestHostUrl = getInitParameter("httpsRequestHostUrl");
+		String httpsRequestMethod = getInitParameter("httpsRequestMethod");
+		String httpsRequestQName = getInitParameter("httpsRequestQName");
+
+		// 未配置appid、appsecret、aeskey时给出提示
+		if ("".equals(appid) || "".equals(appsecret) || "".equals(aeskey)
+				|| aeskey.length() != 43 || "".equals(agentid)) {
+			log.error("appid, appsecret, aeskey or agentid configuration error in web.xml, please check carefully.");
+			System.exit(-1);
+		} else {
+			// token第三方用户验证口令
+			String token = getInitParameter("token");
+			if (null != token) {
+				WeixinUtil.init(token, appid, appsecret, aeskey, agentid, httpsRequestHostUrl, httpsRequestMethod, httpsRequestQName);
+			}
+		}
+	}
+
 	private static Log log = LogFactory.getLog(CorpWeixinServlet.class);
-	
+
 	private static final long serialVersionUID = -5021188348833856475L;
-	
+
 	private static ConcurrentMap<String, Map<String, String>> requestCachePool = new ConcurrentHashMap<>();
 
 	@Override
@@ -65,7 +94,8 @@ public class CorpWeixinServlet extends HttpServlet {
 		}
 
 		// 通过检验signature对请求进行校验，若校验成功则原样返回echostr，表示接入成功，否则接入失败
-		if (WeixinUtil.checkSignature(signature, timestamp, nonce)) {
+		if (WXBizMsgCrypt.checkSignature(WeixinUtil.getToken(), signature,
+				timestamp, nonce)) {
 			out.print(echostr);
 		}
 		out.close();
@@ -78,7 +108,7 @@ public class CorpWeixinServlet extends HttpServlet {
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
-		
+
 		// 获得请求参数
 		String signature = request.getParameter("msg_signature");
 		System.out.println("signature: " + signature);
@@ -133,7 +163,7 @@ public class CorpWeixinServlet extends HttpServlet {
 			return;
 		}
 		requestCachePool.put(requestId, requestMap);
-		//处理
+		// 处理
 		String responseMsg = MessageService.processRequest(requestMap);
 		if (null == responseMsg) {
 			return;
@@ -169,6 +199,5 @@ public class CorpWeixinServlet extends HttpServlet {
 
 		requestCachePool.remove(requestId);
 	}
-
 
 }
