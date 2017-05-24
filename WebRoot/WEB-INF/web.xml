@@ -88,7 +88,7 @@
         </init-param>
         <init-param>
         	<param-name>httpsRequestQName</param-name>
-        	<param-value>http://service.corp.weixin.com</param-value>
+        	<param-value>http://utils.corp.weixin.com</param-value>
         </init-param>
         <load-on-startup>0</load-on-startup>
     </servlet>
