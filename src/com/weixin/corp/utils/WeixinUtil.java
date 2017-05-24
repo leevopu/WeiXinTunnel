@@ -183,7 +183,7 @@ public class WeixinUtil {
 			EndpointReference targetEPR = new EndpointReference(
 					httpsRequestHostUrl);
 			options.setTo(targetEPR);
-
+			options.setAction(httpsRequestMethod);
 			// 在创建QName对象时，QName类的构造方法的第一个参数表示WSDL文件的命名空间名，也就是<wsdl:definitions>元素的targetNamespace属性值
 			QName qName = new QName(httpsRequestQName, httpsRequestMethod);
 			Object[] parameters = new Object[] { requestUrl, requestMethod,
