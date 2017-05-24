@@ -1,27 +1,24 @@
 package com.weixin.corp.entity.message;
 
 import java.io.Serializable;
-
 /**
- * 数据库结果群发和用户主动调用的封装消息
+ * 定时群发和主动调用的消息封装
  * 
  */
 public class RequestCall implements Serializable {
-
-	private static final long serialVersionUID = 5570817032197190881L;
-
 	/**
-	 * 消息标题（非必填，主要图文使用)
+	 * 消息标题（非必填，主要图文使用）
 	 */
 	private String title;
 	/**
-	 * 暂不使用，考虑传调用者IP做校验
+	 * 暂不使用，调用的系统名（caller）
 	 */
 	private String fromUser;
 	/**
 	 * 接收人（用OA系统的用户id） <br>
 	 * <br>
-	 * 用逗号或竖线分割多个接收人，否则只有能匹配上的用户能接收到消息
+	 * 用逗号或竖线分割多个接收人
+	 * 否则只有能匹配上的用户能接收到消息
 	 */
 	private String toUser;
 	/**
@@ -29,39 +26,33 @@ public class RequestCall implements Serializable {
 	 */
 	private String msgType;
 	/**
-	 * 文本内容（若msgType为text则需有值)
-	 * 不识别\r，只识别\n
+	 * 文本内容（若msgType为text则需有值）
+	 * 不识别\r只识别\n
 	 */
 	private String text;
 	/**
 	 * 图片视频文件的二进制流
 	 */
 	private byte[] mediaByte;
-
+	/**
+	 * 图片视频文件的文件名
+	 */
 	private String mediaName;
-
 	/**
 	 * 发送时间（控制时间延迟发送，立即发送可不配置） <br>
 	 * <br>
-	 * 格式 yyyy-MM-dd HH:mm:ss 样例 2020-10-10 10:00:00
+	 * 格式 yyyy-MM-dd HH:mm:ss 样例 2020-10-10 10:10:00
+	 * <br>
+	 * 或 yyyy-MM-dd 样例 2020-10-10（给每日群发使用）
 	 */
 	private String sendTime;
-	
 	/**
-	 * 调用的应用名
-	 */
-	private String caller;
-	
-	/**
-	 * 响应后的错误消息用于提醒
-	 */
-	private String errorInfo;
-
-	/**
-	 * 素材上传后获得的ID
+	 * 素材上传后获得的ID，内部提供，不必主动提供
 	 */
 	private String mediaId;
 
+	private static final long serialVersionUID = 5570817032197190881L;
+	
 	public RequestCall() {
 		super();
 	}
@@ -80,7 +71,6 @@ public class RequestCall implements Serializable {
 	 */
 	public RequestCall(String title, String toUser, String sendTime, String text) {
 		super();
-		this.title = title;
 		this.toUser = toUser;
 		this.sendTime = sendTime;
 		this.text = text;
@@ -150,22 +140,6 @@ public class RequestCall implements Serializable {
 
 	public void setSendTime(String sendTime) {
 		this.sendTime = sendTime;
-	}
-
-	public String getCaller() {
-		return caller;
-	}
-
-	public void setCaller(String caller) {
-		this.caller = caller;
-	}
-
-	public String getErrorInfo() {
-		return errorInfo;
-	}
-
-	public void setErrorInfo(String errorInfo) {
-		this.errorInfo = errorInfo;
 	}
 
 	public String getMediaId() {

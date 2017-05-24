@@ -7,11 +7,6 @@ public class Image {
 		return MediaId;
 	}
 
-	//
-	// public void setMediaId(String mediaId) {
-	// MediaId = mediaId;
-	// }
-
 	public Image(String mediaId) {
 		this.MediaId = mediaId;
 	}

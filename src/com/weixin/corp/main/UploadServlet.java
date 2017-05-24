@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.message.RequestCall;
+import com.weixin.corp.exception.WxException;
 import com.weixin.corp.service.MessageService;
 import com.weixin.corp.service.UploadService;
 import com.weixin.corp.utils.CommonUtil;
@@ -46,17 +47,19 @@ public class UploadServlet extends HttpServlet {
 		long startDoPostTime = System.currentTimeMillis();
 		System.out.println("doPost");
 		System.out.println("start doPost Time = " + startDoPostTime);
-		RequestCall call = parseRequestCall(request);
+		RequestCall call = null;
 		response.setContentType("text/html;charset=UTF-8");
-		if (null != call.getErrorInfo()) {
-			response.getWriter().write(call.getErrorInfo());
-		} else {
-			response.getWriter().write(UploadService.process(call));
+		try {
+			call = parseRequestCall(request);
+		} catch (WxException e) {
+			e.printStackTrace();
+			response.getWriter().write(e.getError());
 		}
+		response.getWriter().write(UploadService.process(call));
 	}
 
 	private RequestCall parseRequestCall(HttpServletRequest request)
-			throws IOException {
+			throws IOException, WxException {
 		RequestCall call = new RequestCall();
 		final int NONE = 0;
 		final int DATAHEADER = 1;
@@ -187,15 +190,14 @@ public class UploadServlet extends HttpServlet {
 			if (CommonUtil.StringisEmpty(call.getTitle())
 					|| CommonUtil.StringisEmpty(call.getText())
 					|| CommonUtil.StringisEmpty(mediaName)) {
-				call.setErrorInfo("图文消息类型，标题、文本、文件素材必填!");
-				System.out.println("图文消息类型，标题、文本、文件素材必填!");
-				return call;
+				System.out.println("图文消息类型时，标题、文本、文件素材必填!");
+				throw new WxException("图文消息类型时，标题、文本、文件素材必填!");
 			}
 		}
 
 		if (CommonUtil.StringisEmpty(mediaName)) {
 			if (CommonUtil.StringisEmpty(call.getText())) {
-				call.setErrorInfo("文本内容和素材文件不能同时为空");
+				throw new WxException("文本内容和素材文件不能同时为空");
 			} else {
 				call.setMsgType(MessageService.TEXT_MSG_TYPE);
 			}
@@ -207,7 +209,7 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	private RequestCall reflectFiledValue(RequestCall call, String fieldName,
-			String fieldValue) {
+			String fieldValue) throws WxException {
 		try {
 			if ("submit".equals(fieldName)) {
 				return call;
@@ -218,7 +220,7 @@ public class UploadServlet extends HttpServlet {
 					declaredField.getType());
 			method.invoke(call, fieldValue);
 		} catch (Exception e) {
-			log.error("RequestCall赋值失败: " + e.getMessage());
+			throw new WxException("图文消息类型时，标题、文本、文件素材必填!");
 		}
 		return call;
 	}
