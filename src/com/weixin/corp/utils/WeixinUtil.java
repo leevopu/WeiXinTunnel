@@ -196,13 +196,13 @@ public class WeixinUtil {
 			// 当方法没有参数时，invokeBlocking方法的第二个参数值不能是null，而要使用new Object[]{}
 			// 如果被调用的WebService方法没有返回值，应使用RPCServiceClient类的invokeRobust方法，
 			// 该方法只有两个参数，它们的含义与invokeBlocking方法的前两个参数的含义相同
-			Class[] returnClass = new Class[] { JSONObject.class };
-			JSONObject response = (JSONObject) serviceClient.invokeBlocking(
+			Class[] returnClass = new Class[] { String.class };
+			String response = (String) serviceClient.invokeBlocking(
 					qName, parameters, returnClass)[0];
 			System.out.println(response);
 
 			// return httpsRequest(requestUrl, requestMethod, outputStr, null);
-			return response;
+			return JSONObject.fromObject(response);
 		} catch (AxisFault x) {
 			x.printStackTrace();
 			log.error(x.getMessage());
@@ -236,13 +236,13 @@ public class WeixinUtil {
 			// 当方法没有参数时，invokeBlocking方法的第二个参数值不能是null，而要使用new Object[]{}
 			// 如果被调用的WebService方法没有返回值，应使用RPCServiceClient类的invokeRobust方法，
 			// 该方法只有两个参数，它们的含义与invokeBlocking方法的前两个参数的含义相同
-			Class[] returnClass = new Class[] { JSONObject.class };
-			JSONObject response = (JSONObject) serviceClient.invokeBlocking(
+			Class[] returnClass = new Class[] { String.class };
+			String response = (String) serviceClient.invokeBlocking(
 					qName, parameters, returnClass)[0];
 			System.out.println(response);
 
 			// return httpsRequest(requestUrl, requestMethod, outputStr, null);
-			return response;
+			return JSONObject.fromObject(response);
 		} catch (AxisFault x) {
 			x.printStackTrace();
 			log.error(x.getMessage());
