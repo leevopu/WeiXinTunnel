@@ -58,10 +58,6 @@ public class WeixinUtil {
 	 */
 	private static Map<String, User> oaUserIdPool = new HashMap<String, User>();
 
-	private static String httpsRequestHostUrl;
-	private static String httpsRequestMethod;
-	private static String httpsRequestQName;
-
 	private static String token = "weixin";
 	private static String appid;
 	private static String appsecret;
@@ -81,9 +77,6 @@ public class WeixinUtil {
 		WeixinUtil.appsecret = appsecret;
 		WeixinUtil.aeskey = aeskey;
 		WeixinUtil.agentid = agentid;
-		WeixinUtil.httpsRequestHostUrl = httpsRequestHostUrl;
-		WeixinUtil.httpsRequestMethod = httpsRequestMethod;
-		WeixinUtil.httpsRequestQName = httpsRequestQName;
 
 		try {
 			serviceClient = new RPCServiceClient();

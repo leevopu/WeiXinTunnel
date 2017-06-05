@@ -34,11 +34,13 @@ public class RequestFilter extends HttpServlet implements Filter {
 		String requestUrl = req.getRequestURL().toString()
 				+ (null == req.getQueryString() ? "" : "?"
 						+ req.getQueryString());
-		System.out.println("requestUrl: " + requestUrl);
 		// 把除webservice请求外的访问转成https
 		if (!requestUrl.toLowerCase().endsWith("wsdl")
 				&& requestUrl.startsWith("http:")) {
 			resp.sendRedirect(requestUrl.replace("http:", "https:").replace(
+					req.getContextPath(),
+					":" + httpsPort + req.getContextPath()));
+			System.out.println(requestUrl.replace("http:", "https:").replace(
 					req.getContextPath(),
 					":" + httpsPort + req.getContextPath()));
 			return;
