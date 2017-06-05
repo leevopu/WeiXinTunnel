@@ -2,7 +2,6 @@ package com.weixin.corp.main;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,7 +118,7 @@ public class TimerTaskServlet extends HttpServlet {
 				List<User> userList = null;
 				Set<String> oaIdSet = null;
 				// 获得oa系统id和userid的映射关系
-				HashMap<String, User> oaUserIdPool = WeixinUtil
+				Map<String, User> oaUserIdPool = WeixinUtil
 						.getOaUserIdPool();
 				for (Department department : departmentList) {
 					userList = UserService.getUserByDepartment(department

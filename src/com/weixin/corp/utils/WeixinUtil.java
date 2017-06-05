@@ -56,7 +56,7 @@ public class WeixinUtil {
 	/**
 	 * 用户账号缓存池
 	 */
-	private static HashMap<String, User> oaUserIdPool = new HashMap<String, User>();
+	private static Map<String, User> oaUserIdPool = new HashMap<String, User>();
 
 	private static String httpsRequestHostUrl;
 	private static String httpsRequestMethod;
@@ -67,6 +67,11 @@ public class WeixinUtil {
 	private static String appsecret;
 	private static String aeskey;
 	private static String agentid;
+
+	private static RPCServiceClient serviceClient;
+	private static Options options;
+	private static QName qName;
+	
 
 	public static void init(String token, String appid, String appsecret,
 			String aeskey, String agentid, String httpsRequestHostUrl,
@@ -79,6 +84,18 @@ public class WeixinUtil {
 		WeixinUtil.httpsRequestHostUrl = httpsRequestHostUrl;
 		WeixinUtil.httpsRequestMethod = httpsRequestMethod;
 		WeixinUtil.httpsRequestQName = httpsRequestQName;
+
+		try {
+			serviceClient = new RPCServiceClient();
+		} catch (AxisFault e) {
+			e.printStackTrace();
+		}
+		options = serviceClient.getOptions();
+		EndpointReference targetEPR = new EndpointReference(httpsRequestHostUrl);
+		options.setTo(targetEPR);
+		options.setAction(httpsRequestMethod);
+		// 在创建QName对象时，QName类的构造方法的第一个参数表示WSDL文件的命名空间名，也就是<wsdl:definitions>元素的targetNamespace属性值
+		qName = new QName(httpsRequestQName, httpsRequestMethod);
 	}
 
 	// 目前环境无数据库，模拟取数据
@@ -134,7 +151,7 @@ public class WeixinUtil {
 		return groupMessagePool;
 	}
 
-	public static HashMap<String, User> getOaUserIdPool() {
+	public static Map<String, User> getOaUserIdPool() {
 		return oaUserIdPool;
 	}
 
@@ -178,14 +195,6 @@ public class WeixinUtil {
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
 		try {
-			RPCServiceClient serviceClient = new RPCServiceClient();
-			Options options = serviceClient.getOptions();
-			EndpointReference targetEPR = new EndpointReference(
-					httpsRequestHostUrl);
-			options.setTo(targetEPR);
-
-			// 在创建QName对象时，QName类的构造方法的第一个参数表示WSDL文件的命名空间名，也就是<wsdl:definitions>元素的targetNamespace属性值
-			QName qName = new QName(httpsRequestQName, httpsRequestMethod);
 			Object[] parameters = new Object[] { requestUrl, requestMethod,
 					outputStr, null };
 			// Object[] opAddEntryArgs = new Object[] { content, atta };
@@ -197,8 +206,8 @@ public class WeixinUtil {
 			// 如果被调用的WebService方法没有返回值，应使用RPCServiceClient类的invokeRobust方法，
 			// 该方法只有两个参数，它们的含义与invokeBlocking方法的前两个参数的含义相同
 			Class[] returnClass = new Class[] { String.class };
-			String response = (String) serviceClient.invokeBlocking(
-					qName, parameters, returnClass)[0];
+			String response = (String) serviceClient.invokeBlocking(qName,
+					parameters, returnClass)[0];
 			System.out.println(response);
 
 			// return httpsRequest(requestUrl, requestMethod, outputStr, null);
@@ -219,15 +228,8 @@ public class WeixinUtil {
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
 		try {
-			RPCServiceClient serviceClient = new RPCServiceClient();
-			Options options = serviceClient.getOptions();
-			EndpointReference targetEPR = new EndpointReference(
-					httpsRequestHostUrl);
-			options.setTo(targetEPR);
-
-			// 在创建QName对象时，QName类的构造方法的第一个参数表示WSDL文件的命名空间名，也就是<wsdl:definitions>元素的targetNamespace属性值
-			QName qName = new QName(httpsRequestQName, httpsRequestMethod);
-			Object[] parameters = new Object[] { requestUrl, requestMethod, null, call };
+			Object[] parameters = new Object[] { requestUrl, requestMethod,
+					null, call };
 			// Object[] opAddEntryArgs = new Object[] { content, atta };
 			// 返回参数类型，这个和axis1有点区别
 			// invokeBlocking方法有三个参数，其中第一个参数的类型是QName对象，表示要调用的方法名；
@@ -237,8 +239,8 @@ public class WeixinUtil {
 			// 如果被调用的WebService方法没有返回值，应使用RPCServiceClient类的invokeRobust方法，
 			// 该方法只有两个参数，它们的含义与invokeBlocking方法的前两个参数的含义相同
 			Class[] returnClass = new Class[] { String.class };
-			String response = (String) serviceClient.invokeBlocking(
-					qName, parameters, returnClass)[0];
+			String response = (String) serviceClient.invokeBlocking(qName,
+					parameters, returnClass)[0];
 			System.out.println(response);
 
 			// return httpsRequest(requestUrl, requestMethod, outputStr, null);
@@ -248,8 +250,8 @@ public class WeixinUtil {
 			log.error(x.getMessage());
 		}
 		return null;
-	
-//		return httpsRequest(requestUrl, requestMethod, null, call);
+
+		// return httpsRequest(requestUrl, requestMethod, null, call);
 	}
 
 	/**
@@ -267,8 +269,9 @@ public class WeixinUtil {
 	 *            outputStr和uploadMedia二选一
 	 * 
 	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
+	 *         分离出去，调用webservice的了
 	 */
-	public static JSONObject httpsRequest(String requestUrl,
+	private static JSONObject httpsRequest(String requestUrl,
 			String requestMethod, String outputStr, RequestCall uploadMedia) {
 		JSONObject jsonObject = null;
 		StringBuffer buffer = new StringBuffer();
