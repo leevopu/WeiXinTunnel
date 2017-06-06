@@ -80,7 +80,7 @@
         
         <init-param>
         	<param-name>httpsRequestHostUrl</param-name>
-        	<param-value>http://localhost/WeixinOuter/services/outerService?wsdl</param-value>
+        	<param-value>http://localhost:8088/WeixinOuter/services/outerService?wsdl</param-value>
         </init-param>
         <init-param>
         	<param-name>httpsRequestMethod</param-name>
