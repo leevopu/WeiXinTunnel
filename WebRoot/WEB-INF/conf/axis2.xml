@@ -194,13 +194,13 @@
     <!-- Transport Ins -->
     <!-- ================================================= -->
     <transportReceiver name="https" class="org.apache.axis2.transport.http.AxisServletListener">  
-        <parameter name="port">8443</parameter>
+        <parameter name="port">8543</parameter>
     </transportReceiver>
     
     
      <transportReceiver name="http"
                        class="org.apache.axis2.transport.http.AxisServletListener">
-        <parameter name="port">8080</parameter> 
+        <parameter name="port">8080</parameter>
         <!-- Here is the complete list of supported parameters (see example settings further below):
             port: the port to listen on (default 6060)
             hostname:  if non-null, url prefix used in reply-to endpoint references                                 (default null)

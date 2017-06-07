@@ -80,7 +80,8 @@
         
         <init-param>
         	<param-name>httpsRequestHostUrl</param-name>
-        	<param-value>http://localhost:8088/WeixinOuter/services/outerService?wsdl</param-value>
+        	<param-value>http://localhost:8099/WeixinOuter/services/outerService?wsdl</param-value>
+        	<!-- <param-value>http://SUNLIQINGKF2-PC:8280/services/testWeiXin</param-value> --> <!-- use esb -->
         </init-param>
         <init-param>
         	<param-name>httpsRequestMethod</param-name>
@@ -146,7 +147,7 @@
        <filter-class>com.weixin.corp.filter.RequestFilter</filter-class>
        <init-param>
 	       <param-name>httpsPort</param-name>
-	       <param-value>8443</param-value>
+	       <param-value>8543</param-value>
        </init-param>
 	</filter>
     <filter-mapping>

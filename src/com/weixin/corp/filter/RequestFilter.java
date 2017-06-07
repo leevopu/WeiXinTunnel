@@ -37,12 +37,10 @@ public class RequestFilter extends HttpServlet implements Filter {
 		// 把除webservice请求外的访问转成https
 		if (!requestUrl.toLowerCase().endsWith("wsdl")
 				&& requestUrl.startsWith("http:")) {
-			resp.sendRedirect(requestUrl.replace("http:", "https:").replace(
-					req.getContextPath(),
-					":" + httpsPort + req.getContextPath()));
-			System.out.println(requestUrl.replace("http:", "https:").replace(
-					req.getContextPath(),
-					":" + httpsPort + req.getContextPath()));
+			System.out.println(requestUrl);
+			System.out.println("ContextPath:" + req.getContextPath());
+			System.out.println(requestUrl.replace("http:", "https:").replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + httpsPort));
+			resp.sendRedirect(requestUrl.replace("http:", "https:").replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + httpsPort));
 			return;
 		}
 		// 加入filter链继续向下执行
@@ -52,6 +50,14 @@ public class RequestFilter extends HttpServlet implements Filter {
 	@Override
 	public void destroy() {
 		super.destroy();
+	}
+	
+	public static void main(String[] args) {
+		String requestUrl = "http://localhost:90/WeixinTest3/uploadServlet";
+		System.out.println(requestUrl.indexOf("/", requestUrl.indexOf(":", 10)));
+		System.out.println(requestUrl.replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + 9999));
+//		requestUrl.replace("http:", "https:").replace(
+//				requestUrl.substring(requestUrl.indexOf(":")), requestUrl.indexOf("/", requestUrl.indexOf(":")))
 	}
 
 }
