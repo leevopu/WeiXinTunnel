@@ -164,11 +164,11 @@ public class TimerTaskServlet extends HttpServlet {
 								"获取access_token成功，有效时长%d秒 token:%s",
 								accessToken.getExpiresIn(),
 								accessToken.getToken()));
-						// 休眠到过期前200秒再去获取新的accessToken
-						Thread.sleep((accessToken.getExpiresIn() - 200) * 1000);
+						// 休眠1小时再去取，防止过期
+						Thread.sleep(3600 * 1000);
 					} else {
-						// 如果access_token为null，60秒后再获取
-						Thread.sleep(60 * 1000);
+						// 如果access_token为null，5秒后再获取
+						Thread.sleep(5 * 1000);
 					}
 				} catch (InterruptedException e) {
 					try {
