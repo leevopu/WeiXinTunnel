@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,7 +176,7 @@ public class MessageService {
 				respContent = "感谢您的关注！";
 			}
 			// 自定义菜单点击事件
-			else if (EVENT_TYPE_CLICK == msgType) {
+			else if (EVENT_TYPE_CLICK == msgType) {/*
 				// 暂未封装-------------------------------测试阶段
 				String eventKey = requestMap.get("EventKey");
 				switch (eventKey) {
@@ -188,7 +187,7 @@ public class MessageService {
 				default:
 					respContent = "点击了" + eventKey;
 				}
-			}
+			*/}
 		}
 		// test
 		// String mediaId =
@@ -266,7 +265,7 @@ public class MessageService {
 	}
 
 	public static JSONObject getPermanentMediaList(String type) {
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("type", type);
 		map.put("offset", 0);
 		map.put("count", 50);
@@ -404,26 +403,40 @@ public class MessageService {
 		if(null != call.getText()){
 			call.setText(call.getText().replace("\r\n", "\n\n"));
 		}
-		switch (call.getMsgType()) {
-		case TEXT_MSG_TYPE:
+//		switch (call.getMsgType()) {
+//		case TEXT_MSG_TYPE:
+//			jsonMessage = new TextJsonMessage(call.getText());
+//			break;
+//		case IMAGE_MSG_TYPE:
+//			jsonMessage = new ImageJsonMessage(call.getMediaId());
+//			break;
+//		case VIDEO_MSG_TYPE:
+//			jsonMessage = new VideoJsonMessage(call.getMediaId());
+//			break;
+//		case FILE_MSG_TYPE:
+//			jsonMessage = new FileJsonMessage(call.getMediaId());
+//			break;
+//		case MPNEWS_MSG_TYPE:
+//			jsonMessage = new MpNewsJsonMessage(call.getTitle(),
+//					call.getMediaId(), call.getText());
+//			break;
+//		default:
+//			break;
+//		}
+		// 服务器是jdk1.6
+		if(TEXT_MSG_TYPE.equals(call.getMsgType())){
 			jsonMessage = new TextJsonMessage(call.getText());
-			break;
-		case IMAGE_MSG_TYPE:
+		}else if(IMAGE_MSG_TYPE.equals(call.getMsgType())){
 			jsonMessage = new ImageJsonMessage(call.getMediaId());
-			break;
-		case VIDEO_MSG_TYPE:
+		}else if(VIDEO_MSG_TYPE.equals(call.getMsgType())){
 			jsonMessage = new VideoJsonMessage(call.getMediaId());
-			break;
-		case FILE_MSG_TYPE:
+		}else if(FILE_MSG_TYPE.equals(call.getMsgType())){
 			jsonMessage = new FileJsonMessage(call.getMediaId());
-			break;
-		case MPNEWS_MSG_TYPE:
+		}else if(MPNEWS_MSG_TYPE.equals(call.getMsgType())){
 			jsonMessage = new MpNewsJsonMessage(call.getTitle(),
 					call.getMediaId(), call.getText());
-			break;
-		default:
-			break;
 		}
+		
 		if (!CommonUtil.StringisEmpty(call.getSendTime())) {
 			Date sendTimeDate = CommonUtil.getStrDate(call.getSendTime(),
 					"yyyy-MM-dd HH:mm:ss");

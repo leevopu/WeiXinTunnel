@@ -5,9 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -61,7 +60,7 @@ public class CorpWeixinServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -5021188348833856475L;
 
-	private static ConcurrentMap<String, Map<String, String>> requestCachePool = new ConcurrentHashMap<>();
+	private static Map<String, Map<String, String>> requestCachePool = new HashMap<String, Map<String,String>>();
 
 	@Override
 	protected void doGet(HttpServletRequest request,

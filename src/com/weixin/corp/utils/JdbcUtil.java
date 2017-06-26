@@ -85,13 +85,20 @@ public class JdbcUtil {
 		// } catch (SQLException e) {
 		// e.printStackTrace();
 		// }
+		
 		Set<String> oaIdSet = new HashSet<String>();
 		oaIdSet.add("1");
 		oaIdSet.add("2");
 		Set<String> oaIdSet2 = new HashSet<String>();
 		oaIdSet2.add("3");
+		Set<String> oaIdSet4 = new HashSet<String>();
+		oaIdSet4.add("4");
+		Set<String> oaIdSet5 = new HashSet<String>();
+		oaIdSet5.add("5");
 		userOaIdMap.put("guanzhao", oaIdSet);
 		userOaIdMap.put("leevo_pu", oaIdSet2);
+		userOaIdMap.put("sunliqing", oaIdSet4);
+		userOaIdMap.put("yangziling", oaIdSet5);
 		return userOaIdMap;
 	}
 }
