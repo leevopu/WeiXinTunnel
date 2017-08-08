@@ -3,7 +3,6 @@ package test;
 
 import net.sf.json.JSONObject;
 
-import com.weixin.aes.AesException;
 import com.weixin.aes.WXBizMsgCrypt;
 import com.weixin.corp.entity.user.User;
 
