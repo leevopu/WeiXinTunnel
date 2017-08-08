@@ -24,7 +24,7 @@ public class UserServlet extends HttpServlet {
 //		if (request.getRemoteAddr().contains("192.168")) {
 			// String userRequest = request.getRequestURI();
 
-			// http://192.168.103.43/WeixinTest3/userServlet?type=update&userid=wangwu&name=wangwu...封装
+			// http://192.168.103.43/WeixinTunnel/userServlet?type=update&userid=wangwu&name=wangwu...封装
 
 			// 模拟解析成实体对象
 			// if(type.equals("create") 创建用户

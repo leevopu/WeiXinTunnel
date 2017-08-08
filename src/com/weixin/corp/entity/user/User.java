@@ -1,7 +1,9 @@
 package com.weixin.corp.entity.user;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,9 +21,11 @@ public class User implements Serializable {
 	private String email;
 	private String weixinid;
 	private String avatar;
+	private List<Attr> extattr = new ArrayList<Attr>();
+	private List<String> order = new ArrayList<String>();
 	private int status;
-	private int enable = 1; //默认启用， 0为禁用
-	private String oaid; //内部系统相互调用的用户id
+	private int enable = 1; // 默认启用， 0为禁用
+	private String oaid; // 内部系统相互调用的用户id
 
 	public String getUserid() {
 		return userid;
@@ -38,7 +42,7 @@ public class User implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public Set<Integer> getDepartment() {
 		return department;
 	}
@@ -46,8 +50,8 @@ public class User implements Serializable {
 	public void setDepartment(Set<Integer> department) {
 		this.department = department;
 	}
-	
-	public void addDepartment(Integer departmentId){
+
+	public void addDepartment(Integer departmentId) {
 		this.department.add(departmentId);
 	}
 
@@ -121,6 +125,50 @@ public class User implements Serializable {
 
 	public void setOaid(String oaid) {
 		this.oaid = oaid;
+	}
+	
+//	public void addExtAttr(String name, String value) {
+//	    this.extattrs.add(new Attr(name, value));
+//	  }
+
+	public List<Attr> getExtattr() {
+		return this.extattr;
+	}
+
+	public List<String> getOrder() {
+		return order;
+	}
+
+	public void setOrder(List<String> order) {
+		this.order = order;
+	}
+
+	public static class Attr {
+
+		private String name;
+		private String value;
+
+		public Attr(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getValue() {
+			return this.value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
 	}
 
 }

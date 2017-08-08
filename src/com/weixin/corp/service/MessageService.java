@@ -48,13 +48,13 @@ public class MessageService {
 
 	public static String MEDIA_TEMP_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE";
 
-	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
+//	public static String MEDIA_PERMANENT_UPLOAD = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=TYPE&access_token=ACCESS_TOKEN";
 
-	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
+//	public static String MEDIA_PERMANENT_COUNT_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/get_count?access_token=ACCESS_TOKEN";
 
-	public static String MEDIA_PERMANENT_LIST_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
+//	public static String MEDIA_PERMANENT_LIST_GET = "https://qyapi.weixin.qq.com/cgi-bin/material/batchget?access_token=ACCESS_TOKEN";
 
-	public static String MEDIA_PERMANENT_DELETE = "https://qyapi.weixin.qq.com/cgi-bin/material/del?access_token=ACCESS_TOKEN&media_id=MEDIA_ID";
+//	public static String MEDIA_PERMANENT_DELETE = "https://qyapi.weixin.qq.com/cgi-bin/material/del?access_token=ACCESS_TOKEN&media_id=MEDIA_ID";
 
 	public static final String TEXT_MSG_TYPE = "text";
 	public static final String IMAGE_MSG_TYPE = "image";
@@ -215,7 +215,7 @@ public class MessageService {
 				WeixinUtil.POST_REQUEST_METHOD, outputStr);
 		if (null != jsonObject) {
 			if (0 != jsonObject.getInt("errcode")) {
-				log.error("群发消息出错 errcode:" + jsonObject.getInt("errcode")
+				log.error("发送消息出错 errcode:" + jsonObject.getInt("errcode")
 						+ "，errmsg:" + jsonObject.getString("errmsg"));
 				return jsonObject.getInt("errcode");
 			}
@@ -230,6 +230,10 @@ public class MessageService {
 		return ErrorCode.MESSAGE_ERROR_RETURN;
 	}
 
+	/**
+	 * 永久素材接口已被微信关闭，不再使用
+	 */
+	/**
 	public static JSONObject uploadPermanentMedia(RequestCall call) {
 		String msgType = call.getMsgType();
 		// 如果是图文类型素材，修改以图片类型上传
@@ -248,9 +252,15 @@ public class MessageService {
 		}
 		return jsonObject;
 	}
+     *
+     */
 
 	public static JSONObject uploadTempMedia(RequestCall call) {
 		String msgType = call.getMsgType();
+		// 如果是图文类型素材并且无mediaId，说明还未上传图文的图片，修改以图片类型上传
+				if (MPNEWS_MSG_TYPE.equals(msgType) && null == call.getMediaId()) {
+					msgType = IMAGE_MSG_TYPE;
+				}
 		JSONObject jsonObject = WeixinUtil.httpsRequestMedia(
 				MessageService.MEDIA_TEMP_UPLOAD.replace("TYPE", msgType),
 				WeixinUtil.POST_REQUEST_METHOD, call);
@@ -264,6 +274,10 @@ public class MessageService {
 		return jsonObject;
 	}
 
+	/**
+	 * 永久素材接口已被微信关闭，不再使用
+	 */
+	/**
 	public static JSONObject getPermanentMediaList(String type) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("type", type);
@@ -283,7 +297,12 @@ public class MessageService {
 		}
 		return jsonObject;
 	}
-
+	 * 
+	 */
+	/**
+	 * 永久素材接口已被微信关闭，不再使用
+	 */
+	/**
 	public static int deletePermanentMedia(String media_id) {
 		JSONObject jsonObject = WeixinUtil.httpsRequest(
 				MEDIA_PERMANENT_DELETE.replace("MEDIA_ID", media_id),
@@ -298,7 +317,8 @@ public class MessageService {
 		}
 		return ErrorCode.MESSAGE_ERROR_RETURN;
 	}
-
+	 *
+	 */
 	/**
 	 * 提供上端系统调用 处理传来的数据放入 groupMessagePool中
 	 * 
@@ -319,6 +339,9 @@ public class MessageService {
 						groupMessagePool.put(sendTime,
 								new HashSet<RequestCall>());
 					}
+					if (call.getSendTime().length() == 10) {
+						call.setSendTime(call.getSendTime() + " 00:00:00");
+					}
 					groupMessagePool.get(sendTime).add(call);
 				}
 			} catch (ParseException e) {
@@ -331,10 +354,10 @@ public class MessageService {
 				return sb.toString();
 			} catch (Exception e2) {
 				e2.printStackTrace();
-				return "群发消息传输出错, " + e2.getMessage();
+				return "群发消息数据准备出错, " + e2.getMessage();
 			}
 		}
-		return "群发消息传输完成";
+		return "群发消息数据准备完成";
 	}
 
 	/**

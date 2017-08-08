@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.weixin.corp.utils.WeixinUtil;
-
 public class RequestFilter extends HttpServlet implements Filter {
 
 	private static final long serialVersionUID = 1L;
@@ -39,8 +37,14 @@ public class RequestFilter extends HttpServlet implements Filter {
 				&& requestUrl.startsWith("http:")) {
 			System.out.println(requestUrl);
 			System.out.println("ContextPath:" + req.getContextPath());
-			System.out.println(requestUrl.replace("http:", "https:").replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + httpsPort));
-			resp.sendRedirect(requestUrl.replace("http:", "https:").replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + httpsPort));
+			if(-1 == requestUrl.indexOf(":", 10)){
+				System.out.println(requestUrl.replace("http:", "https:").replace(req.getContextPath(), ":" + httpsPort + req.getContextPath()));
+				resp.sendRedirect(requestUrl.replace("http:", "https:").replace(req.getContextPath(), ":" + httpsPort + req.getContextPath()));
+			}
+			else{
+				System.out.println(requestUrl.replace("http:", "https:").replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + httpsPort));
+				resp.sendRedirect(requestUrl.replace("http:", "https:").replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + httpsPort));
+			}
 			return;
 		}
 		// 加入filter链继续向下执行
@@ -53,7 +57,7 @@ public class RequestFilter extends HttpServlet implements Filter {
 	}
 	
 	public static void main(String[] args) {
-		String requestUrl = "http://localhost:90/WeixinTest3/uploadServlet";
+		String requestUrl = "http://localhost:90/WeixinTunnel/uploadServlet";
 		System.out.println(requestUrl.indexOf("/", requestUrl.indexOf(":", 10)));
 		System.out.println(requestUrl.replace(requestUrl.substring(requestUrl.indexOf(":", 10), requestUrl.indexOf("/", requestUrl.indexOf(":", 10))), ":" + 9999));
 //		requestUrl.replace("http:", "https:").replace(

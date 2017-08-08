@@ -48,7 +48,7 @@ public class TimerTaskServlet extends HttpServlet {
 		groupMessagePoolInit.run();
 		// JDBCFactory.execRead("select 123");
 		// 启动定时获取跑批数据，每天10点触发1次进行群发
-		// dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
+		 dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
 		// // 启动定时更新用户信息，每天6点触发1次更新缓存
 		// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
 		// 启动循环监控用户自定义发送时间的消息
@@ -63,11 +63,13 @@ public class TimerTaskServlet extends HttpServlet {
 	 *            task
 	 */
 	public static void dailyFixOnTimeTask(int fixHour, Runnable runnable) {
+		fixHour = 14;
+		int minute = 33;
 		long oneDay = 24 * 60 * 60 * 1000;
 		Calendar fixTime = Calendar.getInstance();
 		fixTime.setTime(new Date());
 		fixTime.set(Calendar.HOUR_OF_DAY, fixHour);
-		fixTime.set(Calendar.MINUTE, 0);
+		fixTime.set(Calendar.MINUTE, minute);
 		fixTime.set(Calendar.SECOND, 0);
 		long initDelay = fixTime.getTimeInMillis() - System.currentTimeMillis();
 		initDelay = initDelay > 0 ? initDelay : oneDay + initDelay;
@@ -198,8 +200,8 @@ public class TimerTaskServlet extends HttpServlet {
 					MessageService.sendMessage(jsonMessage);
 					if (jsonMessage.isPermanent()) {
 						// 删除永久库素材消息
-						MessageService.deletePermanentMedia(jsonMessage
-								.getMediaId());
+//						MessageService.deletePermanentMedia(jsonMessage
+//								.getMediaId());
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();

@@ -153,7 +153,7 @@ public class UploadService {
 				String mediaId = null;
 				if (MessageService.MPNEWS_MSG_TYPE.equals(msgType)) {// 图文消息
 					// 永久素材接口
-					jsonObject = MessageService.uploadPermanentMedia(call);
+					jsonObject = MessageService.uploadTempMedia(call);
 					if (null != jsonObject && jsonObject.has("media_id")) {
 						mediaId = jsonObject.getString("media_id");
 						call.setMediaId(mediaId);
@@ -175,7 +175,11 @@ public class UploadService {
 									new Date(System.currentTimeMillis() + 1000
 											* 60 * 60 * 24 * 3))) {
 						// 永久素材接口
+						/*
+						        永久接口已被微信关闭
 						jsonObject = MessageService.uploadPermanentMedia(call);
+						 * 如有需要可考虑将文件先放至本地目录，然后等倒计时队列触发重新组装，校验，发送
+						 */
 					} else {
 						// 临时素材接口
 						jsonObject = MessageService.uploadTempMedia(call);
@@ -200,7 +204,7 @@ public class UploadService {
 					return "发送失败";
 				}
 			} else {
-				// 放入消息队列，定时触发
+				// 放入消息队列，定时触发 3天内有效
 				WeixinUtil.getDelayJsonMessageQueue().offer(jsonMessage);
 				return "放入消息队列，等待定时触发";
 			}
