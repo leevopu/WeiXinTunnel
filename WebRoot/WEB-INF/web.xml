@@ -115,7 +115,7 @@
         </init-param>
         <init-param>
 			<param-name>password</param-name>
-            <param-value>123qweasdzxc</param-value>
+            <param-value>2d091da24e050a5b4b150d30c80089ae</param-value>
         </init-param>
         
         <load-on-startup>1</load-on-startup>  

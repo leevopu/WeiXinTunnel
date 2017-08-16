@@ -87,7 +87,6 @@ public class JdbcUtil {
 			e.printStackTrace();
 		}
 		
-		System.out.println(userOaIdMap);
 		
 //		Set<String> oaIdSet = new HashSet<String>();
 //		oaIdSet.add("1");
@@ -104,7 +103,7 @@ public class JdbcUtil {
 		return userOaIdMap;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		String url = "jdbc:oracle:thin:@192.168.56.92:1521:hsfkjx";
 		boolean flag = initJDBC("oracle.jdbc.driver.OracleDriver", url, "dc_eiif", "123qweasdzxc");
 		getUserOaId();
