@@ -57,15 +57,20 @@
  <!-- corp_account -->
 	    <init-param>  
             <param-name>appid</param-name>
-            <param-value>wx522a5f82e335b883</param-value>
+            <!-- <param-value>wx522a5f82e335b883</param-value> -->
+            <param-value>wxee0f60dba87f5a91</param-value>
         </init-param>
         <init-param>
             <param-name>appsecret</param-name>
-            <param-value>LSBRNWP6sptVw2QLoY8lpFytYQsd1PE5Oy-OyL7oiqtCSbZbRflta3IrkkJfO7c7</param-value>  
+            <!--  <param-value>LSBRNWP6sptVw2QLoY8lpFytYQsd1PE5Oy-OyL7oiqtCSbZbRflta3IrkkJfO7c7</param-value>-->
+            <!--  <param-value>BxlNsaAk4Fcav-0s4eI__Kp_eh3hQ6HL9xrzxEef0qI</param-value>-->
+            <!-- <param-value>9SgiK9WctDiuweXi2e38tNGH9zZPcnJh9Vno8FFdAws</param-value> -->
+            	<param-value>ZFwMZKyTlJY0U4F4STVeH7Xo_XdIkxhpbyiojZbDSG8</param-value>
         </init-param>
         <init-param>
         	<param-name>aeskey</param-name>
-        	<param-value>nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR</param-value>
+        	<!-- <param-value>nh5DkevVih58uqmiDSWqnql6hamyMl7pBK6DiwLdjgR</param-value> -->
+        	     <param-value>abcdddddddddddddddddddddddddddddddddddddddd</param-value>
         </init-param>
         <init-param>
             <param-name>token</param-name>
@@ -75,7 +80,8 @@
 <!-- 企业号下某个应用，目前只用1个，如果用多个可能就不能配死了 -->
         <init-param>
         	<param-name>agentid</param-name>
-        	<param-value>9</param-value>
+        	<!-- <param-value>9</param-value> -->
+        	<param-value>1000002</param-value>
         </init-param>
         
         <init-param>
