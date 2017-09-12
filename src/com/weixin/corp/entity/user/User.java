@@ -26,6 +26,12 @@ public class User implements Serializable {
 	private int status;
 	private int enable = 1; // 默认启用， 0为禁用
 	private String oaid; // 内部系统相互调用的用户id
+	
+
+	public User(String userid) {
+		super();
+		this.userid = userid;
+	}
 
 	public String getUserid() {
 		return userid;
