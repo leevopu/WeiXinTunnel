@@ -43,7 +43,8 @@ public class JdbcUtil {
 			JdbcUtil.url = url;
 			JdbcUtil.user = username;
 			JdbcUtil.password = getDes().decrypt(password);
-//			getConn();
+//			JdbcUtil.password = password;
+			getConn();
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("≥ı ºªØjdbc ß∞‹");
@@ -73,32 +74,38 @@ public class JdbcUtil {
 
 	public static Map<String, Set<String>> getUserOaId() {
 		Map<String, Set<String>> userOaIdMap = new HashMap<String, Set<String>>();
-		// ResultSet result = execRead("select oaid, userid from xxxx");
-		// try {
-		// while (result.next()) {
-		// if (null == userOaIdMap.get(result.getString(2))) {
-		// Set<String> oaIdSet = new HashSet<String>();
-		// userOaIdMap.put(result.getString(2), oaIdSet);
-		// }
-		// userOaIdMap.get(result.getString(2)).add(result.getString(1));
-		// }
-		// } catch (SQLException e) {
-		// e.printStackTrace();
-		// }
+		ResultSet result = execRead("select t.id, t.loginid from dc_down.oa_hrmresource t where t.loginid is not null");
+		try {
+			while (result.next()) {
+				if (null == userOaIdMap.get(result.getString(2))) {
+					Set<String> oaIdSet = new HashSet<String>();
+					userOaIdMap.put(result.getString(2), oaIdSet);
+				}
+				userOaIdMap.get(result.getString(2)).add(result.getString(1));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
-		Set<String> oaIdSet = new HashSet<String>();
-		oaIdSet.add("1");
-		oaIdSet.add("2");
-		Set<String> oaIdSet2 = new HashSet<String>();
-		oaIdSet2.add("3");
-		Set<String> oaIdSet4 = new HashSet<String>();
-		oaIdSet4.add("4");
-		Set<String> oaIdSet5 = new HashSet<String>();
-		oaIdSet5.add("5");
-		userOaIdMap.put("guanzhao", oaIdSet);
-		userOaIdMap.put("leevo_pu", oaIdSet2);
-		userOaIdMap.put("sunliqing", oaIdSet4);
-		userOaIdMap.put("yangziling", oaIdSet5);
+		
+//		Set<String> oaIdSet = new HashSet<String>();
+//		oaIdSet.add("1");
+//		Set<String> oaIdSet2 = new HashSet<String>();
+//		oaIdSet2.add("3");
+//		Set<String> oaIdSet4 = new HashSet<String>();
+//		oaIdSet4.add("4");
+//		Set<String> oaIdSet5 = new HashSet<String>();
+//		oaIdSet5.add("5");
+//		userOaIdMap.put("guanzhao", oaIdSet);
+//		userOaIdMap.put("leevo_pu", oaIdSet2);
+//		userOaIdMap.put("sunliqing", oaIdSet4);
+//		userOaIdMap.put("yangziling", oaIdSet5);
 		return userOaIdMap;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		String url = "jdbc:oracle:thin:@192.168.56.92:1521:hsfkjx";
+		boolean flag = initJDBC("oracle.jdbc.driver.OracleDriver", url, "dc_eiif", "123qweasdzxc");
+		getUserOaId();
 	}
 }

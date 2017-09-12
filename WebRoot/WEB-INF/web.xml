@@ -113,15 +113,15 @@
         </init-param>
         <init-param>
 			<param-name>url</param-name>
-            <param-value>jdbc:oracle:thin:@192.168.159.182:1521:xxxx</param-value>
+            <param-value>jdbc:oracle:thin:@192.168.56.92:1521:hsfkjx</param-value>
         </init-param>
         <init-param>
 			<param-name>username</param-name>
-            <param-value>xx</param-value>
+            <param-value>dc_eiif</param-value>
         </init-param>
         <init-param>
 			<param-name>password</param-name>
-            <param-value>50db2eab56e7777572f34a424f2c3563</param-value>
+            <param-value>2d091da24e050a5b4b150d30c80089ae</param-value>
         </init-param>
         
         <load-on-startup>1</load-on-startup>  
