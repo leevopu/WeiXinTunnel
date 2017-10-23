@@ -106,6 +106,6 @@ public class JdbcUtil {
 	public static void main(String[] args) throws Exception {
 		String url = "jdbc:oracle:thin:@192.168.56.92:1521:hsfkjx";
 		boolean flag = initJDBC("oracle.jdbc.driver.OracleDriver", url, "dc_eiif", "123qweasdzxc");
-		getUserOaId();
+//		getUserOaId();
 	}
 }

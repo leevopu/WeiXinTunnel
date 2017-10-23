@@ -28,8 +28,7 @@ public class UserServlet extends HttpServlet {
 
 			// 模拟解析成实体对象
 			// if(type.equals("create") 创建用户
-			User newUser = new User();
-			newUser.setUserid("wangwu");
+			User newUser = new User("wangwu");
 			newUser.setName("wangwu");
 			// department之后改成部门名称，目前断网测试用departmentId
 			newUser.addDepartment(3);
@@ -47,8 +46,7 @@ public class UserServlet extends HttpServlet {
 			}
 
 			// if(type.equals("update") 更新用户
-			User updateUser = new User();
-			updateUser.setUserid("lisi");
+			User updateUser = new User("lisi");
 			updateUser.setName("lisi");
 			// department之后改成部门名称，目前断网测试用departmentId
 			updateUser.addDepartment(1);
