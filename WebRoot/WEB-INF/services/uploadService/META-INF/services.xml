@@ -9,6 +9,9 @@
 		<operation name="process">
 			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
 		</operation>
+		<operation name="getTest">
+			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
+		</operation>
 		<excludeOperations>
 			<operation></operation>
 			<!-- 屏蔽掉bean里的get set方法,以及不需要包装成webservice接口的方法 -->

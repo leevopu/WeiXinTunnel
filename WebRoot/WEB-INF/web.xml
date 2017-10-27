@@ -101,7 +101,7 @@
     </servlet>
         
     <servlet>  
-        <servlet-name>timerTaskServlet</servlet-name>  
+        <servlet-name>timerTaskServlet</servlet-name>
         <servlet-class>  
             com.weixin.corp.main.TimerTaskServlet
         </servlet-class>

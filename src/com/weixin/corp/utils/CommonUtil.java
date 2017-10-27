@@ -11,11 +11,12 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -25,7 +26,10 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
@@ -198,7 +202,7 @@ public class CommonUtil {
 				Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 		return new BufferedImage(cm, (WritableRaster) raster, true, null);
 	}
-	
+
 	// 字节数组中的INDEXOF函数，与STRING类中的INDEXOF类似
 	public static int byteIndexOf(byte[] b, String s, int start) {
 		return byteIndexOf(b, s.getBytes(), start);
@@ -245,8 +249,46 @@ public class CommonUtil {
 	}
 
 	public static void main(String[] args) {
-		CommonUtil.getStrDate("2017-05-16",
-				"yyyy-MM-dd");
-		
+		CommonUtil.getStrDate("2017-05-16", "yyyy-MM-dd");
+
+	}
+
+	@SuppressWarnings("resource")
+	/**
+	 * excel文件自适应表格显示
+	 * @param file
+	 */
+	public static void selfAdapt(File file) {
+		boolean isE2007 = false; // 判断是否是excel2007格式
+		if (file.getName().endsWith(".xlsx"))
+			isE2007 = true;
+		else if (!file.getName().endsWith(".xls")){ // 不是excel文件
+			return;
+		}
+		try {
+			InputStream input = new FileInputStream(file); // 建立输入流
+			Workbook workbook = null;
+			Sheet sheet = null;
+			// 根据文件格式(2003或者2007)来初始化
+			if (isE2007)
+				workbook = new XSSFWorkbook(input);
+			else
+				workbook = new HSSFWorkbook(input);
+			System.out.println(workbook.getNumberOfSheets());
+			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+				// Sheet sheet = wb.getSheetAt(0); //获得第一个表单
+				// sheet.autoSizeColumn(0, true);
+				sheet = workbook.getSheetAt(i);
+				System.out.println(sheet.getRow(0).getPhysicalNumberOfCells());
+				for (int j = 0; j < sheet.getRow(0).getPhysicalNumberOfCells(); j++) {
+					sheet.autoSizeColumn(j, true);
+				}
+			}
+			FileOutputStream os = new FileOutputStream(file);
+			workbook.write(os);
+			os.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 }

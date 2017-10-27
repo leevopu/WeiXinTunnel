@@ -32,11 +32,14 @@ public class RequestFilter extends HttpServlet implements Filter {
 		String requestUrl = req.getRequestURL().toString()
 				+ (null == req.getQueryString() ? "" : "?"
 						+ req.getQueryString());
+		// python用suds包发过来的webservice请求路径修正
+		if (requestUrl.endsWith("uploadServiceHttpSoap11Endpoint/")){
+			requestUrl = requestUrl.replace("uploadServiceHttpSoap11Endpoint/", "?wsdl");
+		}
 		// 把除webservice请求外的访问转成https
 		if (!requestUrl.toLowerCase().endsWith("wsdl")
 				&& requestUrl.startsWith("http:")) {
 			System.out.println(requestUrl);
-			System.out.println("ContextPath:" + req.getContextPath());
 			if(-1 == requestUrl.indexOf(":", 10)){
 				System.out.println(requestUrl.replace("http:", "https:").replace(req.getContextPath(), ":" + httpsPort + req.getContextPath()));
 				resp.sendRedirect(requestUrl.replace("http:", "https:").replace(req.getContextPath(), ":" + httpsPort + req.getContextPath()));

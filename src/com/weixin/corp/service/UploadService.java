@@ -13,6 +13,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
 import com.weixin.corp.utils.CommonUtil;
@@ -24,9 +27,18 @@ public class UploadService {
 	public static String UPLOAD_TEMP_URL = UploadService.class.getResource("/")
 			.getPath().substring(0, 4)
 			+ "temp/";
+	
+	public static String getTest() {
+		return "abc";
+	}
 
 	public static String process(RequestCall call) {
 		try {
+			if(null != call.getMediaBase64()){
+				BASE64Decoder decoder = new BASE64Decoder();
+				byte[] base64byte = decoder.decodeBuffer(call.getMediaBase64());
+				call.setMediaByte(base64byte);
+			}
 			// 判断是否格式符合要求，是否有缺失的字段
 			if (/* CommonUtil.StringisEmpty(call.getFromUser()) || */CommonUtil
 					.StringisEmpty(call.getToUser())
@@ -129,6 +141,10 @@ public class UploadService {
 						call.setMediaByte(FileUtils.readFileToByteArray(media));
 						System.out.println("图片压缩完成！");
 					}
+				}
+				if (MessageService.FILE_MSG_TYPE.equals(call.getMsgType())){
+					System.out.println("==============fit==============");
+					CommonUtil.selfAdapt(media);
 				}
 			}
 

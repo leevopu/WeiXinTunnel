@@ -31,6 +31,10 @@ public class RequestCall implements Serializable {
 	 */
 	private String text;
 	/**
+	 * 图片视频文件的Base64
+	 */
+	private String mediaBase64;
+	/**
 	 * 图片视频文件的二进制流
 	 */
 	private byte[] mediaByte;
@@ -116,6 +120,14 @@ public class RequestCall implements Serializable {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+
+	public String getMediaBase64() {
+		return mediaBase64;
+	}
+
+	public void setMediaBase64(String mediaBase64) {
+		this.mediaBase64 = mediaBase64;
 	}
 
 	public byte[] getMediaByte() {

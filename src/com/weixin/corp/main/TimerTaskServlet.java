@@ -33,6 +33,7 @@ public class TimerTaskServlet extends HttpServlet {
 		// 启动循环获取access_token的线程，access_token每隔2小时会失效
 		new Thread(new WeixinAccessTokenTimerTaskThread()).start();
 
+		
 		String driverClassName = getInitParameter("driverClassName");
 		String url = getInitParameter("url");
 		String username = getInitParameter("username");
@@ -54,6 +55,7 @@ public class TimerTaskServlet extends HttpServlet {
 		// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
 		// 启动循环监控用户自定义发送时间的消息
 		new Thread(new DelayJsonMessageTimerTaskThread()).start();
+		
 	}
 
 	/**

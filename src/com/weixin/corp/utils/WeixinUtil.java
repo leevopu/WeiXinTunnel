@@ -187,6 +187,12 @@ public class WeixinUtil {
 					WeixinUtil.accessToken.getToken());
 		}
 		requestUrl = requestUrl.replace("AGENTID", WeixinUtil.agentid);
+		System.out.println("xxxxxxxxxx," + requestUrl);
+		log.info("xxxxxxxxxx," + requestUrl);
+		System.out.println("yyyyyyyyyy," + requestMethod);
+		log.info("yyyyyyyyyy," + requestMethod);
+		System.out.println("zzzzzzzzzz," + outputStr);
+		log.info("zzzzzzzzzz," + outputStr);
 		try {
 			Object[] parameters = new Object[] { requestUrl, requestMethod,
 					outputStr, null };
