@@ -29,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
@@ -253,42 +252,72 @@ public class CommonUtil {
 
 	}
 
-	@SuppressWarnings("resource")
 	/**
-	 * excel文件自适应表格显示
+	 * excel文件样式调整
 	 * @param file
 	 */
-	public static void selfAdapt(File file) {
-		boolean isE2007 = false; // 判断是否是excel2007格式
-		if (file.getName().endsWith(".xlsx"))
-			isE2007 = true;
-		else if (!file.getName().endsWith(".xls")){ // 不是excel文件
-			return;
+	public static boolean excelStyleAdjust(File file) {
+		boolean result = false;
+//		boolean isE2007 = false; // 判断是否是excel2007格式
+//		if (file.getName().endsWith(".xlsx"))
+//			isE2007 = true;
+		if (!file.getName().endsWith(".xls")){ // 不是excel文件
+			return result;
 		}
 		try {
 			InputStream input = new FileInputStream(file); // 建立输入流
 			Workbook workbook = null;
 			Sheet sheet = null;
 			// 根据文件格式(2003或者2007)来初始化
-			if (isE2007)
-				workbook = new XSSFWorkbook(input);
-			else
-				workbook = new HSSFWorkbook(input);
-			System.out.println(workbook.getNumberOfSheets());
+//			if (isE2007)
+//				workbook = new XSSFWorkbook(input);
+//			else
+			workbook = new HSSFWorkbook(input);
 			for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 				// Sheet sheet = wb.getSheetAt(0); //获得第一个表单
 				// sheet.autoSizeColumn(0, true);
 				sheet = workbook.getSheetAt(i);
-				System.out.println(sheet.getRow(0).getPhysicalNumberOfCells());
 				for (int j = 0; j < sheet.getRow(0).getPhysicalNumberOfCells(); j++) {
 					sheet.autoSizeColumn(j, true);
 				}
 			}
+			
+			/* ----配置边框，背景纯白色
+			CellStyle blackBoxCellStyle = workbook.createCellStyle();
+			blackBoxCellStyle.setBorderLeft(BorderStyle.THIN);
+			blackBoxCellStyle.setBorderTop(BorderStyle.THIN);
+			blackBoxCellStyle.setBorderRight(BorderStyle.THIN);
+			blackBoxCellStyle.setBorderBottom(BorderStyle.THIN);
+			
+			CellStyle whiteCellStyle = workbook.createCellStyle();
+			whiteCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex()); // 背景色
+			whiteCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+			for (int i = 0; i < 200; i++) {
+				row = sheet.getRow(i);
+				if (null == row) {
+					row = sheet.createRow(i);
+				}
+				for (int j = 0; j < 100; j++) {
+					if (null != row.getCell(j)) {
+						cell = row.getCell(j);
+						cell.setCellStyle(blackBoxCellStyle);
+						continue;
+					}
+					cell = row.createCell(j);
+					cell.setCellStyle(whiteCellStyle);
+				}
+			}*/
+			
 			FileOutputStream os = new FileOutputStream(file);
 			workbook.write(os);
+			workbook.close();
 			os.close();
+			result = true;
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		} finally {
 		}
+		return result;
 	}
 }

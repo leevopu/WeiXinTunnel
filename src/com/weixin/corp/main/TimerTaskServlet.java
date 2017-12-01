@@ -2,8 +2,6 @@ package com.weixin.corp.main;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -18,10 +16,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.weixin.corp.entity.AccessToken;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
-import com.weixin.corp.entity.user.Department;
 import com.weixin.corp.entity.user.User;
 import com.weixin.corp.service.MessageService;
-import com.weixin.corp.service.UserService;
 import com.weixin.corp.utils.JdbcUtil;
 import com.weixin.corp.utils.WeixinUtil;
 
@@ -48,11 +44,10 @@ public class TimerTaskServlet extends HttpServlet {
 
 		Runnable groupMessagePoolInit = new DailyGroupMessageTimerTask();
 		groupMessagePoolInit.run();
-		// JDBCFactory.execRead("select 123");
 		// 启动定时获取跑批数据，每天10点触发1次进行群发
 		dailyFixOnTimeTask(10, new DailyGroupMessageTimerTask());
 		// // 启动定时更新用户信息，每天6点触发1次更新缓存
-		// dailyFixOnTimeTask(6, new DailyUpdateUserTimerTask());
+		dailyFixOnTimeTask(8, new DailyUpdateUserTimerTask());
 		// 启动循环监控用户自定义发送时间的消息
 		new Thread(new DelayJsonMessageTimerTaskThread()).start();
 		
@@ -90,7 +85,7 @@ public class TimerTaskServlet extends HttpServlet {
 			try {
 				log.info("开始执行每日定时群发消息");
 				// 群发消息
-				MessageService.groupMessage();
+//				MessageService.groupMessage();
 				// 未成功发送的记录会保留，可以进一步处理
 				// 之前失败的消息通知管理员
 				// MessageUtil.warnFailureMessage();
@@ -114,48 +109,46 @@ public class TimerTaskServlet extends HttpServlet {
 				log.info("开始执行每日定时更新用户");
 				// 获得oa系统id和userid的映射关系
 				Map<String, User> oaUserIdPool = WeixinUtil.getOaUserIdPool();
-				// 获取微信全部部门信息
-				List<Department> departmentList = UserService.getDepartment();
-				if (null == departmentList) {
-					log.error("未获取到部门信息");
-					return;
-				} else if (departmentList.size() == 0) { // ？？ 未把所有通讯录配置在可见范围
-					Iterator it = userOaIdMap.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry<String, Set<String>> x = (Map.Entry<String, Set<String>>) it
-								.next();
-						String userId = x.getKey();
-						Set<String> oaIds = x.getValue();
-						for (String oaId : oaIds) {
-							oaUserIdPool.put(oaId, new User(userId));
-						}
+//				// 获取微信全部部门信息
+//				List<Department> departmentList = UserService.getDepartment();
+//				if (null == departmentList) {
+//					log.error("未获取到部门信息");
+//					return;
+//				} else if (departmentList.size() == 0) {
+				// 只根据数据库的id和loginid来配置关系表，不管微信服务器的映射关系，有发送时无接收人的错误，到时候再处理
+				for (Map.Entry<String,Set<String>> map : userOaIdMap.entrySet()) {
+					String userId = map.getKey();
+					Set<String> oaIds = map.getValue();
+					for (String oaId : oaIds) {
+						oaUserIdPool.put(oaId, new User(userId));
 					}
 				}
-				// 遍历部门获取用户信息
-				List<User> userList = null;
-				Set<String> oaIdSet = null;
-
-				for (Department department : departmentList) {
-					userList = UserService.getUserByDepartment(department
-							.getId());
-					if (null != userList) {
-						// 放入用户缓存
-						for (User user : userList) {
-							oaIdSet = userOaIdMap.get(user.getUserid());
-							if (null != oaIdSet) {
-								for (String oaId : oaIdSet) {
-									// 没有此oaid的key时初始化
-									if (null == oaUserIdPool.get(oaId)) {
-										oaUserIdPool.put(oaId, user);
-									}
-									// 同一userid有多部门时，设置user的部门号集合
-									oaUserIdPool.get(oaId).getDepartment()
-											.add(department.getId());
-								}
-							}
-						}
-					}
-				}
+//				}
+//				// 遍历部门获取用户信息
+//				List<User> userList = null;
+//				Set<String> oaIdSet = null;
+//
+//				for (Department department : departmentList) {
+//					userList = UserService.getUserByDepartment(department
+//							.getId());
+//					if (null != userList) {
+//						// 放入用户缓存
+//						for (User user : userList) {
+//							oaIdSet = userOaIdMap.get(user.getUserid());
+//							if (null != oaIdSet) {
+//								for (String oaId : oaIdSet) {
+//									// 没有此oaid的key时初始化
+//									if (null == oaUserIdPool.get(oaId)) {
+//										oaUserIdPool.put(oaId, user);
+//									}
+//									// 同一userid有多部门时，设置user的部门号集合
+//									oaUserIdPool.get(oaId).getDepartment()
+//											.add(department.getId());
+//								}
+//							}
+//						}
+//					}
+//				}
 				log.info("用户信息缓存更新完成");
 			} catch (Exception e) {
 				e.printStackTrace();

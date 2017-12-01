@@ -75,18 +75,19 @@ public class JdbcUtil {
 	public static Map<String, Set<String>> getUserOaId() {
 		Map<String, Set<String>> userOaIdMap = new HashMap<String, Set<String>>();
 		ResultSet result = execRead("select t.id, t.loginid from dc_down.oa_hrmresource t where t.loginid is not null");
-		try {
-			while (result.next()) {
-				if (null == userOaIdMap.get(result.getString(2))) {
-					Set<String> oaIdSet = new HashSet<String>();
-					userOaIdMap.put(result.getString(2), oaIdSet);
+		if(null != result){
+			try { // 其实应该id和loginid一一对应，不需要用set，实际是否这样未确定，目前数据库不存在有中文名拼音相同的员工
+				while (result.next()) {
+					if (null == userOaIdMap.get(result.getString(2))) {
+						Set<String> oaIdSet = new HashSet<String>();
+						userOaIdMap.put(result.getString(2), oaIdSet);
+					}
+					userOaIdMap.get(result.getString(2)).add(result.getString(1));
 				}
-				userOaIdMap.get(result.getString(2)).add(result.getString(1));
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
-		
 		
 //		Set<String> oaIdSet = new HashSet<String>();
 //		oaIdSet.add("1");

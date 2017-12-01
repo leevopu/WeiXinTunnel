@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import com.weixin.corp.entity.message.RequestCall;
 import com.weixin.corp.entity.message.json.CorpBaseJsonMessage;
@@ -28,10 +27,6 @@ public class UploadService {
 			.getPath().substring(0, 4)
 			+ "temp/";
 	
-	public static String getTest() {
-		return "abc";
-	}
-
 	public static String process(RequestCall call) {
 		try {
 			if(null != call.getMediaBase64()){
@@ -143,8 +138,9 @@ public class UploadService {
 					}
 				}
 				if (MessageService.FILE_MSG_TYPE.equals(call.getMsgType())){
-					System.out.println("==============fit==============");
-					CommonUtil.selfAdapt(media);
+					if (CommonUtil.excelStyleAdjust(media)){
+						call.setMediaByte(FileUtils.readFileToByteArray(media));
+					}
 				}
 			}
 
@@ -179,8 +175,6 @@ public class UploadService {
 				} else
 				// 无接收人则素材入库--去掉，入库必须选择图文，只有图文入永久库等待调用
 				if (CommonUtil.StringisEmpty(call.getToUser())) {
-					// 永久素材接口？因网页的公共素材库无法看到接口上传的，上传后如何使用？
-
 					return "??";
 				}
 				// 如果有发送时间且发送时间超过系统时间3天，因为临时素材只能保留3天，如果超过3天，则上传永久素材

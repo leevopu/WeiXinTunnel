@@ -81,8 +81,8 @@ public class MediaService {
 			log.error("微信端没有永久图文素材！");
 			return null;
 		}
-//		Collection collection = JSONArray.toCollection(array,MpNews.class);
-		Collection collection = array.toCollection(array,MpNews.class);
+//		Collection collection = JSONArray.toCollection(array, MpNews.class);
+		Collection collection = array.toCollection(array, MpNews.class);
 		mpnewsList = (List<MpNews>) collection;
 		return mpnewsList;
 	}
